@@ -7,19 +7,19 @@
 #include <QTextEdit>
 #include <QPlainTextEdit>
 
-#ifdef _MSC_VER
-#define GLFW_EXPOSE_NATIVE_WIN32
-#define GLFW_EXPOSE_NATIVE_WGL
-#endif
-#include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
-
 #include "plugins.h"
 #include "configstore.h"
 
 #include <boost/filesystem.hpp>
 #include "guiconfig.h"
 #include "configdialog.h"
+
+#ifdef _MSC_VER
+#define GLFW_EXPOSE_NATIVE_WIN32
+#define GLFW_EXPOSE_NATIVE_WGL
+#endif
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 
 static void stopEmulator(GLFWwindow* window)
 {
