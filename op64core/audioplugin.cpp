@@ -33,52 +33,47 @@ bool AudioPlugin::initialize(void* renderWindow, void* statusBar)
 {
     // TODO future: linux version (mupen spec)
     struct AUDIO_INFO {
-        HWND hwnd;
-        HINSTANCE hinst;
+        void* hwnd;
+        void* hinst;
+        int MemoryBswaped;
+        uint8_t* HEADER;
+        uint8_t* RDRAM;
+        uint8_t* DMEM;
+        uint8_t* IMEM;
 
-        BOOL MemoryBswaped;    // If this is set to TRUE, then the memory has been pre
-        //   bswap on a dword (32 bits) boundry 
-        //	eg. the first 8 bytes are stored like this:
-        //        4 3 2 1   8 7 6 5
-        BYTE * HEADER;	// This is the rom header (first 40h bytes of the rom
-        // This will be in the same memory format as the rest of the memory.
-        BYTE * RDRAM;
-        BYTE * DMEM;
-        BYTE * IMEM;
+        uint32_t* MI__INTR_REG;
 
-        DWORD * MI__INTR_REG;
-
-        DWORD * AI__DRAM_ADDR_REG;
-        DWORD * AI__LEN_REG;
-        DWORD * AI__CONTROL_REG;
-        DWORD * AI__STATUS_REG;
-        DWORD * AI__DACRATE_REG;
-        DWORD * AI__BITRATE_REG;
+        uint32_t* AI__DRAM_ADDR_REG;
+        uint32_t* AI__LEN_REG;
+        uint32_t* AI__CONTROL_REG;
+        uint32_t* AI__STATUS_REG;
+        uint32_t* AI__DACRATE_REG;
+        uint32_t* AI__BITRATE_REG;
 
         void(*CheckInterrupts)(void);
     };
 
-    int(*InitiateAudio)    (AUDIO_INFO Audio_Info);
+    int (*InitiateAudio)(AUDIO_INFO Audio_Info);
     InitiateAudio = (int(*)(AUDIO_INFO))opLibGetFunc(_libHandle, "InitiateAudio");
-    if (InitiateAudio == NULL) { return false; }
+    if (InitiateAudio == nullptr) { return false; }
 
     AUDIO_INFO Info;
     memset(&Info, 0, sizeof(Info));
 
-    Info.hwnd = (HWND)renderWindow;
+    Info.hwnd = renderWindow;
     Info.hinst = GetModuleHandle(NULL);
     Info.MemoryBswaped = TRUE;
     Info.HEADER = Bus::rom_image;
     Info.RDRAM = Bus::rdram8;
     Info.DMEM = Bus::sp_dmem8;
     Info.IMEM = Bus::sp_imem8;
-    Info.MI__INTR_REG = (DWORD*)&Bus::mi_reg[MI_INTR_REG];
-    Info.AI__DRAM_ADDR_REG = (DWORD*)&Bus::ai_reg[AI_DRAM_ADDR_REG];
-    Info.AI__LEN_REG = (DWORD*)&Bus::ai_reg[AI_LEN_REG];
-    Info.AI__CONTROL_REG = (DWORD*)&Bus::ai_reg[AI_CONTROL_REG];
-    Info.AI__STATUS_REG = (DWORD*)&Bus::ai_reg[AI_STATUS_REG];
-    Info.AI__DACRATE_REG = (DWORD*)&Bus::ai_reg[AI_DACRATE_REG];
-    Info.AI__BITRATE_REG = (DWORD*)&Bus::ai_reg[AI_BITRATE_REG];
+    Info.MI__INTR_REG = &Bus::mi_reg[MI_INTR_REG];
+    Info.AI__DRAM_ADDR_REG = &Bus::ai_reg[AI_DRAM_ADDR_REG];
+    Info.AI__LEN_REG = &Bus::ai_reg[AI_LEN_REG];
+    Info.AI__CONTROL_REG = &Bus::ai_reg[AI_CONTROL_REG];
+    Info.AI__STATUS_REG = &Bus::ai_reg[AI_STATUS_REG];
+    Info.AI__DACRATE_REG = &Bus::ai_reg[AI_DACRATE_REG];
+    Info.AI__BITRATE_REG = &Bus::ai_reg[AI_BITRATE_REG];
     Info.CheckInterrupts = DummyFunction;
 
     _initialized = InitiateAudio(Info) != 0;
@@ -155,8 +150,8 @@ void AudioPlugin::loadLibrary(const char* libPath)
         return;
     }
 
-    void(*GetDllInfo) (PLUGIN_INFO * PluginInfo);
-    GetDllInfo = (void(*)(PLUGIN_INFO *))opLibGetFunc(_libHandle, "GetDllInfo");
+    void (*GetDllInfo)(PLUGIN_INFO* PluginInfo);
+    GetDllInfo = (void(*)(PLUGIN_INFO*))opLibGetFunc(_libHandle, "GetDllInfo");
 
     if (GetDllInfo == nullptr)
     {

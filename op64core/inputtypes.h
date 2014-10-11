@@ -38,23 +38,3 @@ typedef union {
     };
 } BUTTONS;
 
-#ifdef _MSC_VER
-#include <windows.h>
-typedef struct {
-    HWND hMainWindow;
-    HINSTANCE hinst;
-
-    BOOL MemoryBswaped;		// If this is set to TRUE, then the memory has been pre
-    //   bswap on a dword (32 bits) boundry, only effects header. 
-    //	eg. the first 8 bytes are stored like this:
-    //        4 3 2 1   8 7 6 5
-    BYTE * HEADER;			// This is the rom header (first 40h bytes of the rom)
-    CONTROL *Controls;		// A pointer to an array of 4 controllers .. eg:
-    // CONTROL Controls[4];
-} CONTROL_INFO;
-#else
-typedef struct {
-    CONTROL *Controls;      /* A pointer to an array of 4 controllers .. eg:
-                            CONTROL Controls[4]; */
-} CONTROL_INFO;
-#endif

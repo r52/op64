@@ -19,12 +19,15 @@ the plugin.
 extern "C" {
 #endif
 
-/* Note: BOOL, BYTE, WORD, DWORD, TRUE, FALSE are defined in windows.h */
-
 #define PLUGIN_TYPE_AUDIO			3
 
-#define EXPORT						__declspec(dllexport)
-#define CALL						_cdecl
+#if defined(WIN32)
+#define EXPORT      __declspec(dllexport)
+#define CALL        __cdecl
+#else
+#define EXPORT      __attribute__((visibility("default")))
+#define CALL
+#endif
 
 #define SYSTEM_NTSC					0
 #define SYSTEM_PAL					1
@@ -32,40 +35,33 @@ extern "C" {
 
 /***** Structures *****/
 typedef struct {
-	WORD Version;        /* Should be set to 0x0101 */
-	WORD Type;           /* Set to PLUGIN_TYPE_AUDIO */
-	char Name[100];      /* Name of the DLL */
+	uint16_t Version;
+	uint16_t Type;
+	char Name[100];
 
-	/* If DLL supports memory these memory options then set them to TRUE or FALSE
-	   if it does not support it */
-	BOOL NormalMemory;   /* a normal BYTE array */ 
-	BOOL MemoryBswaped;  /* a normal BYTE array where the memory has been pre
-	                          bswap on a dword (32 bits) boundry */
+	int NormalMemory;
+	int MemoryBswaped;
 } PLUGIN_INFO;
 
 
 typedef struct {
-	HWND hwnd;
-	HINSTANCE hinst;
+	void* hwnd;
+	void* hinst;
+	int MemoryBswaped;
 
-	BOOL MemoryBswaped;    // If this is set to TRUE, then the memory has been pre
-	                       //   bswap on a dword (32 bits) boundry 
-						   //	eg. the first 8 bytes are stored like this:
-	                       //        4 3 2 1   8 7 6 5
-	BYTE * HEADER;	// This is the rom header (first 40h bytes of the rom
-					// This will be in the same memory format as the rest of the memory.
-	BYTE * RDRAM;
-	BYTE * DMEM;
-	BYTE * IMEM;
+	uint8_t* HEADER;
+	uint8_t* RDRAM;
+	uint8_t* DMEM;
+	uint8_t* IMEM;
 
-	DWORD * MI_INTR_REG;
+	uint32_t* MI_INTR_REG;
 
-	DWORD * AI_DRAM_ADDR_REG;
-	DWORD * AI_LEN_REG;
-	DWORD * AI_CONTROL_REG;
-	DWORD * AI_STATUS_REG;
-	DWORD * AI_DACRATE_REG;
-	DWORD * AI_BITRATE_REG;
+	uint32_t* AI_DRAM_ADDR_REG;
+	uint32_t* AI_LEN_REG;
+	uint32_t* AI_CONTROL_REG;
+	uint32_t* AI_STATUS_REG;
+	uint32_t* AI_DACRATE_REG;
+	uint32_t* AI_BITRATE_REG;
 
 	void (*CheckInterrupts)( void );
 } AUDIO_INFO;
@@ -98,7 +94,7 @@ EXPORT void CALL AiLenChanged (void);
   input:    none
   output:   The amount of bytes still left to play.
 *******************************************************************/ 
-EXPORT DWORD CALL AiReadLength (void);
+EXPORT uint32_t CALL AiReadLength (void);
 
 /******************************************************************
   Function: AiUpdate
@@ -112,7 +108,7 @@ EXPORT DWORD CALL AiReadLength (void);
             till there is a messgae in the its message queue.
   output:   none
 *******************************************************************/ 
-//EXPORT void CALL AiUpdate (BOOL Wait);
+//EXPORT void CALL AiUpdate (int Wait);
 
 /******************************************************************
   Function: CloseDLL
@@ -130,7 +126,7 @@ EXPORT void CALL CloseDLL (void);
   input:    a handle to the window that calls this function
   output:   none
 *******************************************************************/ 
-EXPORT void CALL DllAbout ( HWND hParent );
+EXPORT void CALL DllAbout ( void* hParent );
 
 /******************************************************************
   Function: DllConfig
@@ -139,7 +135,7 @@ EXPORT void CALL DllAbout ( HWND hParent );
   input:    a handle to the window that calls this function
   output:   none
 *******************************************************************/ 
-EXPORT void CALL DllConfig ( HWND hParent );
+EXPORT void CALL DllConfig ( void* hParent );
 
 /******************************************************************
   Function: DllTest
@@ -148,7 +144,7 @@ EXPORT void CALL DllConfig ( HWND hParent );
   input:    a handle to the window that calls this function
   output:   none
 *******************************************************************/ 
-EXPORT void CALL DllTest ( HWND hParent );
+EXPORT void CALL DllTest ( void* hParent );
 
 /******************************************************************
   Function: GetDllInfo
@@ -158,7 +154,7 @@ EXPORT void CALL DllTest ( HWND hParent );
             filled by the function. (see def above)
   output:   none
 *******************************************************************/ 
-EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo );
+EXPORT void CALL GetDllInfo ( PLUGIN_INFO* PluginInfo );
 
 /******************************************************************
   Function: InitiateSound
@@ -175,7 +171,7 @@ EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo );
   and then call the function CheckInterrupts to tell the emulator
   that there is a waiting interrupt.
 *******************************************************************/ 
-EXPORT BOOL CALL InitiateAudio (AUDIO_INFO Audio_Info);
+EXPORT int CALL InitiateAudio (AUDIO_INFO Audio_Info);
 
 /******************************************************************
   Function: ProcessAList

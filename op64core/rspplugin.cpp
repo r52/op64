@@ -28,8 +28,8 @@ RSPPlugin::~RSPPlugin()
 bool RSPPlugin::initialize(Plugins* plugins, void* renderWindow, void* statusBar)
 {
     //Get DLL information
-    void(*GetDllInfo) (PLUGIN_INFO * PluginInfo);
-    GetDllInfo = (void(*)(PLUGIN_INFO *))opLibGetFunc(_libHandle, "GetDllInfo");
+    void (*GetDllInfo)(PLUGIN_INFO* PluginInfo);
+    GetDllInfo = (void(*)(PLUGIN_INFO*))opLibGetFunc(_libHandle, "GetDllInfo");
     if (GetDllInfo == nullptr) { return false; }
 
     PLUGIN_INFO PluginInfo;
@@ -40,43 +40,43 @@ bool RSPPlugin::initialize(Plugins* plugins, void* renderWindow, void* statusBar
     }
 
     typedef struct {
-        HINSTANCE hInst;
-        BOOL MemoryBswaped;    /* If this is set to TRUE, then the memory has been pre
-                               bswap on a dword (32 bits) boundry */
-        BYTE * RDRAM;
-        BYTE * DMEM;
-        BYTE * IMEM;
+        void* hInst;
+        int MemoryBswaped;    /* If this is set to TRUE, then the memory has been pre
+                               bswap on a uint32_t (32 bits) boundry */
+        uint8_t* RDRAM;
+        uint8_t* DMEM;
+        uint8_t* IMEM;
 
-        DWORD * MI__INTR_REG;
+        uint32_t* MI__INTR_REG;
 
-        DWORD * SP__MEM_ADDR_REG;
-        DWORD * SP__DRAM_ADDR_REG;
-        DWORD * SP__RD_LEN_REG;
-        DWORD * SP__WR_LEN_REG;
-        DWORD * SP__STATUS_REG;
-        DWORD * SP__DMA_FULL_REG;
-        DWORD * SP__DMA_BUSY_REG;
-        DWORD * SP__PC_REG;
-        DWORD * SP__SEMAPHORE_REG;
+        uint32_t* SP__MEM_ADDR_REG;
+        uint32_t* SP__DRAM_ADDR_REG;
+        uint32_t* SP__RD_LEN_REG;
+        uint32_t* SP__WR_LEN_REG;
+        uint32_t* SP__STATUS_REG;
+        uint32_t* SP__DMA_FULL_REG;
+        uint32_t* SP__DMA_BUSY_REG;
+        uint32_t* SP__PC_REG;
+        uint32_t* SP__SEMAPHORE_REG;
 
-        DWORD * DPC__START_REG;
-        DWORD * DPC__END_REG;
-        DWORD * DPC__CURRENT_REG;
-        DWORD * DPC__STATUS_REG;
-        DWORD * DPC__CLOCK_REG;
-        DWORD * DPC__BUFBUSY_REG;
-        DWORD * DPC__PIPEBUSY_REG;
-        DWORD * DPC__TMEM_REG;
+        uint32_t* DPC__START_REG;
+        uint32_t* DPC__END_REG;
+        uint32_t* DPC__CURRENT_REG;
+        uint32_t* DPC__STATUS_REG;
+        uint32_t* DPC__CLOCK_REG;
+        uint32_t* DPC__BUFBUSY_REG;
+        uint32_t* DPC__PIPEBUSY_REG;
+        uint32_t* DPC__TMEM_REG;
 
-        void(*CheckInterrupts)(void);
-        void(*ProcessDlist)(void);
-        void(*ProcessAlist)(void);
-        void(*ProcessRdpList)(void);
-        void(*ShowCFB)(void);
+        void (*CheckInterrupts)(void);
+        void (*ProcessDlist)(void);
+        void (*ProcessAlist)(void);
+        void (*ProcessRdpList)(void);
+        void (*ShowCFB)(void);
     } RSP_INFO_1_1;
 
     //Get Function from DLL
-    void(*InitiateRSP)    (RSP_INFO_1_1 Audio_Info, unsigned int* Cycles);
+    void (*InitiateRSP)(RSP_INFO_1_1 Audio_Info, unsigned int* Cycles);
     InitiateRSP = (void(*)(RSP_INFO_1_1, unsigned int*))opLibGetFunc(_libHandle, "InitiateRSP");
     if (InitiateRSP == nullptr) { return false; }
 
@@ -96,26 +96,26 @@ bool RSPPlugin::initialize(Plugins* plugins, void* renderWindow, void* statusBar
     Info.IMEM = Bus::sp_imem8;
     Info.MemoryBswaped = FALSE;
 
-    Info.MI__INTR_REG = (DWORD*)&Bus::mi_reg[MI_INTR_REG];
+    Info.MI__INTR_REG = &Bus::mi_reg[MI_INTR_REG];
 
-    Info.SP__MEM_ADDR_REG = (DWORD*)&Bus::sp_reg[SP_MEM_ADDR_REG];
-    Info.SP__DRAM_ADDR_REG = (DWORD*)&Bus::sp_reg[SP_DRAM_ADDR_REG];
-    Info.SP__RD_LEN_REG = (DWORD*)&Bus::sp_reg[SP_RD_LEN_REG];
-    Info.SP__WR_LEN_REG = (DWORD*)&Bus::sp_reg[SP_WR_LEN_REG];
-    Info.SP__STATUS_REG = (DWORD*)&Bus::sp_reg[SP_STATUS_REG];
-    Info.SP__DMA_FULL_REG = (DWORD*)&Bus::sp_reg[SP_DMA_FULL_REG];
-    Info.SP__DMA_BUSY_REG = (DWORD*)&Bus::sp_reg[SP_DMA_BUSY_REG];
-    Info.SP__PC_REG = (DWORD*)&Bus::sp_reg[SP_PC_REG];
-    Info.SP__SEMAPHORE_REG = (DWORD*)&Bus::sp_reg[SP_SEMAPHORE_REG];
+    Info.SP__MEM_ADDR_REG = &Bus::sp_reg[SP_MEM_ADDR_REG];
+    Info.SP__DRAM_ADDR_REG = &Bus::sp_reg[SP_DRAM_ADDR_REG];
+    Info.SP__RD_LEN_REG = &Bus::sp_reg[SP_RD_LEN_REG];
+    Info.SP__WR_LEN_REG = &Bus::sp_reg[SP_WR_LEN_REG];
+    Info.SP__STATUS_REG = &Bus::sp_reg[SP_STATUS_REG];
+    Info.SP__DMA_FULL_REG = &Bus::sp_reg[SP_DMA_FULL_REG];
+    Info.SP__DMA_BUSY_REG = &Bus::sp_reg[SP_DMA_BUSY_REG];
+    Info.SP__PC_REG = &Bus::sp_reg[SP_PC_REG];
+    Info.SP__SEMAPHORE_REG = &Bus::sp_reg[SP_SEMAPHORE_REG];
 
-    Info.DPC__START_REG = (DWORD*)&Bus::dp_reg[DPC_START_REG];
-    Info.DPC__END_REG = (DWORD*)&Bus::dp_reg[DPC_END_REG];
-    Info.DPC__CURRENT_REG = (DWORD*)&Bus::dp_reg[DPC_CURRENT_REG];
-    Info.DPC__STATUS_REG = (DWORD*)&Bus::dp_reg[DPC_STATUS_REG];
-    Info.DPC__CLOCK_REG = (DWORD*)&Bus::dp_reg[DPC_CLOCK_REG];
-    Info.DPC__BUFBUSY_REG = (DWORD*)&Bus::dp_reg[DPC_BUFBUSY_REG];
-    Info.DPC__PIPEBUSY_REG = (DWORD*)&Bus::dp_reg[DPC_PIPEBUSY_REG];
-    Info.DPC__TMEM_REG = (DWORD*)&Bus::dp_reg[DPC_TMEM_REG];
+    Info.DPC__START_REG = &Bus::dp_reg[DPC_START_REG];
+    Info.DPC__END_REG = &Bus::dp_reg[DPC_END_REG];
+    Info.DPC__CURRENT_REG = &Bus::dp_reg[DPC_CURRENT_REG];
+    Info.DPC__STATUS_REG = &Bus::dp_reg[DPC_STATUS_REG];
+    Info.DPC__CLOCK_REG = &Bus::dp_reg[DPC_CLOCK_REG];
+    Info.DPC__BUFBUSY_REG = &Bus::dp_reg[DPC_BUFBUSY_REG];
+    Info.DPC__PIPEBUSY_REG = &Bus::dp_reg[DPC_PIPEBUSY_REG];
+    Info.DPC__TMEM_REG = &Bus::dp_reg[DPC_TMEM_REG];
 
     InitiateRSP(Info, &_cycleCount);
     _initialized = true;
@@ -174,9 +174,9 @@ void RSPPlugin::loadLibrary(const char* libPath)
         return;
     }
 
-    void(*GetDllInfo) (PLUGIN_INFO * PluginInfo);
-    GetDllInfo = (void(*)(PLUGIN_INFO *))opLibGetFunc(_libHandle, "GetDllInfo");
-    if (GetDllInfo == NULL) { unloadLibrary(); return; }
+    void (*GetDllInfo)(PLUGIN_INFO* PluginInfo);
+    GetDllInfo = (void(*)(PLUGIN_INFO*))opLibGetFunc(_libHandle, "GetDllInfo");
+    if (GetDllInfo == nullptr) { unloadLibrary(); return; }
 
     GetDllInfo(&_pluginInfo);
     if (!Plugins::ValidPluginVersion(_pluginInfo))
@@ -186,7 +186,7 @@ void RSPPlugin::loadLibrary(const char* libPath)
     }
 
     //Find entries for functions in DLL
-    void(*InitFunc)(void);
+    void (*InitFunc)(void);
     DoRspCycles = (unsigned int(*)(unsigned int))opLibGetFunc(_libHandle, "DoRspCycles");
     InitFunc = (void(*)(void))  opLibGetFunc(_libHandle, "InitiateRSP");
     RomClosed = (void(*)(void))  opLibGetFunc(_libHandle, "RomClosed");

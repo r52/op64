@@ -12,8 +12,6 @@ http://www.emutalk.net/cgi-bin/ikonboard/ikonboard.cgi?s=3bd272222f66ffff;act=SF
 extern "C" {
 #endif
 
-/* Note: BOOL, BYTE, WORD, DWORD, TRUE, FALSE are defined in windows.h */
-
 #define PLUGIN_TYPE_CONTROLLER		4
 
 /*** Conteroller plugin's ****/
@@ -23,35 +21,31 @@ extern "C" {
 #define PLUGIN_TANSFER_PAK			4 // not implemeted for non raw data
 #define PLUGIN_RAW					5 // the controller plugin is passed in raw data
 
-/********************************************************************************* 
- Note about Conteroller plugin's: 
- the rumble pak needs a function for the force feed back joystick and tranfer pak 
- probaly needs a function for the plugin to be able to select the GB rom and 
- eeprom... maybe this should be done by the emu instead of the plugin, but I think
- it probaly should be done by the plugin. I will see about adding these functions 
- in the next spec
-**********************************************************************************/
+#if defined(WIN32)
+#define EXPORT      __declspec(dllexport)
+#define CALL        __cdecl
+#else
+#define EXPORT      __attribute__((visibility("default")))
+#define CALL
+#endif
 
-#define EXPORT						__declspec(dllexport)
-#define CALL						_cdecl
 
-/***** Structures *****/
 typedef struct {
-	WORD Version;        /* Should be set to 0x0101 */
-	WORD Type;           /* Set to PLUGIN_TYPE_CONTROLLER */
-	char Name[100];      /* Name of the DLL */
-	BOOL Reserved1;
-	BOOL Reserved2;
+	uint16_t Version;
+	uint16_t Type;
+	char Name[100];
+	int Reserved1;
+	int Reserved2;
 } PLUGIN_INFO;
 
 typedef struct {
-	BOOL Present;
-	BOOL RawData;
+	int Present;
+	int RawData;
 	int  Plugin;
 } CONTROL;
 
 typedef union {
-	DWORD Value;
+	uint32_t Value;
 	struct {
 		unsigned R_DPAD       : 1;
 		unsigned L_DPAD       : 1;
@@ -78,16 +72,11 @@ typedef union {
 } BUTTONS;
 
 typedef struct {
-	HWND hMainWindow;
-	HINSTANCE hinst;
-
-	BOOL MemoryBswaped;		// If this is set to TRUE, then the memory has been pre
-							//   bswap on a dword (32 bits) boundry, only effects header. 
-							//	eg. the first 8 bytes are stored like this:
-							//        4 3 2 1   8 7 6 5
-	BYTE * HEADER;			// This is the rom header (first 40h bytes of the rom)
-	CONTROL *Controls;		// A pointer to an array of 4 controllers .. eg:
-							// CONTROL Controls[4];
+	void* hMainWindow;
+	void* hinst;
+	int MemoryBswaped;
+	uint8_t* HEADER;
+	CONTROL* Controls;
 } CONTROL_INFO;
 
 /******************************************************************
@@ -115,7 +104,7 @@ EXPORT void CALL CloseDLL (void);
             initilize controller: 01 03 00 FF FF FF 
             read controller:      01 04 01 FF FF FF FF
 *******************************************************************/
-EXPORT void CALL ControllerCommand ( int Control, BYTE * Command);
+EXPORT void CALL ControllerCommand ( int Control, uint8_t* Command);
 
 /******************************************************************
   Function: DllAbout
@@ -124,7 +113,7 @@ EXPORT void CALL ControllerCommand ( int Control, BYTE * Command);
   input:    a handle to the window that calls this function
   output:   none
 *******************************************************************/ 
-EXPORT void CALL DllAbout ( HWND hParent );
+EXPORT void CALL DllAbout ( void* hParent );
 
 /******************************************************************
   Function: DllConfig
@@ -133,7 +122,7 @@ EXPORT void CALL DllAbout ( HWND hParent );
   input:    a handle to the window that calls this function
   output:   none
 *******************************************************************/ 
-EXPORT void CALL DllConfig ( HWND hParent );
+EXPORT void CALL DllConfig ( void* hParent );
 
 /******************************************************************
   Function: DllTest
@@ -142,7 +131,7 @@ EXPORT void CALL DllConfig ( HWND hParent );
   input:    a handle to the window that calls this function
   output:   none
 *******************************************************************/ 
-EXPORT void CALL DllTest ( HWND hParent );
+EXPORT void CALL DllTest ( void* hParent );
 
 /******************************************************************
   Function: GetDllInfo
@@ -152,7 +141,7 @@ EXPORT void CALL DllTest ( HWND hParent );
             filled by the function. (see def above)
   output:   none
 *******************************************************************/ 
-EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo );
+EXPORT void CALL GetDllInfo ( PLUGIN_INFO* PluginInfo );
 
 /******************************************************************
   Function: GetKeys
@@ -162,7 +151,7 @@ EXPORT void CALL GetDllInfo ( PLUGIN_INFO * PluginInfo );
 			the controller state.
   output:   none
 *******************************************************************/  	
-EXPORT void CALL GetKeys(int Control, BUTTONS * Keys );
+EXPORT void CALL GetKeys(int Control, BUTTONS* Keys );
 
 /******************************************************************
   Function: InitiateControllers
@@ -186,7 +175,7 @@ EXPORT void CALL InitiateControllers (CONTROL_INFO ControlInfo);
   note:     This function is only needed if the DLL is allowing raw
             data.
 *******************************************************************/
-EXPORT void CALL ReadController ( int Control, BYTE * Command );
+EXPORT void CALL ReadController ( int Control, uint8_t* Command );
 
 /******************************************************************
   Function: RomClosed

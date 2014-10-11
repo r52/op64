@@ -15,7 +15,7 @@
 #define _safe_sprintf(buf, len, ...) snprintf(buf, len, __VA_ARGS__);
 #endif
 
-// 1 = little endian
+// borrowed from cxd4/rsp
 #ifdef BIG_ENDIAN
 #define ENDIAN  0
 #else

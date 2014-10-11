@@ -46,9 +46,9 @@ bool InputPlugin::initialize(void* renderWindow, void* statusBar)
     Bus::controllers[3].Plugin = PLUGIN_NONE;
 
     //Get DLL information
-    void(__cdecl *GetDllInfo) (PLUGIN_INFO * PluginInfo);
-    GetDllInfo = (void(__cdecl *)(PLUGIN_INFO *))opLibGetFunc(_libHandle, "GetDllInfo");
-    if (GetDllInfo == NULL) { return false; }
+    void (*GetDllInfo)(PLUGIN_INFO* PluginInfo);
+    GetDllInfo = (void (*)(PLUGIN_INFO*))opLibGetFunc(_libHandle, "GetDllInfo");
+    if (GetDllInfo == nullptr) { return false; }
 
     PLUGIN_INFO PluginInfo;
     GetDllInfo(&PluginInfo);
@@ -56,36 +56,33 @@ bool InputPlugin::initialize(void* renderWindow, void* statusBar)
     //Test Plugin version
     if (PluginInfo.Version == 0x0100) {
         //Get Function from DLL
-        void(__cdecl *InitiateControllers_1_0)(HWND hMainWindow, CONTROL Controls[4]);
-        InitiateControllers_1_0 = (void(__cdecl *)(HWND, CONTROL *))opLibGetFunc(_libHandle, "InitiateControllers");
-        if (InitiateControllers_1_0 == NULL) { return false; }
-        InitiateControllers_1_0((HWND)renderWindow, Bus::controllers);
+        void (*InitiateControllers_1_0)(void* hMainWindow, CONTROL Controls[4]);
+        InitiateControllers_1_0 = (void(*)(void*, CONTROL*))opLibGetFunc(_libHandle, "InitiateControllers");
+        if (InitiateControllers_1_0 == nullptr) { return false; }
+        InitiateControllers_1_0(renderWindow, Bus::controllers);
         _initialized = true;
     }
+
     if (PluginInfo.Version >= 0x0101) {
         typedef struct {
-            HWND hMainWindow;
-            HINSTANCE hinst;
+            void* hMainWindow;
+            void* hinst;
 
-            BOOL MemoryBswaped;		// If this is set to TRUE, then the memory has been pre
-            //   bswap on a dword (32 bits) boundry, only effects header. 
-            //	eg. the first 8 bytes are stored like this:
-            //        4 3 2 1   8 7 6 5
-            BYTE * HEADER;			// This is the rom header (first 40h bytes of the rom)
-            CONTROL *Controls;		// A pointer to an array of 4 controllers .. eg:
-            // CONTROL Controls[4];
+            int MemoryBswaped;
+            uint8_t* HEADER;
+            CONTROL* Controls;
         } CONTROL_INFO;
 
         //Get Function from DLL		
-        void(__cdecl *InitiateControllers_1_1)(CONTROL_INFO * ControlInfo);
-        InitiateControllers_1_1 = (void(__cdecl *)(CONTROL_INFO *))opLibGetFunc(_libHandle, "InitiateControllers");
-        if (InitiateControllers_1_1 == NULL) { return false; }
+        void (*InitiateControllers_1_1)(CONTROL_INFO* ControlInfo);
+        InitiateControllers_1_1 = (void(*)(CONTROL_INFO*))opLibGetFunc(_libHandle, "InitiateControllers");
+        if (InitiateControllers_1_1 == nullptr) { return false; }
 
         CONTROL_INFO ControlInfo;
         ControlInfo.Controls = Bus::controllers;
         ControlInfo.HEADER = Bus::rom->getImage();
         ControlInfo.hinst = GetModuleHandle(NULL);
-        ControlInfo.hMainWindow = (HWND)renderWindow;
+        ControlInfo.hMainWindow = renderWindow;
         ControlInfo.MemoryBswaped = TRUE;
         InitiateControllers_1_1(&ControlInfo);
         _initialized = true;
@@ -144,15 +141,15 @@ void InputPlugin::loadLibrary(const char* libPath)
     }
 
     //Get DLL information
-    void(*GetDllInfo) (PLUGIN_INFO * PluginInfo);
-    GetDllInfo = (void(*)(PLUGIN_INFO *))opLibGetFunc(_libHandle, "GetDllInfo");
+    void (*GetDllInfo)(PLUGIN_INFO* PluginInfo);
+    GetDllInfo = (void(*)(PLUGIN_INFO*))opLibGetFunc(_libHandle, "GetDllInfo");
     if (GetDllInfo == nullptr) { unloadLibrary(); return; }
 
     GetDllInfo(&_pluginInfo);
     if (!Plugins::ValidPluginVersion(_pluginInfo)) { unloadLibrary(); return; }
 
     //Find entries for functions in DLL
-    void(*InitFunc)     (void);
+    void (*InitFunc)(void);
     Config = (void(*)(void*))opLibGetFunc(_libHandle, "DllConfig");
     ControllerCommand = (void(*)(int, uint8_t*))opLibGetFunc(_libHandle, "ControllerCommand");
     GetKeys = (void(*)(int, BUTTONS*)) opLibGetFunc(_libHandle, "GetKeys");

@@ -87,8 +87,8 @@ void GfxPlugin::loadLibrary(const char* libPath)
         return;
     }
 
-    void(*GetDllInfo) (PLUGIN_INFO * PluginInfo);
-    GetDllInfo = (void(*)(PLUGIN_INFO *))opLibGetFunc(_libHandle, "GetDllInfo");
+    void (*GetDllInfo)(PLUGIN_INFO* PluginInfo);
+    GetDllInfo = (void(*)(PLUGIN_INFO*))opLibGetFunc(_libHandle, "GetDllInfo");
 
     if (GetDllInfo == nullptr)
     {
@@ -103,7 +103,7 @@ void GfxPlugin::loadLibrary(const char* libPath)
         return;
     }
 
-    int(*InitFunc) (void * Gfx_Info);
+    int (*InitFunc)(void * Gfx_Info);
     InitFunc = (int(*)(void *)) opLibGetFunc(_libHandle, "InitiateGFX");
     CloseDLL = (void(*)(void)) opLibGetFunc(_libHandle, "CloseDLL");
     ChangeWindow = (void(*)(void)) opLibGetFunc(_libHandle, "ChangeWindow");
@@ -185,50 +185,45 @@ bool GfxPlugin::initialize(void* renderWindow, void* statusBar)
 
     // TODO future: different spec for linux (mupen spec)
     typedef struct {
-        HWND hWnd;			/* Render window */
-        HWND hStatusBar;    /* if render window does not have a status bar then this is NULL */
+        void* hWnd;
+        void* hStatusBar;
 
-        BOOL MemoryBswaped;    // If this is set to TRUE, then the memory has been pre
-        //   bswap on a dword (32 bits) boundry 
-        //	eg. the first 8 bytes are stored like this:
-        //        4 3 2 1   8 7 6 5
+        int MemoryBswaped;
+        uint8_t* HEADER;
+        uint8_t* RDRAM;
+        uint8_t* DMEM;
+        uint8_t* IMEM;
 
-        BYTE * HEADER;	// This is the rom header (first 40h bytes of the rom
-        // This will be in the same memory format as the rest of the memory.
-        BYTE * RDRAM;
-        BYTE * DMEM;
-        BYTE * IMEM;
+        uint32_t* MI_INTR_REG;
 
-        DWORD * MI_INTR_REG;
+        uint32_t* DPC_START_REG;
+        uint32_t* DPC_END_REG;
+        uint32_t* DPC_CURRENT_REG;
+        uint32_t* DPC_STATUS_REG;
+        uint32_t* DPC_CLOCK_REG;
+        uint32_t* DPC_BUFBUSY_REG;
+        uint32_t* DPC_PIPEBUSY_REG;
+        uint32_t* DPC_TMEM_REG;
 
-        DWORD * DPC_START_REG;
-        DWORD * DPC_END_REG;
-        DWORD * DPC_CURRENT_REG;
-        DWORD * DPC_STATUS_REG;
-        DWORD * DPC_CLOCK_REG;
-        DWORD * DPC_BUFBUSY_REG;
-        DWORD * DPC_PIPEBUSY_REG;
-        DWORD * DPC_TMEM_REG;
+        uint32_t* VI_STATUS_REG;
+        uint32_t* VI_ORIGIN_REG;
+        uint32_t* VI_WIDTH_REG;
+        uint32_t* VI_INTR_REG;
+        uint32_t* VI_V_CURRENT_LINE_REG;
+        uint32_t* VI_TIMING_REG;
+        uint32_t* VI_V_SYNC_REG;
+        uint32_t* VI_H_SYNC_REG;
+        uint32_t* VI_LEAP_REG;
+        uint32_t* VI_H_START_REG;
+        uint32_t* VI_V_START_REG;
+        uint32_t* VI_V_BURST_REG;
+        uint32_t* VI_X_SCALE_REG;
+        uint32_t* VI_Y_SCALE_REG;
 
-        DWORD * VI_STATUS_REG;
-        DWORD * VI_ORIGIN_REG;
-        DWORD * VI_WIDTH_REG;
-        DWORD * VI_INTR_REG;
-        DWORD * VI_V_CURRENT_LINE_REG;
-        DWORD * VI_TIMING_REG;
-        DWORD * VI_V_SYNC_REG;
-        DWORD * VI_H_SYNC_REG;
-        DWORD * VI_LEAP_REG;
-        DWORD * VI_H_START_REG;
-        DWORD * VI_V_START_REG;
-        DWORD * VI_V_BURST_REG;
-        DWORD * VI_X_SCALE_REG;
-        DWORD * VI_Y_SCALE_REG;
-
-        void(__cdecl *CheckInterrupts)(void);
+        void (*CheckInterrupts)(void);
     } GFX_INFO;
 
-    int(*InitiateGFX)(GFX_INFO Gfx_Info);
+    int (*InitiateGFX)(GFX_INFO Gfx_Info);
     InitiateGFX = (int(*)(GFX_INFO))opLibGetFunc(_libHandle, "InitiateGFX");
     if (InitiateGFX == nullptr)
     {
@@ -240,39 +235,39 @@ bool GfxPlugin::initialize(void* renderWindow, void* statusBar)
 
     Info.MemoryBswaped = TRUE;
     Info.CheckInterrupts = DummyFunction;
-    Info.hWnd = (HWND)renderWindow;
-    Info.hStatusBar = (HWND)statusBar;
+    Info.hWnd = renderWindow;
+    Info.hStatusBar = statusBar;
 
     Info.HEADER = Bus::rom_image;
     Info.RDRAM = Bus::rdram8;
     Info.DMEM = Bus::sp_dmem8;
     Info.IMEM = Bus::sp_imem8;
 
-    Info.MI_INTR_REG = (DWORD*)&Bus::mi_reg[MI_INTR_REG];
+    Info.MI_INTR_REG = &Bus::mi_reg[MI_INTR_REG];
 
-    Info.DPC_START_REG = (DWORD*)&Bus::dp_reg[DPC_START_REG];
-    Info.DPC_END_REG = (DWORD*)&Bus::dp_reg[DPC_END_REG];
-    Info.DPC_CURRENT_REG = (DWORD*)&Bus::dp_reg[DPC_CURRENT_REG];
-    Info.DPC_STATUS_REG = (DWORD*)&Bus::dp_reg[DPC_STATUS_REG];
-    Info.DPC_CLOCK_REG = (DWORD*)&Bus::dp_reg[DPC_CLOCK_REG];
-    Info.DPC_BUFBUSY_REG = (DWORD*)&Bus::dp_reg[DPC_BUFBUSY_REG];
-    Info.DPC_PIPEBUSY_REG = (DWORD*)&Bus::dp_reg[DPC_PIPEBUSY_REG];
-    Info.DPC_TMEM_REG = (DWORD*)&Bus::dp_reg[DPC_TMEM_REG];
+    Info.DPC_START_REG = &Bus::dp_reg[DPC_START_REG];
+    Info.DPC_END_REG = &Bus::dp_reg[DPC_END_REG];
+    Info.DPC_CURRENT_REG = &Bus::dp_reg[DPC_CURRENT_REG];
+    Info.DPC_STATUS_REG = &Bus::dp_reg[DPC_STATUS_REG];
+    Info.DPC_CLOCK_REG = &Bus::dp_reg[DPC_CLOCK_REG];
+    Info.DPC_BUFBUSY_REG = &Bus::dp_reg[DPC_BUFBUSY_REG];
+    Info.DPC_PIPEBUSY_REG = &Bus::dp_reg[DPC_PIPEBUSY_REG];
+    Info.DPC_TMEM_REG = &Bus::dp_reg[DPC_TMEM_REG];
 
-    Info.VI_STATUS_REG = (DWORD*)&Bus::vi_reg[VI_STATUS_REG];
-    Info.VI_ORIGIN_REG = (DWORD*)&Bus::vi_reg[VI_ORIGIN_REG];
-    Info.VI_WIDTH_REG = (DWORD*)&Bus::vi_reg[VI_WIDTH_REG];
-    Info.VI_INTR_REG = (DWORD*)&Bus::vi_reg[VI_INTR_REG];
-    Info.VI_V_CURRENT_LINE_REG = (DWORD*)&Bus::vi_reg[VI_CURRENT_REG];
-    Info.VI_TIMING_REG = (DWORD*)&Bus::vi_reg[VI_BURST_REG];
-    Info.VI_V_SYNC_REG = (DWORD*)&Bus::vi_reg[VI_V_SYNC_REG];
-    Info.VI_H_SYNC_REG = (DWORD*)&Bus::vi_reg[VI_H_SYNC_REG];
-    Info.VI_LEAP_REG = (DWORD*)&Bus::vi_reg[VI_LEAP_REG];
-    Info.VI_H_START_REG = (DWORD*)&Bus::vi_reg[VI_H_START_REG];
-    Info.VI_V_START_REG = (DWORD*)&Bus::vi_reg[VI_V_START_REG];
-    Info.VI_V_BURST_REG = (DWORD*)&Bus::vi_reg[VI_V_BURST_REG];
-    Info.VI_X_SCALE_REG = (DWORD*)&Bus::vi_reg[VI_X_SCALE_REG];
-    Info.VI_Y_SCALE_REG = (DWORD*)&Bus::vi_reg[VI_Y_SCALE_REG];
+    Info.VI_STATUS_REG = &Bus::vi_reg[VI_STATUS_REG];
+    Info.VI_ORIGIN_REG = &Bus::vi_reg[VI_ORIGIN_REG];
+    Info.VI_WIDTH_REG = &Bus::vi_reg[VI_WIDTH_REG];
+    Info.VI_INTR_REG = &Bus::vi_reg[VI_INTR_REG];
+    Info.VI_V_CURRENT_LINE_REG = &Bus::vi_reg[VI_CURRENT_REG];
+    Info.VI_TIMING_REG = &Bus::vi_reg[VI_BURST_REG];
+    Info.VI_V_SYNC_REG = &Bus::vi_reg[VI_V_SYNC_REG];
+    Info.VI_H_SYNC_REG = &Bus::vi_reg[VI_H_SYNC_REG];
+    Info.VI_LEAP_REG = &Bus::vi_reg[VI_LEAP_REG];
+    Info.VI_H_START_REG = &Bus::vi_reg[VI_H_START_REG];
+    Info.VI_V_START_REG = &Bus::vi_reg[VI_V_START_REG];
+    Info.VI_V_BURST_REG = &Bus::vi_reg[VI_V_BURST_REG];
+    Info.VI_X_SCALE_REG = &Bus::vi_reg[VI_X_SCALE_REG];
+    Info.VI_Y_SCALE_REG = &Bus::vi_reg[VI_Y_SCALE_REG];
 
     _initialized = InitiateGFX(Info) != 0;
 
