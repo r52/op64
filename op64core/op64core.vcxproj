@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{A0A89BDC-500C-40C3-A4F6-D5091BD62F45}</ProjectGuid>
+    <RootNamespace>op64core</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Intel C++ Compiler XE 15.0</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Intel C++ Compiler XE 15.0</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <InterproceduralOptimization>true</InterproceduralOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\op64-util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <StructMemberAlignment>16Bytes</StructMemberAlignment>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <SDLCheck>true</SDLCheck>
+      <Parallelization>true</Parallelization>
+      <UseIntelOptimizedHeaders>true</UseIntelOptimizedHeaders>
+      <AdditionalIncludeDirectories>..\op64-util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OptimizationDiagnosticLevel>Level5</OptimizationDiagnosticLevel>
+      <EmitOptimizationDiagnosticsToFile>true</EmitOptimizationDiagnosticsToFile>
+      <InterproceduralOptimization>MultiFile</InterproceduralOptimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <StructMemberAlignment>16Bytes</StructMemberAlignment>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <OptimizeReferences>false</OptimizeReferences>
+    </Link>
+    <Lib />
+    <ProjectReference />
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="audioplugin.h" />
+    <ClInclude Include="bus.h" />
+    <ClInclude Include="configdefs.h" />
+    <ClInclude Include="configstore.h" />
+    <ClInclude Include="cp1.h" />
+    <ClInclude Include="dma.h" />
+    <ClInclude Include="eeprom.h" />
+    <ClInclude Include="flashram.h" />
+    <ClInclude Include="fpu.h" />
+    <ClInclude Include="gfxplugin.h" />
+    <ClInclude Include="icpu.h" />
+    <ClInclude Include="inputplugin.h" />
+    <ClInclude Include="inputtypes.h" />
+    <ClInclude Include="interrupthandler.h" />
+    <ClInclude Include="imemory.h" />
+    <ClInclude Include="cp0.h" />
+    <ClInclude Include="mempak.h" />
+    <ClInclude Include="mpmemory.h" />
+    <ClInclude Include="mppinterpreter.h" />
+    <ClInclude Include="n64_cic_nus_6105.h" />
+    <ClInclude Include="pif.h" />
+    <ClInclude Include="plugins.h" />
+    <ClInclude Include="rcpcommon.h" />
+    <ClInclude Include="rom.h" />
+    <ClInclude Include="rspplugin.h" />
+    <ClInclude Include="sram.h" />
+    <ClInclude Include="tlb.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="audioplugin.cpp" />
+    <ClCompile Include="bus.cpp" />
+    <ClCompile Include="configstore.cpp" />
+    <ClCompile Include="cp1.cpp" />
+    <ClCompile Include="dma.cpp" />
+    <ClCompile Include="eeprom.cpp" />
+    <ClCompile Include="flashram.cpp" />
+    <ClCompile Include="gfxplugin.cpp" />
+    <ClCompile Include="icpu.cpp" />
+    <ClCompile Include="inputplugin.cpp" />
+    <ClCompile Include="interrupthandler.cpp" />
+    <ClCompile Include="cp0.cpp" />
+    <ClCompile Include="imemory.cpp" />
+    <ClCompile Include="mempak.cpp" />
+    <ClCompile Include="mpmemory.cpp" />
+    <ClCompile Include="mppinterpreter.cpp" />
+    <ClCompile Include="mppinterpreter_cop0.cpp" />
+    <ClCompile Include="mppinterpreter_cop1.cpp" />
+    <ClCompile Include="mppinterpreter_regimm.cpp" />
+    <ClCompile Include="mppinterpreter_special.cpp" />
+    <ClCompile Include="n64_cic_nus_6105.cpp" />
+    <ClCompile Include="pif.cpp" />
+    <ClCompile Include="plugins.cpp" />
+    <ClCompile Include="rom.cpp" />
+    <ClCompile Include="rspplugin.cpp" />
+    <ClCompile Include="sram.cpp" />
+    <ClCompile Include="tlb.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\op64-util\op64-util.vcxproj">
+      <Project>{54ad869c-ca7e-43f9-90e7-b24e2f68af18}</Project>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

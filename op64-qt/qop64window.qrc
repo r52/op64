@@ -1,0 +1,6 @@
+<RCC>
+  <qresource>
+    <file>Resources/gaming.png</file>
+    <file>Resources/processor.png</file>
+  </qresource>
+</RCC>

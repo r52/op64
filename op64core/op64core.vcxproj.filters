@@ -1,0 +1,237 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\memory">
+      <UniqueIdentifier>{03a6b007-de67-4d1b-96e2-3467cae746cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\cpu">
+      <UniqueIdentifier>{6d0152d5-1bae-4a74-b721-0f554b37ba19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\memory">
+      <UniqueIdentifier>{4acdf87f-4cb9-45fa-ac2a-402edbfb2380}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\cpu">
+      <UniqueIdentifier>{9d5ae354-70c0-4ccb-904a-eea78b89f8a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\memory\mupen">
+      <UniqueIdentifier>{f06efc76-6a16-4157-954d-8b4fd9aa45e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\memory\mupen">
+      <UniqueIdentifier>{e5df5003-2374-4473-8f53-2eaf76ec5b1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\cpu\interpreter">
+      <UniqueIdentifier>{da718fe3-efbf-4c86-a26e-d4fbd1fc6504}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\cpu\interpreter">
+      <UniqueIdentifier>{46d23dff-f0fc-49d9-8678-ecd65ac45439}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\tlb">
+      <UniqueIdentifier>{0fad23c3-b010-4f9b-8f0d-85b77262f163}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\tlb">
+      <UniqueIdentifier>{0d681ba0-7104-4f15-80a4-23b7576f8b54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\cpu\fpu">
+      <UniqueIdentifier>{a74bec3c-f3bb-48ad-9534-6db2135f8ce5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pif">
+      <UniqueIdentifier>{7e18ca9f-ec12-4114-95a8-7c9b23b3253f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\pif">
+      <UniqueIdentifier>{c29fff6e-c4b6-46c1-bbab-c3b056432047}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\input">
+      <UniqueIdentifier>{02f8912e-eedb-42e5-9111-4a22cf5ca347}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\save">
+      <UniqueIdentifier>{6299bd8b-357b-4d2a-b332-a28df329dd8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\save">
+      <UniqueIdentifier>{23360af5-2a8d-4784-b448-b497b18e1599}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\plugins">
+      <UniqueIdentifier>{03a7396a-a7df-4898-8022-f2cd25c97a1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugins">
+      <UniqueIdentifier>{ed6635ca-7c94-4187-a944-42faf655b351}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="rom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="icpu.h">
+      <Filter>Header Files\cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="mppinterpreter.h">
+      <Filter>Header Files\cpu\interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="mpmemory.h">
+      <Filter>Header Files\memory\mupen</Filter>
+    </ClInclude>
+    <ClInclude Include="interrupthandler.h">
+      <Filter>Header Files\cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="cp1.h">
+      <Filter>Header Files\cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="cp0.h">
+      <Filter>Header Files\cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="bus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tlb.h">
+      <Filter>Header Files\tlb</Filter>
+    </ClInclude>
+    <ClInclude Include="fpu.h">
+      <Filter>Header Files\cpu\fpu</Filter>
+    </ClInclude>
+    <ClInclude Include="pif.h">
+      <Filter>Header Files\pif</Filter>
+    </ClInclude>
+    <ClInclude Include="n64_cic_nus_6105.h">
+      <Filter>Header Files\pif</Filter>
+    </ClInclude>
+    <ClInclude Include="inputtypes.h">
+      <Filter>Header Files\input</Filter>
+    </ClInclude>
+    <ClInclude Include="imemory.h">
+      <Filter>Header Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="rcpcommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dma.h">
+      <Filter>Header Files\cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="sram.h">
+      <Filter>Header Files\save</Filter>
+    </ClInclude>
+    <ClInclude Include="flashram.h">
+      <Filter>Header Files\save</Filter>
+    </ClInclude>
+    <ClInclude Include="eeprom.h">
+      <Filter>Header Files\save</Filter>
+    </ClInclude>
+    <ClInclude Include="mempak.h">
+      <Filter>Header Files\save</Filter>
+    </ClInclude>
+    <ClInclude Include="plugins.h">
+      <Filter>Header Files\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="gfxplugin.h">
+      <Filter>Header Files\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="audioplugin.h">
+      <Filter>Header Files\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="rspplugin.h">
+      <Filter>Header Files\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="inputplugin.h">
+      <Filter>Header Files\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="configstore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="configdefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="rom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="icpu.cpp">
+      <Filter>Source Files\cpu</Filter>
+    </ClCompile>
+    <ClCompile Include="mppinterpreter.cpp">
+      <Filter>Source Files\cpu\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="mpmemory.cpp">
+      <Filter>Source Files\memory\mupen</Filter>
+    </ClCompile>
+    <ClCompile Include="mppinterpreter_regimm.cpp">
+      <Filter>Source Files\cpu\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="mppinterpreter_special.cpp">
+      <Filter>Source Files\cpu\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="interrupthandler.cpp">
+      <Filter>Source Files\cpu</Filter>
+    </ClCompile>
+    <ClCompile Include="mppinterpreter_cop0.cpp">
+      <Filter>Source Files\cpu\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="mppinterpreter_cop1.cpp">
+      <Filter>Source Files\cpu\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="cp1.cpp">
+      <Filter>Source Files\cpu</Filter>
+    </ClCompile>
+    <ClCompile Include="cp0.cpp">
+      <Filter>Source Files\cpu</Filter>
+    </ClCompile>
+    <ClCompile Include="bus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tlb.cpp">
+      <Filter>Source Files\tlb</Filter>
+    </ClCompile>
+    <ClCompile Include="n64_cic_nus_6105.cpp">
+      <Filter>Source Files\pif</Filter>
+    </ClCompile>
+    <ClCompile Include="pif.cpp">
+      <Filter>Source Files\pif</Filter>
+    </ClCompile>
+    <ClCompile Include="imemory.cpp">
+      <Filter>Source Files\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="dma.cpp">
+      <Filter>Source Files\cpu</Filter>
+    </ClCompile>
+    <ClCompile Include="sram.cpp">
+      <Filter>Source Files\save</Filter>
+    </ClCompile>
+    <ClCompile Include="flashram.cpp">
+      <Filter>Source Files\save</Filter>
+    </ClCompile>
+    <ClCompile Include="eeprom.cpp">
+      <Filter>Source Files\save</Filter>
+    </ClCompile>
+    <ClCompile Include="mempak.cpp">
+      <Filter>Source Files\save</Filter>
+    </ClCompile>
+    <ClCompile Include="plugins.cpp">
+      <Filter>Source Files\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="configstore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gfxplugin.cpp">
+      <Filter>Source Files\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="audioplugin.cpp">
+      <Filter>Source Files\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="rspplugin.cpp">
+      <Filter>Source Files\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="inputplugin.cpp">
+      <Filter>Source Files\plugins</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

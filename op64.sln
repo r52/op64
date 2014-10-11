@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "op64-console", "op64-console\op64-console.vcxproj", "{AC67800E-EB88-4AE4-B18D-A8104DB3FEED}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A0A89BDC-500C-40C3-A4F6-D5091BD62F45} = {A0A89BDC-500C-40C3-A4F6-D5091BD62F45}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "op64core", "op64core\op64core.vcxproj", "{A0A89BDC-500C-40C3-A4F6-D5091BD62F45}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "op64-util", "op64-util\op64-util.vcxproj", "{54AD869C-CA7E-43F9-90E7-B24E2F68AF18}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "op64-qt", "op64-qt\op64-qt.vcxproj", "{B12702AD-ABFB-343A-A199-8E24837244A3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dummyaudio", "dummyaudio\dummyaudio.vcxproj", "{7BB6B3CA-D36D-4E2C-82DE-91BEA9122BDE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dummyinput", "dummyinput\dummyinput.vcxproj", "{1A3C7C9E-E50B-4242-884C-427B1B69123C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AC67800E-EB88-4AE4-B18D-A8104DB3FEED}.Debug|x64.ActiveCfg = Debug|x64
+		{AC67800E-EB88-4AE4-B18D-A8104DB3FEED}.Debug|x64.Build.0 = Debug|x64
+		{AC67800E-EB88-4AE4-B18D-A8104DB3FEED}.Release|x64.ActiveCfg = Release|x64
+		{AC67800E-EB88-4AE4-B18D-A8104DB3FEED}.Release|x64.Build.0 = Release|x64
+		{A0A89BDC-500C-40C3-A4F6-D5091BD62F45}.Debug|x64.ActiveCfg = Debug|x64
+		{A0A89BDC-500C-40C3-A4F6-D5091BD62F45}.Debug|x64.Build.0 = Debug|x64
+		{A0A89BDC-500C-40C3-A4F6-D5091BD62F45}.Release|x64.ActiveCfg = Release|x64
+		{A0A89BDC-500C-40C3-A4F6-D5091BD62F45}.Release|x64.Build.0 = Release|x64
+		{54AD869C-CA7E-43F9-90E7-B24E2F68AF18}.Debug|x64.ActiveCfg = Debug|x64
+		{54AD869C-CA7E-43F9-90E7-B24E2F68AF18}.Debug|x64.Build.0 = Debug|x64
+		{54AD869C-CA7E-43F9-90E7-B24E2F68AF18}.Release|x64.ActiveCfg = Release|x64
+		{54AD869C-CA7E-43F9-90E7-B24E2F68AF18}.Release|x64.Build.0 = Release|x64
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x64.ActiveCfg = Debug|x64
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x64.Build.0 = Debug|x64
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.ActiveCfg = Release|x64
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.Build.0 = Release|x64
+		{7BB6B3CA-D36D-4E2C-82DE-91BEA9122BDE}.Debug|x64.ActiveCfg = Debug|x64
+		{7BB6B3CA-D36D-4E2C-82DE-91BEA9122BDE}.Debug|x64.Build.0 = Debug|x64
+		{7BB6B3CA-D36D-4E2C-82DE-91BEA9122BDE}.Release|x64.ActiveCfg = Release|x64
+		{7BB6B3CA-D36D-4E2C-82DE-91BEA9122BDE}.Release|x64.Build.0 = Release|x64
+		{1A3C7C9E-E50B-4242-884C-427B1B69123C}.Debug|x64.ActiveCfg = Debug|x64
+		{1A3C7C9E-E50B-4242-884C-427B1B69123C}.Debug|x64.Build.0 = Debug|x64
+		{1A3C7C9E-E50B-4242-884C-427B1B69123C}.Release|x64.ActiveCfg = Release|x64
+		{1A3C7C9E-E50B-4242-884C-427B1B69123C}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
