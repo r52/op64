@@ -121,6 +121,6 @@ private:
         LOG(buf, LOG_LEVEL_INFO); \
     }
 #else
-#define LOG_PC(x)
+#define LOG_PC
 #endif
 

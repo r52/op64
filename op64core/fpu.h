@@ -370,6 +370,7 @@ inline uint8_t c_cmp_32(float* fs, float* ft)
     }
 
     uint64_t flags = __readeflags();
+    // ZF . PF . CF
     uint8_t result = (flags & 1) | ((flags >> 1) & 2) | ((flags >> 4) & 4);
     return result;
 }

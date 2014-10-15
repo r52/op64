@@ -10,7 +10,7 @@ void MPPInterpreter::MFC1(void)
     if (_cp0->cop1_unusable())
         return;
 
-    _reg[_cur_instr.rt].s = signextend<int32_t, int64_t>(*(int32_t*)Bus::s_reg[_cur_instr.fs]);
+    _reg[_cur_instr.rt].s = *(int32_t*)Bus::s_reg[_cur_instr.fs];
     ++_PC;
 }
 
@@ -26,12 +26,12 @@ void MPPInterpreter::CFC1(void)
 
     if (_cur_instr.fs == 31)
     {
-        _reg[_cur_instr.rt].s = signextend<int32_t, int64_t>(*(Bus::FCR31));
+        _reg[_cur_instr.rt].s = *(int32_t*)Bus::FCR31;
     }
 
     if (_cur_instr.fs == 0)
     {
-        _reg[_cur_instr.rt].s = signextend<int32_t, int64_t>(*(Bus::FCR0));
+        _reg[_cur_instr.rt].s = *(int32_t*)Bus::FCR0;
     }
     ++_PC;
 }
@@ -269,7 +269,7 @@ void MPPInterpreter::TRUNC_W_S(void)
 
     uint32_t saved_mode = get_rounding();
 
-    set_rounding(TRUNC_MODE);
+    set_rounding(ROUND_MODE);
     *(int32_t*)Bus::s_reg[_cur_instr.fd] = trunc_f32_to_i32((float*)Bus::s_reg[_cur_instr.fs]);
     set_rounding(saved_mode);
 
@@ -434,7 +434,7 @@ void MPPInterpreter::C_LE_S(void)
         Bus::stop = 1;
     }
 
-    *(Bus::FCR31) = (result & (CMP_LESS_THAN | CMP_EQUAL)) ? *(Bus::FCR31) | 0x800000 : *(Bus::FCR31)&~0x800000;
+    *(Bus::FCR31) = ((result == CMP_LESS_THAN) || (result == CMP_EQUAL)) ? *(Bus::FCR31) | 0x800000 : *(Bus::FCR31)&~0x800000;
 
     ++_PC;
 }
@@ -560,7 +560,7 @@ void MPPInterpreter::TRUNC_W_D(void)
         return;
 
     uint32_t saved_mode = get_rounding();
-    set_rounding(TRUNC_MODE);
+    set_rounding(ROUND_MODE);
     *(int32_t*)Bus::s_reg[_cur_instr.fd] = trunc_f64_to_i32((double*)Bus::d_reg[_cur_instr.fs]);
     set_rounding(saved_mode);
 
@@ -711,7 +711,7 @@ void MPPInterpreter::C_LE_D(void)
         Bus::stop = 1;
     }
 
-    *(Bus::FCR31) = (result & (CMP_LESS_THAN | CMP_EQUAL)) ? *(Bus::FCR31) | 0x800000 : *(Bus::FCR31)&~0x800000;
+    *(Bus::FCR31) = ((result == CMP_LESS_THAN) || (result == CMP_EQUAL)) ? *(Bus::FCR31) | 0x800000 : *(Bus::FCR31)&~0x800000;
 
     ++_PC;
 }

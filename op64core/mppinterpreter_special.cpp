@@ -196,7 +196,7 @@ void MPPInterpreter::DMULT(void)
     _lo.u = result;
     _hi.u = (result >> 64);
 #elif defined(_MSC_VER)
-    _lo.s = _mul128((int64_t)_reg[_cur_instr.rs].s, (int64_t)_reg[_cur_instr.rt].s, &_hi.s);
+    _lo.s = _mul128(_reg[_cur_instr.rs].s, _reg[_cur_instr.rt].s, &_hi.s);
 #else
     int64_t hi_prod, mid_prods, lo_prod;
     int64_t rshi = (int32_t)(_reg[_cur_instr.rs].s >> 32);
