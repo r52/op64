@@ -14,20 +14,11 @@
 #include "guiconfig.h"
 #include "configdialog.h"
 
-#ifdef _MSC_VER
-#define GLFW_EXPOSE_NATIVE_WIN32
-#define GLFW_EXPOSE_NATIVE_WGL
-#endif
-#include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
+#include "renderwidget.h"
 
-static void stopEmulator(GLFWwindow* window)
-{
-    EMU.stopEmulator();
-}
 
 QOP64Window::QOP64Window(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent), renderWidget(nullptr)
 {
     ui.setupUi(this);
 
@@ -47,18 +38,29 @@ QOP64Window::QOP64Window(QWidget *parent)
     setupGUI();
     connectGUIControls();
 
-    setupGLFW();
 
     // register statusbar
-    _plugins->setStatusBar((void*)ui.statusBar->winId());
+    //_plugins->setStatusBar((void*)ui.statusBar->winId());
 }
 
 QOP64Window::~QOP64Window()
 {
-    emuThread.quit();
-    glfwTerminate();
+    if (EMU.getState() == EMU_RUNNING)
+    {
+        EMU.stopEmulator();
+        QEventLoop loop;
+        connect(_emu, &EmulatorThread::emulatorFinished, &loop, &QEventLoop::quit);
+        loop.exec();
+    }
+
+    _emuThread.quit();
 
     delete _plugins;
+
+    if (nullptr != renderWidget)
+    {
+        delete renderWidget; renderWidget = nullptr;
+    }
 }
 
 void QOP64Window::openRom(void)
@@ -69,12 +71,15 @@ void QOP64Window::openRom(void)
     {
         if (EMU.loadRom(_romFile.toLocal8Bit().data()))
         {
-            glwindow = glfwCreateWindow(640, 480, "OpenGL", nullptr, nullptr);
+            renderWidget = new RenderWidget;
+            renderWidget->setGeometry(QRect(0, 0, 640, 480));
+            renderWidget->setMinimumSize(QSize(640, 480));
+            renderWidget->move(100, 100);
 
-            _plugins->setRenderWindow(glfwGetWin32Window(glwindow));
-            glfwSetWindowCloseCallback(glwindow, stopEmulator);
+            _plugins->setRenderWindow((void*)renderWidget->winId());
+            renderWidget->show();
 
-            emuThread.start();
+            _emuThread.start();
 
             emit runEmulator();
         }
@@ -83,8 +88,10 @@ void QOP64Window::openRom(void)
 
 void QOP64Window::emulationFinished()
 {
-    glfwDestroyWindow(glwindow);
-    glwindow = nullptr;
+    if (nullptr != renderWidget)
+    {
+        delete renderWidget; renderWidget = nullptr;
+    }
 }
 
 void QOP64Window::logCallback(const char* msg)
@@ -130,11 +137,11 @@ void QOP64Window::setupDirectories(void)
 void QOP64Window::setupEmulationThread(void)
 {
     // Setup emulation thread
-    EmulatorThread* emu = new EmulatorThread(_plugins);
-    emu->moveToThread(&emuThread);
-    connect(&emuThread, &QThread::finished, emu, &QObject::deleteLater);
-    connect(emu, &EmulatorThread::emulatorFinished, this, &QOP64Window::emulationFinished);
-    connect(this, &QOP64Window::runEmulator, emu, &EmulatorThread::runEmulator);
+    _emu = new EmulatorThread(_plugins);
+    _emu->moveToThread(&_emuThread);
+    connect(&_emuThread, &QThread::finished, _emu, &QObject::deleteLater);
+    connect(_emu, &EmulatorThread::emulatorFinished, this, &QOP64Window::emulationFinished);
+    connect(this, &QOP64Window::runEmulator, _emu, &EmulatorThread::runEmulator);
     //emuThread.start();
 }
 
@@ -154,20 +161,6 @@ void QOP64Window::connectGUIControls(void)
 
     // advanced
     connect(ui.actionShow_Log, SIGNAL(toggled(bool)), this, SLOT(toggleShowLog(bool)));
-}
-
-void QOP64Window::setupGLFW(void)
-{
-    // glfw init
-    glfwInit();
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-
-    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 }
 
 void QOP64Window::toggleShowLog(bool show)

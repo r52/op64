@@ -6,9 +6,10 @@
 #include <QThread>
 
 
-class GLFWwindow;
 class Plugins;
 class ConfigDialog;
+class EmulatorThread;
+class RenderWidget;
 
 class QOP64Window : public QMainWindow
 {
@@ -45,10 +46,11 @@ private slots:
 private:
     Ui::QOP64WindowClass ui;
     QString _romFile;
-    QThread emuThread;
-    GLFWwindow* glwindow;
+    QThread _emuThread;
+    EmulatorThread* _emu;
     Plugins* _plugins;
     ConfigDialog* cfgDialog;
+    RenderWidget* renderWidget;
 };
 
 #endif // QOP64WINDOW_H

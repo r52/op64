@@ -174,8 +174,8 @@ void MPPInterpreter::DIVU(void)
 {
     if (_reg[_cur_instr.rt].u != 0)
     {
-        _lo.s = signextend<int32_t, int64_t>((uint32_t)_reg[_cur_instr.rs].u / (uint32_t)_reg[_cur_instr.rt].u);
-        _hi.s = signextend<int32_t, int64_t>((uint32_t)_reg[_cur_instr.rs].u % (uint32_t)_reg[_cur_instr.rt].u);
+        _lo.u = signextend<int32_t, int64_t>((uint32_t)_reg[_cur_instr.rs].u / (uint32_t)_reg[_cur_instr.rt].u);
+        _hi.u = signextend<int32_t, int64_t>((uint32_t)_reg[_cur_instr.rs].u % (uint32_t)_reg[_cur_instr.rt].u);
     }
     else
     {
@@ -187,8 +187,8 @@ void MPPInterpreter::DIVU(void)
 void MPPInterpreter::DMULT(void)
 {
 #if defined(__GNUC__)
-    __int128_t rs128 = (int64_t)_reg[_cur_instr.rs];
-    __int128_t rs128 = (int64_t)_reg[_cur_instr.rt];
+    __int128_t rs128 = (uint64_t)_reg[_cur_instr.rs].s;
+    __int128_t rs128 = (uint64_t)_reg[_cur_instr.rt].s;
     __int128_t result;
 
     result = rs128 * rs128;
@@ -196,21 +196,21 @@ void MPPInterpreter::DMULT(void)
     _lo.u = result;
     _hi.u = (result >> 64);
 #elif defined(_MSC_VER)
-    _lo.u = _mul128((int64_t)_reg[_cur_instr.rs].s, (int64_t)_reg[_cur_instr.rt].s, (int64_t*)&_hi.u);
+    _lo.s = _mul128((int64_t)_reg[_cur_instr.rs].s, (int64_t)_reg[_cur_instr.rt].s, &_hi.s);
 #else
     int64_t hi_prod, mid_prods, lo_prod;
-    int64_t rshi = (int32_t)(_reg[_cur_instr.rs] >> 32);
-    int64_t rthi = (int32_t)(_reg[_cur_instr.rt] >> 32);
-    int64_t rslo = (uint32_t)_reg[_cur_instr.rs];
-    int64_t rtlo = (uint32_t)_reg[_cur_instr.rt];
+    int64_t rshi = (int32_t)(_reg[_cur_instr.rs].s >> 32);
+    int64_t rthi = (int32_t)(_reg[_cur_instr.rt].s >> 32);
+    int64_t rslo = (uint32_t)_reg[_cur_instr.rs].u;
+    int64_t rtlo = (uint32_t)_reg[_cur_instr.rt].u;
 
     mid_prods = (rshi * rtlo) + (rslo * rthi);
     lo_prod = (rslo * rtlo);
     hi_prod = (rshi * rthi);
 
     mid_prods += lo_prod >> 32;
-    _hi.u = hi_prod + (mid_prods >> 32);
-    _lo.u = (uint32_t)lo_prod + (mid_prods << 32);
+    _hi.s = hi_prod + (mid_prods >> 32);
+    _lo.s = (uint32_t)lo_prod + (mid_prods << 32);
 #endif
 
     ++_PC;
@@ -219,8 +219,8 @@ void MPPInterpreter::DMULT(void)
 void MPPInterpreter::DMULTU(void)
 {
 #if defined(__GNUC__)
-    __uint128_t rs128 = _reg[_cur_instr.rs];
-    __uint128_t rs128 = _reg[_cur_instr.rt];
+    __uint128_t rs128 = _reg[_cur_instr.rs].u;
+    __uint128_t rs128 = _reg[_cur_instr.rt].u;
 
     __uint128_t result = rs128 * rt128;
     _lo.u = result;
@@ -229,10 +229,10 @@ void MPPInterpreter::DMULTU(void)
     _lo.u = _umul128(_reg[_cur_instr.rs].u, _reg[_cur_instr.rt].u, &_hi.u);
 #else
     uint64_t hi_prod, mid_prods, lo_prod;
-    uint64_t rshi = (int32_t) (_reg[_cur_instr.rs] >> 32);
-    uint64_t rthi = (int32_t) (_reg[_cur_instr.rt] >> 32);
-    uint64_t rslo = (uint32_t) _reg[_cur_instr.rs];
-    uint64_t rtlo = (uint32_t) _reg[_cur_instr.rt];
+    uint64_t rshi = (int32_t) (_reg[_cur_instr.rs].s >> 32);
+    uint64_t rthi = (int32_t) (_reg[_cur_instr.rt].s >> 32);
+    uint64_t rslo = (uint32_t) _reg[_cur_instr.rs].u;
+    uint64_t rtlo = (uint32_t) _reg[_cur_instr.rt].u;
 
     mid_prods = (rshi * rtlo) + (rslo * rthi);
     lo_prod = (rslo * rtlo);

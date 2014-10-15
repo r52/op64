@@ -104,12 +104,13 @@ public:
         return -1;
     }
 
+    void loadConfig(void);
+    void saveConfig(void);
+
 private:
     ConfigStore(void);
     ~ConfigStore(void);
 
-    void loadConfig(void);
-    void saveConfig(void);
     void setupDefaults(void);
 
     // Not implemented

@@ -1,6 +1,5 @@
 #pragma once
 #include <QObject>
-#include <QGLWidget>
 
 class Plugins;
 class ICPU;

@@ -128,5 +128,7 @@ void ConfigDialog::saveAndClose(void)
         store.set(CFG_SECTION_CORE, CFG_RSP_PLUGIN, data.toString().toStdString());
     }
 
+    store.saveConfig();
+
     close();
 }
