@@ -187,8 +187,8 @@ void MPPInterpreter::DIVU(void)
 void MPPInterpreter::DMULT(void)
 {
 #if defined(__GNUC__)
-    __int128_t rs128 = (uint64_t)_reg[_cur_instr.rs].s;
-    __int128_t rs128 = (uint64_t)_reg[_cur_instr.rt].s;
+    __int128_t rs128 = (int64_t)_reg[_cur_instr.rs].s;
+    __int128_t rs128 = (int64_t)_reg[_cur_instr.rt].s;
     __int128_t result;
 
     result = rs128 * rs128;
