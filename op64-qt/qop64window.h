@@ -10,6 +10,7 @@ class Plugins;
 class ConfigDialog;
 class EmulatorThread;
 class RenderWidget;
+enum EmuState;
 
 class QOP64Window : public QMainWindow
 {
@@ -33,6 +34,7 @@ signals:
 
 public slots:
     void emulationFinished();
+    void emulatorChangeState(EmuState newstate);
 
 private slots:
     void openRom(void);

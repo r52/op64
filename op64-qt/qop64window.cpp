@@ -79,18 +79,8 @@ void QOP64Window::openRom(void)
             _plugins->setRenderWindow((void*)renderWidget->winId());
             renderWidget->show();
 
-            _emuThread.start();
-
             emit runEmulator();
         }
-    }
-}
-
-void QOP64Window::emulationFinished()
-{
-    if (nullptr != renderWidget)
-    {
-        delete renderWidget; renderWidget = nullptr;
     }
 }
 
@@ -142,7 +132,11 @@ void QOP64Window::setupEmulationThread(void)
     connect(&_emuThread, &QThread::finished, _emu, &QObject::deleteLater);
     connect(_emu, &EmulatorThread::emulatorFinished, this, &QOP64Window::emulationFinished);
     connect(this, &QOP64Window::runEmulator, _emu, &EmulatorThread::runEmulator);
-    //emuThread.start();
+
+    EMU.moveToThread(&_emuThread);
+    connect(&EMU, SIGNAL(stateChanged(EmuState)), this, SLOT(emulatorChangeState(EmuState)), Qt::DirectConnection);
+
+    _emuThread.start();
 }
 
 void QOP64Window::connectGUIControls(void)
@@ -217,5 +211,36 @@ void QOP64Window::showGraphicsConfig(void)
 void QOP64Window::showRSPConfig(void)
 {
     _plugins->ConfigPlugin((void*)this->winId(), PLUGIN_TYPE_RSP);
+}
+
+void QOP64Window::emulatorChangeState(EmuState newstate)
+{
+    switch (newstate)
+    {
+    case DEAD:
+        renderWidget->deleteLater();
+        renderWidget = nullptr;
+        break;
+    case ROM_LOADED:
+        break;
+    case HARDWARE_INITIALIZED:
+        break;
+    case EMU_RUNNING:
+        break;
+    case EMU_PAUSED:
+        break;
+    case EMU_STOPPED:
+        break;
+    case HARDWARE_DEINITIALIZED:
+        break;
+    }
+}
+
+void QOP64Window::emulationFinished()
+{
+    if (nullptr != renderWidget)
+    {
+        delete renderWidget; renderWidget = nullptr;
+    }
 }
 

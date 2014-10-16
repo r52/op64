@@ -89,9 +89,10 @@ bool Emulator::uninitializeHardware(void)
         return false;
     }
 
+    setState(DEAD);
+
     if (Bus::disconnectDevices())
     {
-        setState(DEAD);
         return true;
     }
 
