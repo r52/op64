@@ -74,8 +74,8 @@ bool InputPlugin::initialize(void* renderWindow, void* statusBar)
         } CONTROL_INFO;
 
         //Get Function from DLL		
-        void (*InitiateControllers_1_1)(CONTROL_INFO* ControlInfo);
-        InitiateControllers_1_1 = (void(*)(CONTROL_INFO*))opLibGetFunc(_libHandle, "InitiateControllers");
+        void (*InitiateControllers_1_1)(CONTROL_INFO ControlInfo);
+        InitiateControllers_1_1 = (void(*)(CONTROL_INFO))opLibGetFunc(_libHandle, "InitiateControllers");
         if (InitiateControllers_1_1 == nullptr) { return false; }
 
         CONTROL_INFO ControlInfo;
@@ -84,7 +84,7 @@ bool InputPlugin::initialize(void* renderWindow, void* statusBar)
         ControlInfo.hinst = GetModuleHandle(NULL);
         ControlInfo.hMainWindow = renderWindow;
         ControlInfo.MemoryBswaped = TRUE;
-        InitiateControllers_1_1(&ControlInfo);
+        InitiateControllers_1_1(ControlInfo);
         _initialized = true;
     }
 
