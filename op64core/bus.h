@@ -13,6 +13,7 @@ union Register64;
 class InterruptHandler;
 class PIF;
 class Plugins;
+class SysTiming;
 
 struct _controller_data;
 typedef struct _controller_data CONTROL;
@@ -26,6 +27,7 @@ namespace Bus
     extern IMemory* mem;
     extern Rom* rom;
     extern Plugins* plugins;
+    extern SysTiming* systimer;
 
     // managed devices
     extern InterruptHandler* interrupt;
@@ -88,6 +90,9 @@ namespace Bus
     extern bool* SPECIAL_done;
     extern bool* perform_hard_reset;
     extern bool* interrupt_unsafe_state;
+
+    // core control
+    extern std::atomic<bool> limitVI;
 
     bool connectRom(Rom* dev);
     bool connectMemory(IMemory* dev);

@@ -7,6 +7,8 @@
 #include "rom.h"
 #include "plugins.h"
 #include "gfxplugin.h"
+#include "systiming.h"
+#include "corecontrol.h"
 
 bool Interrupt::operator<(const Interrupt& i) const
 {
@@ -176,10 +178,16 @@ void InterruptHandler::gen_interrupt(void)
 
         // TODO future: cheats here???
 
-        // TODO future: gfx draw
         Bus::plugins->gfx()->UpdateScreen();
 
-        // TODO future do vi limiter here
+        uint64_t frameRate;
+        if (Bus::limitVI && (frameRate = Bus::systimer->doVILimit()))
+        {
+            if (CoreControl::displayVI)
+            {
+                CoreControl::displayVI(frameRate);
+            }
+        }
 
         if (Bus::vi_reg[VI_V_SYNC_REG] == 0)
             Bus::vi_reg[_VI_DELAY] = 500000;

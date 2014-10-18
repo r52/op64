@@ -150,6 +150,12 @@
     <ClInclude Include="configdefs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="systiming.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="corecontrol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="rom.cpp">
@@ -232,6 +238,12 @@
     </ClCompile>
     <ClCompile Include="inputplugin.cpp">
       <Filter>Source Files\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="systiming.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="corecontrol.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

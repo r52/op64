@@ -6,6 +6,7 @@
 #include "pif.h"
 #include "logger.h"
 #include "plugins.h"
+#include "systiming.h"
 
 namespace Bus
 {
@@ -14,6 +15,7 @@ namespace Bus
     ICPU* cpu = nullptr;
     IMemory* mem = nullptr;
     Plugins* plugins = nullptr;
+    SysTiming* systimer = nullptr;
 
     // managed devices
     InterruptHandler* interrupt = nullptr;
@@ -75,6 +77,9 @@ namespace Bus
     bool* SPECIAL_done = nullptr;
     bool* perform_hard_reset = nullptr;
     bool* interrupt_unsafe_state = nullptr;
+
+    // core control
+    std::atomic<bool> limitVI = true;
 
     // local bus state check. if true, then machine ready to execute
     static bool devicesInitialized = false;
@@ -177,9 +182,14 @@ namespace Bus
 
         plugins->RomOpened();
 
+        systimer = new SysTiming(rom->getViLimit());
+        systimer->startTimers();
+
         cpu->execute();
 
         plugins->RomClosed();
+
+        delete systimer; systimer = nullptr;
     }
 
     bool disconnectDevices(void)

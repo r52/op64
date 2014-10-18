@@ -1,6 +1,7 @@
 #include "renderwidget.h"
 #include "emulator.h"
 #include <QCloseEvent>
+#include "corecontrol.h"
 
 
 
@@ -11,6 +12,8 @@ QWidget(parent)
     setAttribute(Qt::WA_NativeWindow, true);
     setAttribute(Qt::WA_NoSystemBackground);
     setAttribute(Qt::WA_OpaquePaintEvent);
+
+    CoreControl::displayVI = std::bind(&RenderWidget::displayVI, this, std::placeholders::_1);
 }
 
 void RenderWidget::closeEvent(QCloseEvent * event)
@@ -21,4 +24,9 @@ void RenderWidget::closeEvent(QCloseEvent * event)
     }
 
     event->accept();
+}
+
+void RenderWidget::displayVI(uint64_t framerate)
+{
+    this->setWindowTitle(QString("%1 VI/s").arg(framerate));
 }

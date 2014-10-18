@@ -82,6 +82,7 @@
     <ClInclude Include="bus.h" />
     <ClInclude Include="configdefs.h" />
     <ClInclude Include="configstore.h" />
+    <ClInclude Include="corecontrol.h" />
     <ClInclude Include="cp1.h" />
     <ClInclude Include="dma.h" />
     <ClInclude Include="eeprom.h" />
@@ -104,12 +105,14 @@
     <ClInclude Include="rom.h" />
     <ClInclude Include="rspplugin.h" />
     <ClInclude Include="sram.h" />
+    <ClInclude Include="systiming.h" />
     <ClInclude Include="tlb.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="audioplugin.cpp" />
     <ClCompile Include="bus.cpp" />
     <ClCompile Include="configstore.cpp" />
+    <ClCompile Include="corecontrol.cpp" />
     <ClCompile Include="cp1.cpp" />
     <ClCompile Include="dma.cpp" />
     <ClCompile Include="eeprom.cpp" />
@@ -133,6 +136,7 @@
     <ClCompile Include="rom.cpp" />
     <ClCompile Include="rspplugin.cpp" />
     <ClCompile Include="sram.cpp" />
+    <ClCompile Include="systiming.cpp" />
     <ClCompile Include="tlb.cpp" />
   </ItemGroup>
   <ItemGroup>

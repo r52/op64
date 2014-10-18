@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <QWidget>
 
 class RenderWidget : public QWidget
@@ -13,4 +14,7 @@ public:
 
 protected:
     virtual void closeEvent(QCloseEvent * event);
+
+private:
+    void displayVI(uint64_t framerate);
 };
