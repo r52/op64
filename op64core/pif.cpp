@@ -68,9 +68,16 @@ void PIF::pifRead(void)
                 {
                     if (_controllers[channel].Present &&
                         _controllers[channel].RawData)
-                        if (Bus::plugins->input()->ReadController != nullptr) { Bus::plugins->input()->ReadController(channel, &Bus::pif_ram8[i]); }
+                    {
+                        if (Bus::plugins->input()->ReadController != nullptr)
+                        {
+                            Bus::plugins->input()->ReadController(channel, &Bus::pif_ram8[i]);
+                        }
+                    }
                     else
+                    {
                         readController(channel, &Bus::pif_ram8[i]);
+                    }
                 }
                 i += Bus::pif_ram8[i] + (Bus::pif_ram8[(i + 1)] & 0x3F) + 1;
                 channel++;
@@ -131,7 +138,9 @@ void PIF::pifWrite(void)
         case 0x00:
             channel++;
             if (channel > 6)
+            {
                 i = 0x40;
+            }
             break;
         case 0xFF:
             break;
@@ -142,9 +151,16 @@ void PIF::pifWrite(void)
                 {
                     if (_controllers[channel].Present &&
                         _controllers[channel].RawData)
-                        if (Bus::plugins->input()->ControllerCommand != nullptr) { Bus::plugins->input()->ControllerCommand(channel, &Bus::pif_ram8[i]); }
+                    {
+                        if (Bus::plugins->input()->ControllerCommand != nullptr)
+                        {
+                            Bus::plugins->input()->ControllerCommand(channel, &Bus::pif_ram8[i]);
+                        }
+                    }
                     else
+                    {
                         controllerCommand(channel, &Bus::pif_ram8[i]);
+                    }
                 }
                 else if (channel == 4)
                 {
@@ -219,7 +235,10 @@ void PIF::controllerCommand(int32_t controller, uint8_t* cmd)
     case 0x00: // read status
     case 0xFF: // reset
         if ((cmd[1] & 0x80))
+        {
             break;
+        }
+
         if (_controllers[controller].Present)
         {
             cmd[3] = 0x05;
@@ -238,11 +257,15 @@ void PIF::controllerCommand(int32_t controller, uint8_t* cmd)
             }
         }
         else
+        {
             cmd[1] |= 0x80;
+        }
         break;
     case 0x01:
         if (!_controllers[controller].Present)
+        {
             cmd[1] |= 0x80;
+        }
         break;
     case 0x02: // read controller pack
         if (_controllers[controller].Present)
@@ -254,7 +277,8 @@ void PIF::controllerCommand(int32_t controller, uint8_t* cmd)
                 _mempak->read(controller, address, &cmd[5]);
                 break;
             case PLUGIN_RAW:
-                if (Bus::plugins->input()->ControllerCommand != nullptr) {
+                if (Bus::plugins->input()->ControllerCommand != nullptr)
+                {
                     Bus::plugins->input()->ControllerCommand(controller, cmd);
                 }
                 break;
@@ -278,7 +302,8 @@ void PIF::controllerCommand(int32_t controller, uint8_t* cmd)
                 _mempak->write(controller, address, &cmd[5]);
                 break;
             case PLUGIN_RAW:
-                if (Bus::plugins->input()->ControllerCommand != nullptr) {
+                if (Bus::plugins->input()->ControllerCommand != nullptr)
+                {
                     Bus::plugins->input()->ControllerCommand(controller, cmd);
                 }
                 break;
