@@ -28,5 +28,5 @@ void RenderWidget::closeEvent(QCloseEvent * event)
 
 void RenderWidget::displayVI(uint64_t framerate)
 {
-    this->setWindowTitle(QString("%1 VI/s").arg(framerate));
+    QMetaObject::invokeMethod(this, "setWindowTitle", Q_ARG(QString, QString("%1 VI/s").arg(framerate)));
 }
