@@ -181,7 +181,7 @@ void InterruptHandler::gen_interrupt(void)
         Bus::plugins->gfx()->UpdateScreen();
 
         uint64_t frameRate;
-        if (Bus::limitVI && (frameRate = Bus::systimer->doVILimit()))
+        if (frameRate = Bus::systimer->doVILimit())
         {
             if (CoreControl::displayVI)
             {

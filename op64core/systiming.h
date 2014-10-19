@@ -9,6 +9,12 @@ enum TimingMode
     TIMING_PAL
 };
 
+enum LimitMode
+{
+    LIMIT_BY_VI = 0,
+    LIMIT_BY_FREQ
+};
+
 class SysTiming
 {
 public:
@@ -22,9 +28,17 @@ public:
     uint64_t doVILimit();
     void doFreqLimit();
 
+    void setLimitMode(LimitMode mode)
+    {
+        _limitmode = mode;
+        startTimers();
+    }
+
 private:
     uint64_t _framesElapsed;
     TimingMode _mode;
+    LimitMode _limitmode;
 
-    boost::chrono::high_resolution_clock::time_point _lastTime;
+    boost::chrono::high_resolution_clock::time_point _lastVITime;
+    boost::chrono::high_resolution_clock::time_point _lastTick;
 };
