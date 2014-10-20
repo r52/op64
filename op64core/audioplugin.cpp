@@ -82,6 +82,7 @@ bool AudioPlugin::initialize(void* renderWindow, void* statusBar)
         _usingThread = true;
         _audioThreadStop = false;
         _audioThread = std::thread(&AudioPlugin::audioThread, this);
+        _audioThread.detach();
     }
 
     if (Bus::ai_reg[AI_DACRATE_REG] != 0) {
@@ -200,7 +201,6 @@ void AudioPlugin::unloadLibrary(void)
     if (_usingThread)
     {
         _audioThreadStop = true;
-        _audioThread.join();
         _usingThread = false;
     }
 
