@@ -17,7 +17,9 @@ bool opLoadLib(LibHandle* handle, const char* libpath)
 #ifdef _MSC_VER
     const size_t size = strlen(libpath) + 1;
     std::wstring path(size, L'#');
-    mbstowcs(&path[0], libpath, size);
+    size_t convnum = 0;
+
+    mbstowcs_s(&convnum, &path[0], size, libpath, _TRUNCATE);
 
     *handle = LoadLibrary(path.c_str());
 

@@ -67,6 +67,9 @@
     <Filter Include="Source Files\plugins">
       <UniqueIdentifier>{ed6635ca-7c94-4187-a944-42faf655b351}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\cpu\fpu">
+      <UniqueIdentifier>{e7813743-ad95-4e34-8986-2db428b6c2cb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rom.h">
@@ -245,5 +248,13 @@
     <ClCompile Include="corecontrol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="windows\fpu_cmp_32.asm">
+      <Filter>Source Files\cpu\fpu</Filter>
+    </MASM>
+    <MASM Include="windows\fpu_cmp_64.asm">
+      <Filter>Source Files\cpu\fpu</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

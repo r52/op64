@@ -12,6 +12,7 @@
 #include "util.h"
 #include "tlb.h"
 
+// borrowed from pj64
 static const uint32_t SWL_MASK[4] = { 0x00000000, 0xFF000000, 0xFFFF0000, 0xFFFFFF00 };
 static const uint32_t SWR_MASK[4] = { 0x00FFFFFF, 0x0000FFFF, 0x000000FF, 0x00000000 };
 static const uint32_t LWL_MASK[4] = { 0x00000000, 0x000000FF, 0x0000FFFF, 0x00FFFFFF };
@@ -100,36 +101,37 @@ void MPPInterpreter::initialize(void)
 
 void MPPInterpreter::hard_reset(void)
 {
-    uint32_t i;
+    vec_for(uint32_t i = 0; i < 32; i++)
+    {
+        _reg[i].u = 0;
+        _cp0_reg[i] = 0;
+        _fgr[i] = 0;
 
-    _reg[:].u = 0;
-    _cp0_reg[0:32] = 0;
-    _fgr[0:32] = 0;
+        TLB::tlb_entry_table[i].mask = 0;
+        TLB::tlb_entry_table[i].vpn2 = 0;
+        TLB::tlb_entry_table[i].g = 0;
+        TLB::tlb_entry_table[i].asid = 0;
+        TLB::tlb_entry_table[i].pfn_even = 0;
+        TLB::tlb_entry_table[i].c_even = 0;
+        TLB::tlb_entry_table[i].d_even = 0;
+        TLB::tlb_entry_table[i].v_even = 0;
+        TLB::tlb_entry_table[i].pfn_odd = 0;
+        TLB::tlb_entry_table[i].c_odd = 0;
+        TLB::tlb_entry_table[i].d_odd = 0;
+        TLB::tlb_entry_table[i].v_odd = 0;
+        TLB::tlb_entry_table[i].r = 0;
+        //TLB::tlb_entry_table[i].check_par:ty_mask=0x1000;
 
-    TLB::tlb_entry_table[:].mask = 0;
-    TLB::tlb_entry_table[:].vpn2 = 0;
-    TLB::tlb_entry_table[:].g = 0;
-    TLB::tlb_entry_table[:].asid = 0;
-    TLB::tlb_entry_table[:].pfn_even = 0;
-    TLB::tlb_entry_table[:].c_even = 0;
-    TLB::tlb_entry_table[:].d_even = 0;
-    TLB::tlb_entry_table[:].v_even = 0;
-    TLB::tlb_entry_table[:].pfn_odd = 0;
-    TLB::tlb_entry_table[:].c_odd = 0;
-    TLB::tlb_entry_table[:].d_odd = 0;
-    TLB::tlb_entry_table[:].v_odd = 0;
-    TLB::tlb_entry_table[:].r = 0;
-    //TLB::tlb_entry_table[:].check_par:ty_mask=0x1000;
+        TLB::tlb_entry_table[i].start_even = 0;
+        TLB::tlb_entry_table[i].end_even = 0;
+        TLB::tlb_entry_table[i].phys_even = 0;
+        TLB::tlb_entry_table[i].start_odd = 0;
+        TLB::tlb_entry_table[i].end_odd = 0;
+        TLB::tlb_entry_table[i].phys_odd = 0;
 
-    TLB::tlb_entry_table[:].start_even = 0;
-    TLB::tlb_entry_table[:].end_even = 0;
-    TLB::tlb_entry_table[:].phys_even = 0;
-    TLB::tlb_entry_table[:].start_odd = 0;
-    TLB::tlb_entry_table[:].end_odd = 0;
-    TLB::tlb_entry_table[:].phys_odd = 0;
-
-    TLB::tlb_lookup_read[:] = 0;
-    TLB::tlb_lookup_write[:] = 0;
+        TLB::tlb_lookup_read[i] = 0;
+        TLB::tlb_lookup_write[i] = 0;
+    }
 
     _llbit = 0;
     _hi.u = 0;
@@ -310,7 +312,7 @@ void MPPInterpreter::execute(void)
 
 void MPPInterpreter::prefetch(void)
 {
-    uint32_t* mem = Bus::mem->fast_mem_access(_PC);
+    uint32_t* mem = Bus::mem->fast_fetch(_PC);
     if (nullptr != mem)
     {
         prefetch_opcode(mem[0], mem[1]);
@@ -380,18 +382,6 @@ void MPPInterpreter::BEQ(void)
 void MPPInterpreter::BNE(void)
 {
     // DECLARE_JUMP(BNE, PCADDR + (iimmediate+1)*4, irs != irt, &reg[0], 0, 0)
-    /*
-    uint32_t target = (((uint32_t)_PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2));
-    bool condition = (_reg[_cur_instr.rs] != _reg[_cur_instr.rt]);
-    if (target == ((uint32_t)_PC) && _check_nop)
-    {
-        generic_idle(target, condition, &_reg[0], false, false);
-        return;
-    }
-
-    generic_jump(target, condition, &_reg[0], false, false);
-    */
-
     DO_JUMP(
         ((uint32_t)_PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
         _reg[_cur_instr.rs].s != _reg[_cur_instr.rt].s,
@@ -968,7 +958,7 @@ void MPPInterpreter::general_exception(void)
 
     _cp0_reg[CP0_EPC_REG] = (uint32_t)_PC;
 
-    if (_delay_slot == 1 || _delay_slot == 3)
+    if (_delay_slot)
     {
         _cp0_reg[CP0_CAUSE_REG] |= 0x80000000;
         _cp0_reg[CP0_EPC_REG] -= 4;
@@ -1007,10 +997,14 @@ void MPPInterpreter::TLB_refill_exception(unsigned int address, int w)
     if (_cp0_reg[CP0_STATUS_REG] & 0x2) // Test de EXL
     {
         global_jump_to(0x80000180);
-        if (_delay_slot == 1 || _delay_slot == 3)
+        if (_delay_slot)
+        {
             _cp0_reg[CP0_CAUSE_REG] |= 0x80000000;
+        }
         else
+        {
             _cp0_reg[CP0_CAUSE_REG] &= 0x7FFFFFFF;
+        }
     }
     else
     {
@@ -1039,7 +1033,7 @@ void MPPInterpreter::TLB_refill_exception(unsigned int address, int w)
             global_jump_to(0x80000000);
         }
     }
-    if (_delay_slot == 1 || _delay_slot == 3)
+    if (_delay_slot)
     {
         _cp0_reg[CP0_CAUSE_REG] |= 0x80000000;
         _cp0_reg[CP0_EPC_REG] -= 4;

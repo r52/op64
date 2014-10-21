@@ -359,15 +359,39 @@ inline double abs_f64(double* f)
     return result;
 }
 
+#if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
+extern "C" {
+    void fpu_cmp_32(float* fs, float* ft);
+    void fpu_cmp_64(double* fs, double* ft);
+}
+#endif
+
 inline uint8_t c_cmp_32(float* fs, float* ft)
 {
-    // TODO future, linux version
+    // If using windows ICC, use inline asm
+#if defined(_MSC_VER) && defined(__INTEL_COMPILER)
     __asm
     {
         movss xmm0, DWORD PTR[rcx]
         movss xmm1, DWORD PTR[rdx]
         comiss xmm0, xmm1
     }
+#elif defined(_MSC_VER) && ! defined(__INTEL_COMPILER)
+    fpu_cmp_32(fs, ft);
+#else
+    __m128 ffs;
+    __m128 fft;
+
+    ffs = _mm_load_ss(fs);
+    fft = _mm_load_ss(ft);
+
+    __asm__ __volatile__(
+        "comiss %1, %2\n\t"
+        : /* No outputs as we call readeflags */
+        : "x" (ffs), "x" (fft)
+        : "cc"
+        );
+#endif
 
     uint64_t flags = __readeflags();
     // ZF . PF . CF
@@ -377,13 +401,29 @@ inline uint8_t c_cmp_32(float* fs, float* ft)
 
 inline uint8_t c_cmp_64(double* fs, double* ft)
 {
-    // TODO future, linux version
+#if defined(_MSC_VER) && defined(__INTEL_COMPILER)
     __asm
     {
         movsd xmm0, QWORD PTR[rcx]
         movsd xmm1, QWORD PTR[rdx]
         comisd xmm0, xmm1
     }
+#elif defined(_MSC_VER) && ! defined(__INTEL_COMPILER)
+    fpu_cmp_64(fs, ft);
+#else
+    __m128d ffs;
+    __m128d fft;
+
+    ffs = _mm_load_sd(fs);
+    fft = _mm_load_sd(ft);
+
+    __asm__ __volatile__(
+        "comisd %1, %2\n\t"
+        : /* No outputs as we call readeflags */
+        : "x" (ffs), "x" (fft)
+        : "cc"
+        );
+#endif
 
     uint64_t flags = __readeflags();
     uint8_t result = (flags & 1) | ((flags >> 1) & 2) | ((flags >> 4) & 4);

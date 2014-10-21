@@ -3,6 +3,7 @@
 #include "bus.h"
 #include "rom.h"
 #include "configstore.h"
+#include "optime.h"
 
 unsigned char byte2bcd(int n)
 {
@@ -13,7 +14,7 @@ unsigned char byte2bcd(int n)
 void EEPROM::eepromCommand(uint8_t* command)
 {
     time_t curtime_time;
-    struct tm *curtime;
+    tm curtime;
 
     if (Bus::rom->getSaveType() == SAVETYPE_AUTO)
     {
@@ -73,15 +74,15 @@ void EEPROM::eepromCommand(uint8_t* command)
             break;
         case 2:
             time(&curtime_time);
-            curtime = localtime(&curtime_time);
-            command[4] = byte2bcd(curtime->tm_sec);
-            command[5] = byte2bcd(curtime->tm_min);
-            command[6] = 0x80 + byte2bcd(curtime->tm_hour);
-            command[7] = byte2bcd(curtime->tm_mday);
-            command[8] = byte2bcd(curtime->tm_wday);
-            command[9] = byte2bcd(curtime->tm_mon + 1);
-            command[10] = byte2bcd(curtime->tm_year);
-            command[11] = byte2bcd(curtime->tm_year / 100);
+            curtime = op::localtime(curtime_time);
+            command[4] = byte2bcd(curtime.tm_sec);
+            command[5] = byte2bcd(curtime.tm_min);
+            command[6] = 0x80 + byte2bcd(curtime.tm_hour);
+            command[7] = byte2bcd(curtime.tm_mday);
+            command[8] = byte2bcd(curtime.tm_wday);
+            command[9] = byte2bcd(curtime.tm_mon + 1);
+            command[10] = byte2bcd(curtime.tm_year);
+            command[11] = byte2bcd(curtime.tm_year / 100);
             command[12] = 0x00;	// status
             break;
         }
@@ -155,7 +156,9 @@ void EEPROM::write(uint8_t* buf, int line)
 
 EEPROM::EEPROM()
 {
-
+#ifndef HAS_CXX11_LIST_INST
+    fill_array(_eeprom, 0, 0x800, 0xff);
+#endif
 }
 
 EEPROM::~EEPROM()

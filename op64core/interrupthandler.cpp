@@ -413,11 +413,12 @@ void InterruptHandler::gen_interrupt(void)
         Bus::cp0_reg[CP0_ERROREPC_REG] = (uint32_t)*(Bus::PC);
         
         // adjust ErrorEPC if we were in a delay slot, and clear the delay_slot and dyna_interp flags
-        if (*(Bus::delay_slot) == 1 || *(Bus::delay_slot) == 3)
+        if (*(Bus::delay_slot))
         {
             Bus::cp0_reg[CP0_ERROREPC_REG] -= 4;
         }
-        *(Bus::delay_slot) = 0;
+
+        *(Bus::delay_slot) = false;
 
         // set next instruction address to reset vector
         *(Bus::last_instr_addr) = 0xa4000040;

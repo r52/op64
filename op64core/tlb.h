@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-typedef struct tlb_entry
+struct tlb_entry
 {
     int16_t mask;
     int32_t vpn2;

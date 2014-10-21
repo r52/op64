@@ -90,7 +90,6 @@ bool Rom::isValidRom(const uint8_t* image)
 
 void Rom::swapRom(uint8_t* rom, uint_fast32_t size)
 {
-    uint8_t temp;
     uint32_t i;
 
     switch (rom[0])

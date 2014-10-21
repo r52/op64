@@ -33,9 +33,12 @@ PIF::~PIF(void)
 
 void PIF::initialize(void)
 {
-    _controllers[:].Present = 0;
-    _controllers[:].RawData = 0;
-    _controllers[:].Plugin = PLUGIN_NONE;
+    vec_for(uint32_t i = 0; i < 4; i++)
+    {
+        _controllers[i].Present = 0;
+        _controllers[i].RawData = 0;
+        _controllers[i].Plugin = PLUGIN_NONE;
+    }
 }
 
 void PIF::pifRead(void)

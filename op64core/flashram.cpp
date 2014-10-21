@@ -4,7 +4,7 @@
 #include "logger.h"
 
 
-char emptyBlock[128] = { 0xff };
+char emptyBlock[128] = { 0xffu };
 
 FlashRam::FlashRam() :
 _mode(NOPES_MODE),
@@ -37,7 +37,7 @@ void FlashRam::loadFlashRam(void)
     {
         _flashramfile.open(flashpath, std::ios::out);
         _flashramfile.seekp(0x1ffff);
-        _flashramfile.put(0xff);
+        _flashramfile.put(0xffu);
         _flashramfile.close();
     }
 

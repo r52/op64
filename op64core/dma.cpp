@@ -69,8 +69,6 @@ void DMA::writeSP(void)
 
 void DMA::readPI(void)
 {
-    uint32_t i;
-
     if (pi_reg[PI_CART_ADDR_REG] >= 0x08000000
         && pi_reg[PI_CART_ADDR_REG] < 0x08010000)
     {

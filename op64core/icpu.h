@@ -283,7 +283,7 @@ protected:
     //virtual void SV(void) = 0;
     virtual void SD(void) = 0;
 
-
+#ifdef HAS_CXX11_LIST_INST
     InstructionTable instruction_table = 
     {
         &ICPU::SPECIAL, &ICPU::REGIMM, &ICPU::J, &ICPU::JAL, &ICPU::BEQ, &ICPU::BNE, &ICPU::BLEZ, &ICPU::BGTZ,
@@ -295,6 +295,9 @@ protected:
         &ICPU::LL, &ICPU::LWC1, &ICPU::SV, &ICPU::SV, &ICPU::LLD, &ICPU::LDC1, &ICPU::SV, &ICPU::LD,
         &ICPU::SC, &ICPU::SWC1, &ICPU::SV, &ICPU::SV, &ICPU::SCD, &ICPU::SDC1, &ICPU::SV, &ICPU::SD
     };
+#else
+    InstructionTable instruction_table;
+#endif
 
 
     //===========================================================================
@@ -373,6 +376,7 @@ protected:
     virtual void DSRL32(void) = 0;
     virtual void DSRA32(void) = 0;
 
+#ifdef HAS_CXX11_LIST_INST
     InstructionTable special_table = 
     {
         &ICPU::SLL, &ICPU::SV, &ICPU::SRL, &ICPU::SRA, &ICPU::SLLV, &ICPU::SV, &ICPU::SRLV, &ICPU::SRAV,
@@ -384,6 +388,9 @@ protected:
         &ICPU::TGE, &ICPU::TGEU, &ICPU::TLT, &ICPU::TLTU, &ICPU::TEQ, &ICPU::SV, &ICPU::TNE, &ICPU::SV,
         &ICPU::DSLL, &ICPU::SV, &ICPU::DSRL, &ICPU::DSRA, &ICPU::DSLL32, &ICPU::SV, &ICPU::DSRL32, &ICPU::DSRA32
     };
+#else
+    InstructionTable special_table;
+#endif
 
 
     //===========================================================================
@@ -404,6 +411,7 @@ protected:
     virtual void BLTZALL(void) = 0;
     virtual void BGEZALL(void) = 0;
 
+#ifdef HAS_CXX11_LIST_INST
     InstructionTable regimm_table = 
     {
         &ICPU::BLTZ, &ICPU::BGEZ, &ICPU::BLTZL, &ICPU::BGEZL, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV,
@@ -411,6 +419,9 @@ protected:
         &ICPU::BLTZAL, &ICPU::BGEZAL, &ICPU::BLTZALL, &ICPU::BGEZALL, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV,
         &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV
     };
+#else
+    InstructionTable regimm_table;
+#endif
 
 
     //===========================================================================
@@ -420,6 +431,7 @@ protected:
     virtual void MTC0(void) = 0;
     virtual void TLB(void) = 0;
 
+#ifdef HAS_CXX11_LIST_INST
     InstructionTable cop0_table =
     {
         &ICPU::MFC0, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::MTC0, &ICPU::SV, &ICPU::SV, &ICPU::SV,
@@ -427,6 +439,9 @@ protected:
         &ICPU::TLB, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV,
         &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV
     };
+#else
+    InstructionTable cop0_table;
+#endif
 
 
     //===========================================================================
@@ -444,7 +459,7 @@ protected:
     virtual void W(void) = 0;
     virtual void L(void) = 0;
 
-
+#ifdef HAS_CXX11_LIST_INST
     InstructionTable cop1_table =
     {
         &ICPU::MFC1,&ICPU::DMFC1,&ICPU::CFC1,&ICPU::SV,&ICPU::MTC1,&ICPU::DMTC1,&ICPU::CTC1,&ICPU::SV,
@@ -452,7 +467,9 @@ protected:
         &ICPU::S   ,&ICPU::D    ,&ICPU::SV  ,&ICPU::SV,&ICPU::W   ,&ICPU::L    ,&ICPU::SV  ,&ICPU::SV,
         &ICPU::SV  ,&ICPU::SV   ,&ICPU::SV  ,&ICPU::SV,&ICPU::SV  ,&ICPU::SV   ,&ICPU::SV  ,&ICPU::SV
     };
-
+#else
+    InstructionTable cop1_table;
+#endif
 
     //===========================================================================
     // tlb instructions
@@ -463,7 +480,7 @@ protected:
     virtual void TLBP(void) = 0;
     virtual void ERET(void) = 0;
 
-
+#ifdef HAS_CXX11_LIST_INST
     InstructionTable tlb_table =
     {
         &ICPU::SV  ,&ICPU::TLBR,&ICPU::TLBWI,&ICPU::SV,&ICPU::SV,&ICPU::SV,&ICPU::TLBWR,&ICPU::SV, 
@@ -475,7 +492,9 @@ protected:
         &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV,
         &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV
     };
-
+#else
+    InstructionTable tlb_table;
+#endif
 
     //===========================================================================
     // bc instructions
@@ -485,13 +504,15 @@ protected:
     virtual void BC1FL(void) = 0;
     virtual void BC1TL(void) = 0;
 
-
+#ifdef HAS_CXX11_LIST_INST
     InstructionTable bc_table =
     {
         &ICPU::BC1F ,&ICPU::BC1T ,
         &ICPU::BC1FL,&ICPU::BC1TL
     };
-
+#else
+    InstructionTable bc_table;
+#endif
 
     //===========================================================================
     // s instructions
@@ -531,7 +552,7 @@ protected:
     virtual void C_LE_S(void) = 0;
     virtual void C_NGT_S(void) = 0;
 
-
+#ifdef HAS_CXX11_LIST_INST
     InstructionTable s_table =
     {
         &ICPU::ADD_S    ,&ICPU::SUB_S    ,&ICPU::MUL_S   ,&ICPU::DIV_S    ,&ICPU::SQRT_S   ,&ICPU::ABS_S    ,&ICPU::MOV_S   ,&ICPU::NEG_S    , 
@@ -543,7 +564,9 @@ protected:
         &ICPU::C_F_S    ,&ICPU::C_UN_S   ,&ICPU::C_EQ_S  ,&ICPU::C_UEQ_S  ,&ICPU::C_OLT_S  ,&ICPU::C_ULT_S  ,&ICPU::C_OLE_S ,&ICPU::C_ULE_S  , 
         &ICPU::C_SF_S   ,&ICPU::C_NGLE_S ,&ICPU::C_SEQ_S ,&ICPU::C_NGL_S  ,&ICPU::C_LT_S   ,&ICPU::C_NGE_S  ,&ICPU::C_LE_S  ,&ICPU::C_NGT_S
     };
-
+#else
+    InstructionTable s_table;
+#endif
 
     //===========================================================================
     // d instructions
@@ -584,7 +607,7 @@ protected:
     virtual void C_LE_D(void) = 0;
     virtual void C_NGT_D(void) = 0;
 
-
+#ifdef HAS_CXX11_LIST_INST
     InstructionTable d_table =
     {
         &ICPU::ADD_D    ,&ICPU::SUB_D    ,&ICPU::MUL_D   ,&ICPU::DIV_D    ,&ICPU::SQRT_D   ,&ICPU::ABS_D    ,&ICPU::MOV_D   ,&ICPU::NEG_D    ,
@@ -596,7 +619,9 @@ protected:
         &ICPU::C_F_D    ,&ICPU::C_UN_D   ,&ICPU::C_EQ_D  ,&ICPU::C_UEQ_D  ,&ICPU::C_OLT_D  ,&ICPU::C_ULT_D  ,&ICPU::C_OLE_D ,&ICPU::C_ULE_D  ,
         &ICPU::C_SF_D   ,&ICPU::C_NGLE_D ,&ICPU::C_SEQ_D ,&ICPU::C_NGL_D  ,&ICPU::C_LT_D   ,&ICPU::C_NGE_D  ,&ICPU::C_LE_D  ,&ICPU::C_NGT_D
     };
-
+#else
+    InstructionTable d_table;
+#endif
 
     //===========================================================================
     // w instructions
@@ -604,7 +629,7 @@ protected:
     virtual void CVT_S_W(void) = 0;
     virtual void CVT_D_W(void) = 0;
 
-
+#ifdef HAS_CXX11_LIST_INST
     InstructionTable w_table =
     {
         &ICPU::SV     ,&ICPU::SV     ,&ICPU::SV,&ICPU::SV,&ICPU::SV,&ICPU::SV,&ICPU::SV,&ICPU::SV, 
@@ -616,7 +641,9 @@ protected:
         &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV,
         &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV
     };
-
+#else
+    InstructionTable w_table;
+#endif
 
     //===========================================================================
     // l instructions
@@ -624,7 +651,7 @@ protected:
     virtual void CVT_D_L(void) = 0;
     virtual void CVT_S_L(void) = 0;
 
-
+#ifdef HAS_CXX11_LIST_INST
     InstructionTable l_table =
     {
         &ICPU::SV     ,&ICPU::SV     ,&ICPU::SV,&ICPU::SV,&ICPU::SV,&ICPU::SV,&ICPU::SV,&ICPU::SV, 
@@ -636,7 +663,9 @@ protected:
         &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV,
         &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV
     };
-
+#else
+    InstructionTable l_table;
+#endif
 
 protected:
     // PC

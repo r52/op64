@@ -1,7 +1,10 @@
 #include <algorithm>
+
+#include "logger.h"
+#include "util.h"
+
 #include "mpmemory.h"
 #include "rom.h"
-#include "logger.h"
 #include "icpu.h"
 #include "interrupthandler.h"
 #include "cp0.h"
@@ -15,6 +18,7 @@
 #include "audioplugin.h"
 #include "rspplugin.h"
 
+
 #define MEM_NOT_IMPLEMENTED() \
     Bus::stop = true; \
     LOG_ERROR("OP: %x; Function %s in %s line %i not implemented. Stopping...\n", Bus::cur_instr->code, __func__, __FILE__, __LINE__);
@@ -23,29 +27,29 @@
 
 void MPMemory::initialize(void)
 {
-    readmem_table[:] = &MPMemory::read_nomem;
-    writemem_table[:] = &MPMemory::write_nomem;
+    fill_array(readmem_table, 0, 0x10000, &MPMemory::read_nomem);
+    fill_array(writemem_table, 0, 0x10000, &MPMemory::write_nomem);
 
     // init rdram
-    _rdram[:] = 0;
+    fill_array(_rdram, 0, 0x800000 / 4, 0);
 
-    readmem_table[0x8000:0x80] = &MPMemory::read_rdram;
-    readmem_table[0xa000:0x80] = &MPMemory::read_rdram;
-    writemem_table[0x8000:0x80] = &MPMemory::write_rdram;
-    writemem_table[0xa000:0x80] = &MPMemory::write_rdram;
+    fill_array(readmem_table, 0x8000, 0x80, &MPMemory::read_rdram);
+    fill_array(readmem_table, 0xa000, 0x80, &MPMemory::read_rdram);
+    fill_array(writemem_table, 0x8000, 0x80, &MPMemory::write_rdram);
+    fill_array(writemem_table, 0xa000, 0x80, &MPMemory::write_rdram);
 
-    readmem_table[0x8080:0x370] = &MPMemory::read_nothing;
-    readmem_table[0xa080:0x370] = &MPMemory::read_nothing;
-    writemem_table[0x8080:0x370] = &MPMemory::write_nothing;
-    writemem_table[0xa080:0x370] = &MPMemory::write_nothing;
+    fill_array(readmem_table, 0x8080, 0x370, &MPMemory::read_nothing);
+    fill_array(readmem_table, 0xa080, 0x370, &MPMemory::read_nothing);
+    fill_array(writemem_table, 0x8080, 0x370, &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xa080, 0x370, &MPMemory::write_nothing);
 
     // rdram reg
     readmem_table[0x83f0] = &MPMemory::read_rdram_reg;
     readmem_table[0xa3f0] = &MPMemory::read_rdram_reg;
     writemem_table[0x83f0] = &MPMemory::write_rdram_reg;
     writemem_table[0xa3f0] = &MPMemory::write_rdram_reg;
-    _rdram_reg[:] = 0;
-    readrdram_table[:] = &trash;
+    fill_array(_rdram_reg, 0, RDRAM_NUM_REGS, 0);
+    fill_array(readrdram_table, 0, 0x10000, &trash);
     readrdram_table[0x0] = &_rdram_reg[RDRAM_CONFIG_REG];
     readrdram_table[0x4] = &_rdram_reg[RDRAM_DEVICE_ID_REG];
     readrdram_table[0x8] = &_rdram_reg[RDRAM_DELAY_REG];
@@ -58,10 +62,10 @@ void MPMemory::initialize(void)
     readrdram_table[0x24] = &_rdram_reg[RDRAM_DEVICE_MANUF_REG];
 
 
-    readmem_table[0x83f1:0xf] = &MPMemory::read_nothing;
-    readmem_table[0xa3f1:0xf] = &MPMemory::read_nothing;
-    writemem_table[0x83f1:0xf] = &MPMemory::write_nothing;
-    writemem_table[0xa3f1:0xf] = &MPMemory::write_nothing;
+    fill_array(readmem_table, 0x83f1, 0xf, &MPMemory::read_nothing);
+    fill_array(readmem_table, 0xa3f1, 0xf, &MPMemory::read_nothing);
+    fill_array(writemem_table, 0x83f1, 0xf, &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xa3f1, 0xf, &MPMemory::write_nothing);
 
 
     // sp mem
@@ -70,22 +74,22 @@ void MPMemory::initialize(void)
     writemem_table[0x8400] = &MPMemory::write_rsp_mem;
     writemem_table[0xa400] = &MPMemory::write_rsp_mem;
 
-    _SP_DMEM[0:(0x1000 / 4)] = 0;
-    _SP_IMEM[0:(0x1000 / 4)] = 0;
+    fill_array(_SP_DMEM, 0, (0x1000 / 4), 0);
+    fill_array(_SP_IMEM, 0, (0x1000 / 4), 0);
 
-    readmem_table[0x8401:0x3] = &MPMemory::read_nothing;
-    readmem_table[0xa401:0x3] = &MPMemory::read_nothing;
-    writemem_table[0x8401:0x3] = &MPMemory::write_nothing;
-    writemem_table[0xa401:0x3] = &MPMemory::write_nothing;
+    fill_array(readmem_table, 0x8401, 0x3, &MPMemory::read_nothing);
+    fill_array(readmem_table, 0xa401, 0x3, &MPMemory::read_nothing);
+    fill_array(writemem_table, 0x8401, 0x3, &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xa401, 0x3, &MPMemory::write_nothing);
 
     //sp reg
     readmem_table[0x8404] = &MPMemory::read_rsp_reg;
     readmem_table[0xa404] = &MPMemory::read_rsp_reg;
     writemem_table[0x8404] = &MPMemory::write_rsp_reg;
     writemem_table[0xa404] = &MPMemory::write_rsp_reg;
-    _sp_reg[:] = 0;
+    fill_array(_sp_reg, 0, SP_NUM_REGS, 0);
     _sp_reg[SP_STATUS_REG] = 1;
-    readsp_table[:] = &trash;
+    fill_array(readsp_table, 0, 0x10000, &trash);
     readsp_table[0x0] = &_sp_reg[SP_MEM_ADDR_REG];
     readsp_table[0x4] = &_sp_reg[SP_DRAM_ADDR_REG];
     readsp_table[0x8] = &_sp_reg[SP_RD_LEN_REG];
@@ -95,31 +99,31 @@ void MPMemory::initialize(void)
     readsp_table[0x18] = &_sp_reg[SP_DMA_BUSY_REG];
     readsp_table[0x1c] = &_sp_reg[SP_SEMAPHORE_REG];
 
-    readmem_table[0x8405:0x3] = &MPMemory::read_nothing;
-    readmem_table[0xa405:0x3] = &MPMemory::read_nothing;
-    writemem_table[0x8405:0x3] = &MPMemory::write_nothing;
-    writemem_table[0xa405:0x3] = &MPMemory::write_nothing;
+    fill_array(readmem_table, 0x8405, 0x3, &MPMemory::read_nothing);
+    fill_array(readmem_table, 0xa405, 0x3, &MPMemory::read_nothing);
+    fill_array(writemem_table, 0x8405, 0x3, &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xa405, 0x3, &MPMemory::write_nothing);
 
     readmem_table[0x8408] = &MPMemory::read_rsp_stat;
     readmem_table[0xa408] = &MPMemory::read_rsp_stat;
     writemem_table[0x8408] = &MPMemory::write_rsp_stat;
     writemem_table[0xa408] = &MPMemory::write_rsp_stat;
-    readsp_stat_table[:] = &trash;
+    fill_array(readsp_stat_table, 0, 0x10000, &trash);
     readsp_stat_table[0x0] = &_sp_reg[SP_PC_REG];
     readsp_stat_table[0x4] = &_sp_reg[SP_IBIST_REG];
 
-    readmem_table[0x8409:0x7] = &MPMemory::read_nothing;
-    readmem_table[0xa409:0x7] = &MPMemory::read_nothing;
-    writemem_table[0x8409:0x7] = &MPMemory::write_nothing;
-    writemem_table[0xa409:0x7] = &MPMemory::write_nothing;
+    fill_array(readmem_table, 0x8409, 0x7, &MPMemory::read_nothing);
+    fill_array(readmem_table, 0xa409, 0x7, &MPMemory::read_nothing);
+    fill_array(writemem_table, 0x8409, 0x7, &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xa409, 0x7, &MPMemory::write_nothing);
 
     // dp reg
     readmem_table[0x8410] = &MPMemory::read_dp;
     readmem_table[0xa410] = &MPMemory::read_dp;
     writemem_table[0x8410] = &MPMemory::write_dp;
     writemem_table[0xa410] = &MPMemory::write_dp;
-    _dp_reg[:] = 0;
-    readdp_table[:] = &trash;
+    fill_array(_dp_reg, 0, DPC_NUM_REGS, 0);
+    fill_array(readdp_table, 0, 0x10000, &trash);
     readdp_table[0x0] = &_dp_reg[DPC_START_REG];
     readdp_table[0x4] = &_dp_reg[DPC_END_REG];
     readdp_table[0x8] = &_dp_reg[DPC_CURRENT_REG];
@@ -129,27 +133,27 @@ void MPMemory::initialize(void)
     readdp_table[0x18] = &_dp_reg[DPC_PIPEBUSY_REG];
     readdp_table[0x1c] = &_dp_reg[DPC_TMEM_REG];
 
-    readmem_table[0x8411:0xf] = &MPMemory::read_nothing;
-    readmem_table[0xa411:0xf] = &MPMemory::read_nothing;
-    writemem_table[0x8411:0xf] = &MPMemory::write_nothing;
-    writemem_table[0xa411:0xf] = &MPMemory::write_nothing;
+    fill_array(readmem_table, 0x8411, 0xf, &MPMemory::read_nothing);
+    fill_array(readmem_table, 0xa411, 0xf, &MPMemory::read_nothing);
+    fill_array(writemem_table, 0x8411, 0xf, &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xa411, 0xf, &MPMemory::write_nothing);
 
     // dps reg
     readmem_table[0x8420] = &MPMemory::read_dps;
     readmem_table[0xa420] = &MPMemory::read_dps;
     writemem_table[0x8420] = &MPMemory::write_dps;
     writemem_table[0xa420] = &MPMemory::write_dps;
-    _dps_reg[:] = 0;
-    readdps_table[:] = &trash;
+    fill_array(_dps_reg, 0, DPS_NUM_REGS, 0);
+    fill_array(readdps_table, 0, 0x10000, &trash);
     readdps_table[0x0] = &_dps_reg[DPS_TBIST_REG];
     readdps_table[0x4] = &_dps_reg[DPS_TEST_MODE_REG];
     readdps_table[0x8] = &_dps_reg[DPS_BUFTEST_ADDR_REG];
     readdps_table[0xc] = &_dps_reg[DPS_BUFTEST_DATA_REG];
 
-    readmem_table[0x8421:0xf] = &MPMemory::read_nothing;
-    readmem_table[0xa421:0xf] = &MPMemory::read_nothing;
-    writemem_table[0x8421:0xf] = &MPMemory::write_nothing;
-    writemem_table[0xa421:0xf] = &MPMemory::write_nothing;
+    fill_array(readmem_table, 0x8421, 0xf, &MPMemory::read_nothing);
+    fill_array(readmem_table, 0xa421, 0xf, &MPMemory::read_nothing);
+    fill_array(writemem_table, 0x8421, 0xf, &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xa421, 0xf, &MPMemory::write_nothing);
 
 
     // mi reg
@@ -157,26 +161,26 @@ void MPMemory::initialize(void)
     readmem_table[0xa430] = &MPMemory::read_mi;
     writemem_table[0xa830] = &MPMemory::write_mi;
     writemem_table[0xa430] = &MPMemory::write_mi;
-    _mi_reg[:] = 0;
+    fill_array(_mi_reg, 0, MI_NUM_REGS, 0);
     _mi_reg[MI_VERSION_REG] = 0x02020102;
-    readmi_table[:] = &trash;
+    fill_array(readmi_table, 0, 0x10000, &trash);
     readmi_table[0x0] = &_mi_reg[MI_INIT_MODE_REG];
     readmi_table[0x4] = &_mi_reg[MI_VERSION_REG];
     readmi_table[0x8] = &_mi_reg[MI_INTR_REG];
     readmi_table[0xc] = &_mi_reg[MI_INTR_MASK_REG];
 
-    readmem_table[0x8431:0xf] = &MPMemory::read_nothing;
-    readmem_table[0xa431:0xf] = &MPMemory::read_nothing;
-    writemem_table[0x8431:0xf] = &MPMemory::write_nothing;
-    writemem_table[0xa431:0xf] = &MPMemory::write_nothing;
+    fill_array(readmem_table, 0x8431, 0xf, &MPMemory::read_nothing);
+    fill_array(readmem_table, 0xa431, 0xf, &MPMemory::read_nothing);
+    fill_array(writemem_table, 0x8431, 0xf, &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xa431, 0xf, &MPMemory::write_nothing);
 
     // vi reg
     readmem_table[0x8440] = &MPMemory::read_vi;
     readmem_table[0xa440] = &MPMemory::read_vi;
     writemem_table[0x8440] = &MPMemory::write_vi;
     writemem_table[0xa440] = &MPMemory::write_vi;
-    _vi_reg[:] = 0;
-    readvi_table[:] = &trash;
+    fill_array(_vi_reg, 0, VI_NUM_REGS, 0);
+    fill_array(readvi_table, 0, 0x10000, &trash);
     readvi_table[0x0] = &_vi_reg[VI_STATUS_REG];
     readvi_table[0x4] = &_vi_reg[VI_ORIGIN_REG];
     readvi_table[0x8] = &_vi_reg[VI_WIDTH_REG];
@@ -192,10 +196,10 @@ void MPMemory::initialize(void)
     readvi_table[0x30] = &_vi_reg[VI_X_SCALE_REG];
     readvi_table[0x34] = &_vi_reg[VI_Y_SCALE_REG];
 
-    readmem_table[0x8441:0xf] = &MPMemory::read_nothing;
-    readmem_table[0xa441:0xf] = &MPMemory::read_nothing;
-    writemem_table[0x8441:0xf] = &MPMemory::write_nothing;
-    writemem_table[0xa441:0xf] = &MPMemory::write_nothing;
+    fill_array(readmem_table, 0x8441, 0xf, &MPMemory::read_nothing);
+    fill_array(readmem_table, 0xa441, 0xf, &MPMemory::read_nothing);
+    fill_array(writemem_table, 0x8441, 0xf, &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xa441, 0xf, &MPMemory::write_nothing);
 
 
     // ai reg
@@ -203,8 +207,8 @@ void MPMemory::initialize(void)
     readmem_table[0xa450] = &MPMemory::read_ai;
     writemem_table[0x8450] = &MPMemory::write_ai;
     writemem_table[0xa450] = &MPMemory::write_ai;
-    _ai_reg[:] = 0;
-    readai_table[:] = &trash;
+    fill_array(_ai_reg, 0, AI_NUM_REGS, 0);
+    fill_array(readai_table, 0, 0x10000, &trash);
     readai_table[0x0] = &_ai_reg[AI_DRAM_ADDR_REG];
     readai_table[0x4] = &_ai_reg[AI_LEN_REG];
     readai_table[0x8] = &_ai_reg[AI_CONTROL_REG];
@@ -212,10 +216,10 @@ void MPMemory::initialize(void)
     readai_table[0x10] = &_ai_reg[AI_DACRATE_REG];
     readai_table[0x14] = &_ai_reg[AI_BITRATE_REG];
 
-    readmem_table[0x8451:0xf] = &MPMemory::read_nothing;
-    readmem_table[0xa451:0xf] = &MPMemory::read_nothing;
-    writemem_table[0x8451:0xf] = &MPMemory::write_nothing;
-    writemem_table[0xa451:0xf] = &MPMemory::write_nothing;
+    fill_array(readmem_table, 0x8451, 0xf, &MPMemory::read_nothing);
+    fill_array(readmem_table, 0xa451, 0xf, &MPMemory::read_nothing);
+    fill_array(writemem_table, 0x8451, 0xf, &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xa451, 0xf, &MPMemory::write_nothing);
 
 
     // pi reg
@@ -223,8 +227,8 @@ void MPMemory::initialize(void)
     readmem_table[0xa460] = &MPMemory::read_pi;
     writemem_table[0x8460] = &MPMemory::write_pi;
     writemem_table[0xa460] = &MPMemory::write_pi;
-    _pi_reg[:] = 0;
-    readpi_table[:] = &trash;
+    fill_array(_pi_reg, 0, PI_NUM_REGS, 0);
+    fill_array(readpi_table, 0, 0x10000, &trash);
     readpi_table[0x0] = &_pi_reg[PI_DRAM_ADDR_REG];
     readpi_table[0x4] = &_pi_reg[PI_CART_ADDR_REG];
     readpi_table[0x8] = &_pi_reg[PI_RD_LEN_REG];
@@ -239,10 +243,10 @@ void MPMemory::initialize(void)
     readpi_table[0x2c] = &_pi_reg[PI_BSD_DOM2_PGS_REG];
     readpi_table[0x30] = &_pi_reg[PI_BSD_DOM2_RLS_REG];
 
-    readmem_table[0x8461:0xf] = &MPMemory::read_nothing;
-    readmem_table[0xa461:0xf] = &MPMemory::read_nothing;
-    writemem_table[0x8461:0xf] = &MPMemory::write_nothing;
-    writemem_table[0xa461:0xf] = &MPMemory::write_nothing;
+    fill_array(readmem_table, 0x8461, 0xf, &MPMemory::read_nothing);
+    fill_array(readmem_table, 0xa461, 0xf, &MPMemory::read_nothing);
+    fill_array(writemem_table, 0x8461, 0xf, &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xa461, 0xf, &MPMemory::write_nothing);
 
 
     // ri reg
@@ -250,8 +254,8 @@ void MPMemory::initialize(void)
     readmem_table[0xa470] = &MPMemory::read_ri;
     writemem_table[0x8470] = &MPMemory::write_ri;
     writemem_table[0xa470] = &MPMemory::write_ri;
-    _ri_reg[:] = 0;
-    readri_table[:] = &trash;
+    fill_array(_ri_reg, 0, RI_NUM_REGS, 0);
+    fill_array(readri_table, 0, 0x10000, &trash);
     readri_table[0x0] = &_ri_reg[RI_MODE_REG];
     readri_table[0x4] = &_ri_reg[RI_CONFIG_REG];
     readri_table[0x8] = &_ri_reg[RI_CURRENT_LOAD_REG];
@@ -261,10 +265,10 @@ void MPMemory::initialize(void)
     readri_table[0x18] = &_ri_reg[RI_RERROR_REG];
     readri_table[0x1c] = &_ri_reg[RI_WERROR_REG];
 
-    readmem_table[0x8471:0xf] = &MPMemory::read_nothing;
-    readmem_table[0xa471:0xf] = &MPMemory::read_nothing;
-    writemem_table[0x8471:0xf] = &MPMemory::write_nothing;
-    writemem_table[0xa471:0xf] = &MPMemory::write_nothing;
+    fill_array(readmem_table, 0x8471, 0xf, &MPMemory::read_nothing);
+    fill_array(readmem_table, 0xa471, 0xf, &MPMemory::read_nothing);
+    fill_array(writemem_table, 0x8471, 0xf, &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xa471, 0xf, &MPMemory::write_nothing);
 
 
     // si reg
@@ -272,8 +276,8 @@ void MPMemory::initialize(void)
     readmem_table[0xa480] = &MPMemory::read_si;
     writemem_table[0x8480] = &MPMemory::write_si;
     writemem_table[0xa480] = &MPMemory::write_si;
-    _si_reg[:] = 0;
-    readsi_table[:] = &trash;
+    fill_array(_si_reg, 0, SI_NUM_REGS, 0);
+    fill_array(readsi_table, 0, 0x10000, &trash);
     readsi_table[0x0] = &_si_reg[SI_DRAM_ADDR_REG];
     readsi_table[0x4] = &_si_reg[SI_PIF_ADDR_RD64B_REG];
     readsi_table[0x8] = &trash;
@@ -281,13 +285,13 @@ void MPMemory::initialize(void)
     readsi_table[0x14] = &trash;
     readsi_table[0x18] = &_si_reg[SI_STATUS_REG];
 
-    readmem_table[0x8481:0x37f] = &MPMemory::read_nothing;
-    readmem_table[0xa481:0x37f] = &MPMemory::read_nothing;
-    writemem_table[0x8481:0x37f] = &MPMemory::write_nothing;
-    writemem_table[0xa481:0x37f] = &MPMemory::write_nothing;
+    fill_array(readmem_table, 0x8481, 0x37f, &MPMemory::read_nothing);
+    fill_array(readmem_table, 0xa481, 0x37f, &MPMemory::read_nothing);
+    fill_array(writemem_table, 0x8481, 0x37f, &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xa481, 0x37f, &MPMemory::write_nothing);
 
 
-    // sram
+    // flashram
     readmem_table[0x8800] = &MPMemory::read_flashram_status;
     readmem_table[0xa800] = &MPMemory::read_flashram_status;
     readmem_table[0x8801] = &MPMemory::read_nothing;
@@ -297,23 +301,23 @@ void MPMemory::initialize(void)
     writemem_table[0x8801] = &MPMemory::write_flashram_command;
     writemem_table[0xa801] = &MPMemory::write_flashram_command;
 
-    readmem_table[0x8802:0x7fe] = &MPMemory::read_nothing;
-    readmem_table[0xa802:0x7fe] = &MPMemory::read_nothing;
-    writemem_table[0x8802:0x7fe] = &MPMemory::write_nothing;
-    writemem_table[0xa802:0x7fe] = &MPMemory::write_nothing;
+    fill_array(readmem_table, 0x8802, 0x7fe, &MPMemory::read_nothing);
+    fill_array(readmem_table, 0xa802, 0x7fe, &MPMemory::read_nothing);
+    fill_array(writemem_table, 0x8802, 0x7fe, &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xa802, 0x7fe, &MPMemory::write_nothing);
 
 
     // rom
     uint32_t rom_size = Bus::rom->getSize();
-    readmem_table[0x9000:(rom_size >> 16)] = &MPMemory::read_rom;
-    readmem_table[0xb000:(rom_size >> 16)] = &MPMemory::read_rom;
-    writemem_table[0x9000:(rom_size >> 16)] = &MPMemory::write_nothing;
-    writemem_table[0xb000:(rom_size >> 16)] = &MPMemory::write_rom;
+    fill_array(readmem_table, 0x9000, (rom_size >> 16), &MPMemory::read_rom);
+    fill_array(readmem_table, 0xb000, (rom_size >> 16), &MPMemory::read_rom);
+    fill_array(writemem_table, 0x9000, (rom_size >> 16), &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xb000, (rom_size >> 16), &MPMemory::write_rom);
 
-    readmem_table[0x9000 + (rom_size >> 16) : 0x9fc0 - (0x9000 + (rom_size >> 16))] = &MPMemory::read_nothing;
-    readmem_table[0xb000 + (rom_size >> 16) : 0xbfc0 - (0xb000 + (rom_size >> 16))] = &MPMemory::read_nothing;
-    writemem_table[0x9000 + (rom_size >> 16) : 0x9fc0 - (0x9000 + (rom_size >> 16))] = &MPMemory::read_nothing;
-    writemem_table[0xb000 + (rom_size >> 16) : 0xbfc0 - (0xb000 + (rom_size >> 16))] = &MPMemory::read_nothing;
+    fill_array(readmem_table, 0x9000 + (rom_size >> 16), 0x9fc0 - (0x9000 + (rom_size >> 16)), &MPMemory::read_nothing);
+    fill_array(readmem_table, 0xb000 + (rom_size >> 16), 0xbfc0 - (0xb000 + (rom_size >> 16)), &MPMemory::read_nothing);
+    fill_array(writemem_table, 0x9000 + (rom_size >> 16), 0x9fc0 - (0x9000 + (rom_size >> 16)), &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xb000 + (rom_size >> 16), 0xbfc0 - (0xb000 + (rom_size >> 16)), &MPMemory::write_nothing);
 
 
     // pif
@@ -321,12 +325,12 @@ void MPMemory::initialize(void)
     readmem_table[0xbfc0] = &MPMemory::read_pif;
     writemem_table[0x9fc0] = &MPMemory::write_pif;
     writemem_table[0xbfc0] = &MPMemory::write_pif;
-    _PIF_RAM[:] = 0;
+    fill_array(_PIF_RAM, 0, (0x40 / 4), 0);
 
-    readmem_table[0x9fc1:0x3f] = &MPMemory::read_nothing;
-    readmem_table[0xbfc1:0x3f] = &MPMemory::read_nothing;
-    writemem_table[0x9fc1:0x3f] = &MPMemory::write_nothing;
-    writemem_table[0xbfc1:0x3f] = &MPMemory::write_nothing;
+    fill_array(readmem_table, 0x9fc1, 0x3f, &MPMemory::read_nothing);
+    fill_array(readmem_table, 0xbfc1, 0x3f, &MPMemory::read_nothing);
+    fill_array(writemem_table, 0x9fc1, 0x3f, &MPMemory::write_nothing);
+    fill_array(writemem_table, 0xbfc1, 0x3f, &MPMemory::write_nothing);
 
     Bus::pif->initialize();
 }
@@ -2430,7 +2434,7 @@ void MPMemory::prepare_rsp(void)
 
 
 
-uint32_t* MPMemory::fast_mem_access(uint32_t address)
+uint32_t* MPMemory::fast_fetch(uint32_t address)
 {
     if (address < 0x80000000 || address >= 0xc0000000)
     {

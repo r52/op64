@@ -3,8 +3,6 @@
 
 #include <cstdint>
 #include "imemory.h"
-#include "rcpcommon.h"
-#include "util.h"
 
 
 class MPMemory : public IMemory
@@ -25,7 +23,7 @@ public:
         (this->*writemem_table[address >> 16])(address, src, size);
     }
 
-    virtual uint32_t* fast_mem_access(uint32_t address);
+    virtual uint32_t* fast_fetch(uint32_t address);
 
 private:
 

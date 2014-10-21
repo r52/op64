@@ -6,19 +6,6 @@
 void MPPInterpreter::BLTZ(void)
 {
     // DECLARE_JUMP(BLTZ, PCADDR + (iimmediate+1)*4, irs < 0, &reg[0], 0, 0)
-
-    /*
-    uint32_t target = (((uint32_t)_PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2));
-    bool condition = ((int64_t)_reg[_cur_instr.rs] < 0);
-    if (target == ((uint32_t)_PC) && _check_nop)
-    {
-        generic_idle(target, condition, &_reg[0], false, false);
-        return;
-    }
-
-    generic_jump(target, condition, &_reg[0], false, false);
-    */
-
     DO_JUMP(
         ((uint32_t)_PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
         _reg[_cur_instr.rs].s < 0,

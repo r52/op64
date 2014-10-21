@@ -1,4 +1,4 @@
-#include <ctime>
+#include "optime.h"
 #include "logger.h"
 
 using namespace std;
@@ -35,12 +35,11 @@ void Logger::log(const char* msg, uint32_t level)
 
     if (_useTimeStamp)
     {
-        time_t now;
-        time(&now);
-        char* timstr = ctime(&now);
-        timstr[strlen(timstr) - 1] = '\0';
-
-        _safe_sprintf(buf, 350, "%s: %s - %s\n", timstr, log_levels[level], msg);
+        time_t now = time(NULL);
+        char tmstr[100];
+        tm t = op::localtime(now);
+        strftime(tmstr, sizeof(tmstr), "%c", &t);
+        _safe_sprintf(buf, 350, "%s: %s - %s\n", tmstr, log_levels[level], msg);
     }
     else
     {

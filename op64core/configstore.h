@@ -9,6 +9,10 @@
 #include "configdefs.h"
 #include "logger.h"
 
+#if defined(_MSC_VER) && ! defined(__INTEL_COMPILER)
+#pragma warning( disable : 4018 )
+#endif
+
 typedef std::function<void(void)> ConfigCallback;
 typedef int64_t CallbackID;
 typedef std::unordered_set<CallbackID> CallbackList;
@@ -65,7 +69,7 @@ public:
 
     void addChangeCallback(std::string section, std::string key, CallbackID id)
     {
-        if (id >= _callbackRegistry.size())
+        if (id < 0 || id >= _callbackRegistry.size())
         {
             LOG_ERROR("%s: invalid callback id", __FUNCTION__);
             return;
@@ -78,7 +82,7 @@ public:
 
     void removeChangeCallback(std::string section, std::string key, CallbackID id)
     {
-        if (id >= _callbackRegistry.size())
+        if (id < 0 || id >= _callbackRegistry.size())
         {
             LOG_ERROR("%s: invalid callback id", __FUNCTION__);
             return;
