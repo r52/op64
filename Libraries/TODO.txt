@@ -1,1 +1,0 @@
-These 2 libs only contain windows .libs in them right now
