@@ -44,6 +44,7 @@ private slots:
     void showRSPConfig(void);
     void openConfigDialog(void);
     void toggleShowLog(bool show);
+    void showAboutDialog(void);
 
 private:
     Ui::QOP64WindowClass ui;

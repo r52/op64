@@ -39,3 +39,17 @@
 #if defined(_MSC_VER) && ! defined(__INTEL_COMPILER)
 #define __func__ __FUNCTION__
 #endif
+
+// compiler messages
+#define __STR2__(x) #x
+#define __STR__(x) __STR2__(x)
+
+#if defined(__INTEL_COMPILER)
+#define COMPILER "Intel C++ " __STR__(__INTEL_COMPILER)
+#elif defined(__clang__)
+#define COMPILER "clang " __STR__(CLANG_VERSION)
+#elif defined(__GNUC__)
+#define COMPILER "g++ " __STR__(GCC_VERSION)
+#elif defined(_MSC_VER)
+#define COMPILER "MSVC " __STR__(_MSC_VER)
+#endif

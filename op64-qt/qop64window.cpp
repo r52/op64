@@ -15,6 +15,7 @@
 #include "configdialog.h"
 
 #include "renderwidget.h"
+#include <QMessageBox>
 
 
 QOP64Window::QOP64Window(QWidget *parent)
@@ -59,7 +60,7 @@ QOP64Window::~QOP64Window()
 
     if (nullptr != renderWidget)
     {
-        delete renderWidget; renderWidget = nullptr;
+        renderWidget->deleteLater(); renderWidget = nullptr;
     }
 }
 
@@ -155,6 +156,9 @@ void QOP64Window::connectGUIControls(void)
 
     // advanced
     connect(ui.actionShow_Log, SIGNAL(toggled(bool)), this, SLOT(toggleShowLog(bool)));
+
+    // about
+    connect(ui.actionAbout, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
 }
 
 void QOP64Window::toggleShowLog(bool show)
@@ -240,7 +244,32 @@ void QOP64Window::emulationFinished()
 {
     if (nullptr != renderWidget)
     {
-        delete renderWidget; renderWidget = nullptr;
+        renderWidget->deleteLater(); renderWidget = nullptr;
     }
+}
+
+void QOP64Window::showAboutDialog(void)
+{
+    static QString aboutMsg =
+        "op64<br/>"
+#ifdef _DEBUG
+        "DEBUG BUILD<br/>"
+#endif
+        "<br/>"
+        "Experimental 64-bit emulator<br/>"
+        "<br/>"
+        "Core based on <a href='http://www.pj64-emu.com/'>Project 64</a> and <a href='https://code.google.com/p/mupen64plus/'>mupen64plus</a><br/>"
+        "Configuration icons from the Human O2 icon set by <a href='http://schollidesign.deviantart.com/'>schollidesign</a>, licensed under GPL<br/>"
+        "<br/>"
+        "Compiled on: " __DATE__ " " __TIME__ "<br/>"
+        "Compiled using: " COMPILER "<br/>"
+        "Qt version: " QT_VERSION_STR "<br/>"
+        "Boost version: " + QString::number(BOOST_VERSION / 100000) + "." + QString::number(BOOST_VERSION / 100 % 1000) + "." + QString::number(BOOST_VERSION % 100) + "<br/>"
+        "<br/>"
+        "(c) 2014<br/>"
+        "Licensed under GPLv2<br/>"
+        "Source code available at <a href=''>GitHub</a>";
+
+    QMessageBox::about(this, tr("About op64"), aboutMsg);
 }
 
