@@ -213,7 +213,7 @@ void DMA::writePI(void)
     }
     else
     {
-        for (i = 0; i < (int32_t)longueur; i++)
+        vec_for (i = 0; i < (int32_t)longueur; i++)
         {
             rdram8[BES(pi_reg[PI_DRAM_ADDR_REG] + i)] =
                 rom_image[BES(((pi_reg[PI_CART_ADDR_REG] - 0x10000000) & 0x3FFFFFF) + i)];
@@ -259,7 +259,7 @@ void DMA::readSI(void)
 
     Bus::pif->pifRead();
 
-    for (i = 0; i < (64 / 4); i++)
+    vec_for (i = 0; i < (64 / 4); i++)
     {
         Bus::rdram[Bus::si_reg[SI_DRAM_ADDR_REG] / 4 + i] = byteswap_u32(Bus::pif_ram32[i]);
     }
@@ -286,7 +286,7 @@ void DMA::writeSI(void)
         Bus::stop = true;
     }
 
-    for (i = 0; i < (64 / 4); i++)
+    vec_for (i = 0; i < (64 / 4); i++)
     {
         Bus::pif_ram32[i] = byteswap_u32(Bus::rdram[Bus::si_reg[SI_DRAM_ADDR_REG] / 4 + i]);
     }

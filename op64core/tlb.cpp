@@ -2,6 +2,7 @@
 #include "bus.h"
 #include "rom.h"
 #include "icpu.h"
+#include "compiler.h"
 
 
 tlb_entry TLB::tlb_entry_table[32];
@@ -59,20 +60,34 @@ void TLB::tlb_unmap(tlb_entry *entry)
 
     if (entry->v_even)
     {
-        for (i = entry->start_even; i < entry->end_even; i += 0x1000)
+        vec_for (i = entry->start_even; i < entry->end_even; i += 0x1000)
+        {
             tlb_lookup_read[i >> 12] = 0;
+        }
+
         if (entry->d_even)
-            for (i = entry->start_even; i < entry->end_even; i += 0x1000)
+        {
+            vec_for (i = entry->start_even; i < entry->end_even; i += 0x1000)
+            {
                 tlb_lookup_write[i >> 12] = 0;
+            }
+        }
     }
 
     if (entry->v_odd)
     {
-        for (i = entry->start_odd; i < entry->end_odd; i += 0x1000)
+        vec_for (i = entry->start_odd; i < entry->end_odd; i += 0x1000)
+        {
             tlb_lookup_read[i >> 12] = 0;
+        }
+
         if (entry->d_odd)
-            for (i = entry->start_odd; i < entry->end_odd; i += 0x1000)
+        {
+            vec_for (i = entry->start_odd; i < entry->end_odd; i += 0x1000)
+            {
                 tlb_lookup_write[i >> 12] = 0;
+            }
+        }
     }
 }
 
@@ -86,11 +101,18 @@ void TLB::tlb_map(tlb_entry *entry)
             !(entry->start_even >= 0x80000000 && entry->end_even < 0xC0000000) &&
             entry->phys_even < 0x20000000)
         {
-            for (i = entry->start_even; i < entry->end_even; i += 0x1000)
+            vec_for (i = entry->start_even; i < entry->end_even; i += 0x1000)
+            {
                 tlb_lookup_read[i >> 12] = 0x80000000 | (entry->phys_even + (i - entry->start_even) + 0xFFF);
+            }
+
             if (entry->d_even)
-                for (i = entry->start_even; i < entry->end_even; i += 0x1000)
+            {
+                vec_for (i = entry->start_even; i < entry->end_even; i += 0x1000)
+                {
                     tlb_lookup_write[i >> 12] = 0x80000000 | (entry->phys_even + (i - entry->start_even) + 0xFFF);
+                }
+            }
         }
     }
 
@@ -100,11 +122,18 @@ void TLB::tlb_map(tlb_entry *entry)
             !(entry->start_odd >= 0x80000000 && entry->end_odd < 0xC0000000) &&
             entry->phys_odd < 0x20000000)
         {
-            for (i = entry->start_odd; i < entry->end_odd; i += 0x1000)
+            vec_for (i = entry->start_odd; i < entry->end_odd; i += 0x1000)
+            {
                 tlb_lookup_read[i >> 12] = 0x80000000 | (entry->phys_odd + (i - entry->start_odd) + 0xFFF);
+            }
+
             if (entry->d_odd)
-                for (i = entry->start_odd; i < entry->end_odd; i += 0x1000)
+            {
+                vec_for (i = entry->start_odd; i < entry->end_odd; i += 0x1000)
+                {
                     tlb_lookup_write[i >> 12] = 0x80000000 | (entry->phys_odd + (i - entry->start_odd) + 0xFFF);
+                }
+            }
         }
     }
 }

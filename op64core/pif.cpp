@@ -33,7 +33,7 @@ PIF::~PIF(void)
 
 void PIF::initialize(void)
 {
-    vec_for(uint32_t i = 0; i < 4; i++)
+    vec_for (uint32_t i = 0; i < 4; i++)
     {
         _controllers[i].Present = 0;
         _controllers[i].RawData = 0;

@@ -24,6 +24,8 @@
     LOG_ERROR("OP: %x; Function %s in %s line %i not implemented. Stopping...\n", Bus::cur_instr->code, __func__, __FILE__, __LINE__);
 
 
+static FrameBufferInfo fbInfo[6];
+static char framebufferRead[0x800];
 
 void MPMemory::initialize(void)
 {
@@ -333,6 +335,8 @@ void MPMemory::initialize(void)
     fill_array(writemem_table, 0xbfc1, 0x3f, &MPMemory::write_nothing);
 
     Bus::pif->initialize();
+
+    fbInfo[0].addr = 0;
 }
 
 void MPMemory::read_nothing(uint32_t& address, uint64_t* dest, DataSize size)
@@ -882,6 +886,28 @@ void MPMemory::read_pif(uint32_t& address, uint64_t* dest, DataSize size)
         break;
     }
 }
+
+
+void MPMemory::read_rdramFB(uint32_t& address, uint64_t* dest, DataSize size)
+{
+    for (uint32_t i = 0; i < 6; i++)
+    {
+        if (fbInfo[i].addr)
+        {
+            uint32_t start = fbInfo[i].addr & 0x7FFFFF;
+            uint32_t end = start + fbInfo[i].width * fbInfo[i].height * fbInfo[i].size - 1;
+            if ((address & 0x7FFFFF) >= start && (address & 0x7FFFFF) <= end &&
+                framebufferRead[(address & 0x7FFFFF) >> 12])
+            {
+                Bus::plugins->gfx()->fbRead(address);
+                framebufferRead[(address & 0x7FFFFF) >> 12] = 0;
+            }
+        }
+    }
+
+    read_rdram(address, dest, size);
+}
+
 
 void MPMemory::write_nomem(uint32_t& address, uint64_t* src, DataSize size)
 {
@@ -2159,6 +2185,39 @@ void MPMemory::write_pif(uint32_t& address, uint64_t* src, DataSize size)
 }
 
 
+void MPMemory::write_rdramFB(uint32_t& address, uint64_t* src, DataSize size)
+{
+    for (uint32_t i = 0; i < 6; i++)
+    {
+        if (fbInfo[i].addr)
+        {
+            uint32_t start = fbInfo[i].addr & 0x7FFFFF;
+            uint32_t end = start + fbInfo[i].width * fbInfo[i].height * fbInfo[i].size - 1;
+            if ((address & 0x7FFFFF) >= start && (address & 0x7FFFFF) <= end)
+            {
+                switch (size)
+                {
+                case SIZE_WORD:
+                    Bus::plugins->gfx()->fbWrite(address, 4);
+                    break;
+                case SIZE_DWORD:
+                    Bus::plugins->gfx()->fbWrite(address, 8);
+                    break;
+                case SIZE_HWORD:
+                    Bus::plugins->gfx()->fbWrite(HES(address), 2);
+                    break;
+                case SIZE_BYTE:
+                    Bus::plugins->gfx()->fbWrite(BES(address), 1);
+                    break;
+                }
+            }
+        }
+    }
+
+    write_rdram(address, src, size);
+}
+
+
 void MPMemory::update_MI_init_mode_reg(void)
 {
     _mi_reg[MI_INIT_MODE_REG] &= ~0x7F; // init_length
@@ -2288,6 +2347,7 @@ void MPMemory::update_sp_reg(void)
 }
 
 
+
 void MPMemory::prepare_rsp(void)
 {
     int32_t save_pc = _sp_reg[SP_PC_REG] & ~0xFFF;
@@ -2303,37 +2363,26 @@ void MPMemory::prepare_rsp(void)
         }
 
         // unprotecting old frame buffers
-        /* TODO frame buffer shit after gfx
-        if (gfx.fBGetFrameBufferInfo && gfx.fBRead && gfx.fBWrite &&
-            frameBufferInfos[0].addr)
+        if (Bus::plugins->gfx()->fbGetInfo && Bus::plugins->gfx()->fbRead && Bus::plugins->gfx()->fbWrite &&
+            fbInfo[0].addr)
         {
-            int i;
-            for (i = 0; i < 6; i++)
+            vec_for (uint32_t i = 0; i < 6; i++)
             {
-                if (frameBufferInfos[i].addr)
+                if (fbInfo[i].addr)
                 {
-                    int j;
-                    int start = frameBufferInfos[i].addr & 0x7FFFFF;
-                    int end = start + frameBufferInfos[i].width*
-                        frameBufferInfos[i].height*
-                        frameBufferInfos[i].size - 1;
+                    uint32_t start = fbInfo[i].addr & 0x7FFFFF;
+                    uint32_t end = start + fbInfo[i].width * fbInfo[i].height * fbInfo[i].size - 1;
                     start = start >> 16;
                     end = end >> 16;
 
-                    for (j = start; j <= end; j++)
-                    {
-                            readmem_table[0x8000 + j] = read_rdram;
-                            readmem_table[0xa000 + j] = read_rdram;
-
-                            writemem_table[0x8000 + j] = write_rdram;
-                            writemem_table[0xa000 + j] = write_rdram;
-                    }
+                    fill_array(readmem_table, 0x8000 + start, end - start + 1, &MPMemory::read_rdram);
+                    fill_array(readmem_table, 0xa000 + start, end - start + 1, &MPMemory::read_rdram);
+                    fill_array(writemem_table, 0x8000 + start, end - start + 1, &MPMemory::write_rdram);
+                    fill_array(writemem_table, 0xa000 + start, end - start + 1, &MPMemory::write_rdram);
                 }
             }
         }
-        */
 
-        //gfx.processDList();
         _sp_reg[SP_PC_REG] &= 0xFFF;
         Bus::plugins->rsp()->DoRspCycles(0xffffffff);
         _sp_reg[SP_PC_REG] |= save_pc;
@@ -2350,58 +2399,52 @@ void MPMemory::prepare_rsp(void)
         _sp_reg[SP_STATUS_REG] &= ~0x303;
 
         // protecting new frame buffers
-        /*
-        if (gfx.fBGetFrameBufferInfo && gfx.fBRead && gfx.fBWrite)
-            gfx.fBGetFrameBufferInfo(frameBufferInfos);
-
-        if (gfx.fBGetFrameBufferInfo && gfx.fBRead && gfx.fBWrite
-            && frameBufferInfos[0].addr)
+        if (Bus::plugins->gfx()->fbGetInfo && Bus::plugins->gfx()->fbRead && Bus::plugins->gfx()->fbWrite)
         {
-            int i;
-            for (i = 0; i < 6; i++)
+            Bus::plugins->gfx()->fbGetInfo(fbInfo);
+        }
+
+        if (Bus::plugins->gfx()->fbGetInfo && Bus::plugins->gfx()->fbRead && Bus::plugins->gfx()->fbWrite
+            && fbInfo[0].addr)
+        {
+            vec_for (uint32_t i = 0; i < 6; i++)
             {
-                if (frameBufferInfos[i].addr)
+                if (fbInfo[i].addr)
                 {
-                    int j;
-                    int start = frameBufferInfos[i].addr & 0x7FFFFF;
-                    int end = start + frameBufferInfos[i].width*
-                        frameBufferInfos[i].height*
-                        frameBufferInfos[i].size - 1;
-                    int start1 = start;
-                    int end1 = end;
+                    uint32_t j;
+                    uint32_t start = fbInfo[i].addr & 0x7FFFFF;
+                    uint32_t end = start + fbInfo[i].width * fbInfo[i].height * fbInfo[i].size - 1;
+                    uint32_t start1 = start;
+                    uint32_t end1 = end;
+
                     start >>= 16;
                     end >>= 16;
-                    for (j = start; j <= end; j++)
-                    {
-                            readmem_table[0x8000 + j] = read_rdramFB;
-                            readmem_table[0xa000 + j] = read_rdramFB;
-                            writemem_table[0x8000 + j] = write_rdramFB;
-                            writemem_table[0xa000 + j] = write_rdramFB;
-                    }
+
+                    fill_array(readmem_table, 0x8000 + start, end - start + 1, &MPMemory::read_rdramFB);
+                    fill_array(readmem_table, 0xa000 + start, end - start + 1, &MPMemory::read_rdramFB);
+                    fill_array(writemem_table, 0x8000 + start, end - start + 1, &MPMemory::write_rdramFB);
+                    fill_array(writemem_table, 0xa000 + start, end - start + 1, &MPMemory::write_rdramFB);
+
                     start <<= 4;
                     end <<= 4;
-                    for (j = start; j <= end; j++)
+                    vec_for (j = start; j <= end; j++)
                     {
-                        if (j >= start1 && j <= end1) framebufferRead[j] = 1;
-                        else framebufferRead[j] = 0;
-                    }
-
-                    if (firstFrameBufferSetting)
-                    {
-                        firstFrameBufferSetting = 0;
-                        fast_memory = 0;
-                        for (j = 0; j < 0x100000; j++)
-                            invalid_code[j] = 1;
+                        if (j >= start1 && j <= end1)
+                        {
+                            framebufferRead[j] = 1;
+                        }
+                        else
+                        {
+                            framebufferRead[j] = 0;
+                        }
                     }
                 }
             }
         }
-        */
     }
     // Audio task
     else if (_SP_DMEM[0xFC0 / 4] == 2)
     {
-        //audio.processAList();
         _sp_reg[SP_PC_REG] &= 0xFFF;
         Bus::plugins->rsp()->DoRspCycles(0xFFFFFFFF);
         _sp_reg[SP_PC_REG] |= save_pc;
@@ -2431,8 +2474,6 @@ void MPMemory::prepare_rsp(void)
         _sp_reg[SP_STATUS_REG] &= ~0x203;
     }
 }
-
-
 
 uint32_t* MPMemory::fast_fetch(uint32_t address)
 {

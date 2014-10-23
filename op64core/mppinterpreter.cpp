@@ -101,7 +101,7 @@ void MPPInterpreter::initialize(void)
 
 void MPPInterpreter::hard_reset(void)
 {
-    vec_for(uint32_t i = 0; i < 32; i++)
+    vec_for (uint32_t i = 0; i < 32; i++)
     {
         _reg[i].u = 0;
         _cp0_reg[i] = 0;
@@ -981,19 +981,27 @@ void MPPInterpreter::general_exception(void)
 
 void MPPInterpreter::TLB_refill_exception(unsigned int address, int w)
 {
-    int usual_handler = 0, i;
+    uint32_t i;
+    bool usual_handler = false;
 
     if (w != 2)
+    {
         _cp0->update_count();
+    }
 
     if (w == 1)
+    {
         _cp0_reg[CP0_CAUSE_REG] = (3 << 2);
+    }
     else
+    {
         _cp0_reg[CP0_CAUSE_REG] = (2 << 2);
+    }
 
     _cp0_reg[CP0_BADVADDR_REG] = address;
     _cp0_reg[CP0_CONTEXT_REG] = (_cp0_reg[CP0_CONTEXT_REG] & 0xFF80000F) | ((address >> 9) & 0x007FFFF0);
     _cp0_reg[CP0_ENTRYHI_REG] = address & 0xFFFFE000;
+
     if (_cp0_reg[CP0_STATUS_REG] & 0x2) // Test de EXL
     {
         global_jump_to(0x80000180);
@@ -1014,16 +1022,25 @@ void MPPInterpreter::TLB_refill_exception(unsigned int address, int w)
         _cp0_reg[CP0_STATUS_REG] |= 0x2; //EXL=1
 
         if (address >= 0x80000000 && address < 0xc0000000)
+        {
             usual_handler = 1;
+        }
+
         for (i = 0; i < 32; i++)
         {
             if (/*tlb_e[i].v_even &&*/ address >= TLB::tlb_entry_table[i].start_even &&
                 address <= TLB::tlb_entry_table[i].end_even)
-                usual_handler = 1;
+            {
+                usual_handler = true;
+            }
+
             if (/*tlb_e[i].v_odd &&*/ address >= TLB::tlb_entry_table[i].start_odd &&
                 address <= TLB::tlb_entry_table[i].end_odd)
-                usual_handler = 1;
+            {
+                usual_handler = true;
+            }
         }
+
         if (usual_handler)
         {
             global_jump_to(0x80000180);
@@ -1033,6 +1050,7 @@ void MPPInterpreter::TLB_refill_exception(unsigned int address, int w)
             global_jump_to(0x80000000);
         }
     }
+
     if (_delay_slot)
     {
         _cp0_reg[CP0_CAUSE_REG] |= 0x80000000;
@@ -1042,11 +1060,13 @@ void MPPInterpreter::TLB_refill_exception(unsigned int address, int w)
     {
         _cp0_reg[CP0_CAUSE_REG] &= 0x7FFFFFFF;
     }
+
     if (w != 2)
+    {
         _cp0_reg[CP0_EPC_REG] -= 4;
+    }
 
     _last_instr_addr = (uint32_t)_PC;
-
 
     if (_delay_slot)
     {

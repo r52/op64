@@ -89,7 +89,7 @@ void MemPak::loadMempak(void)
 
     int i, j;
     for (i = 0; i < 4; i++) {
-        for (j = 0; j < 0x8000; j += 2) {
+        vec_for (j = 0; j < 0x8000; j += 2) {
             _mempaks[i][j] = 0;
             _mempaks[i][j + 1] = 0x03;
         }

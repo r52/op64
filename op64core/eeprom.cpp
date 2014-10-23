@@ -144,7 +144,7 @@ void EEPROM::write(uint8_t* buf, int line)
         loadEEPROM();
     }
 
-    for (int i = 0; i<8; i++)
+    for (int i = 0; i < 8; i++)
     { 
         _eeprom[line * 8 + i] = buf[i];
     }

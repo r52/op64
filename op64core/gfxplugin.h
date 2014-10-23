@@ -3,6 +3,14 @@
 #include <string>
 #include "util.h"
 
+typedef struct
+{
+    uint32_t addr;
+    uint32_t size;
+    uint32_t width;
+    uint32_t height;
+} FrameBufferInfo;
+
 class GfxPlugin
 {
 public:
@@ -21,7 +29,7 @@ public:
     void(*ChangeWindow)(void);
     void(*Config)(void* hParent);
     void(*DrawScreen)(void);
-    void(*MoveScreen)(int xpos, int ypos);
+    void(*MoveScreen)(int32_t xpos, int32_t ypos);
     void(*ProcessDList)(void);
     void(*ProcessRDPList)(void);
     void(*ShowCFB)(void);
@@ -29,6 +37,11 @@ public:
     void(*ViStatusChanged)(void);
     void(*ViWidthChanged)(void);
     void(*SoftReset)(void);
+
+    // frame buffer extension
+    void(*fbRead)(uint32_t addr);
+    void(*fbWrite)(uint32_t addr, uint32_t size);
+    void(*fbGetInfo)(void* p);
 
 private:
     GfxPlugin();

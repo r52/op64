@@ -4,7 +4,7 @@
 
 
 void gfx_dummy_func(void) {}
-void DummyMoveScreen(int, int) {}
+void DummyMoveScreen(int32_t, int32_t) {}
 
 GfxPlugin::GfxPlugin(const char* libPath) :
 CaptureScreen(nullptr),
@@ -23,6 +23,9 @@ CloseDLL(nullptr),
 RomOpen(nullptr),
 RomClosed(nullptr),
 PluginOpened(nullptr),
+fbGetInfo(nullptr),
+fbRead(nullptr),
+fbWrite(nullptr),
 _libHandle(nullptr),
 _initialized(false),
 _romOpened(false)
@@ -68,8 +71,6 @@ void GfxPlugin::unloadLibrary(void)
     RomClosed = nullptr;
     RomOpen = nullptr;
     DrawScreen = nullptr;
-    //	FrameBufferRead      = NULL;
-    //	FrameBufferWrite     = NULL;
     MoveScreen = nullptr;
     ProcessDList = nullptr;
     ProcessRDPList = nullptr;
@@ -77,6 +78,9 @@ void GfxPlugin::unloadLibrary(void)
     UpdateScreen = nullptr;
     ViStatusChanged = nullptr;
     ViWidthChanged = nullptr;
+    fbGetInfo = nullptr;
+    fbRead = nullptr;
+    fbWrite = nullptr;
 }
 
 void GfxPlugin::loadLibrary(const char* libPath)
@@ -109,7 +113,7 @@ void GfxPlugin::loadLibrary(const char* libPath)
     ChangeWindow = (void(*)(void)) opLibGetFunc(_libHandle, "ChangeWindow");
     Config = (void(*)(void*)) opLibGetFunc(_libHandle, "DllConfig");
     DrawScreen = (void(*)(void)) opLibGetFunc(_libHandle, "DrawScreen");
-    MoveScreen = (void(*)(int, int))opLibGetFunc(_libHandle, "MoveScreen");
+    MoveScreen = (void(*)(int32_t, int32_t))opLibGetFunc(_libHandle, "MoveScreen");
     ProcessDList = (void(*)(void)) opLibGetFunc(_libHandle, "ProcessDList");
     RomClosed = (void(*)(void)) opLibGetFunc(_libHandle, "RomClosed");
     RomOpen = (void(*)(void)) opLibGetFunc(_libHandle, "RomOpen");
@@ -147,6 +151,11 @@ void GfxPlugin::loadLibrary(const char* libPath)
 
         PluginOpened();
     }
+
+    // frame buffer extension
+    fbRead = (void(*)(uint32_t)) opLibGetFunc(_libHandle, "FBRead");
+    fbWrite = (void(*)(uint32_t, uint32_t)) opLibGetFunc(_libHandle, "FBWrite");
+    fbGetInfo = (void(*)(void*)) opLibGetFunc(_libHandle, "FBGetFrameBufferInfo");
 }
 
 void GfxPlugin::onRomOpen(void)

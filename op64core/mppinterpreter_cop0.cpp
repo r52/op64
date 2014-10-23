@@ -200,9 +200,8 @@ void MPPInterpreter::TLBWR(void)
 
 void MPPInterpreter::TLBP(void)
 {
-    int i;
     _cp0_reg[CP0_INDEX_REG] |= 0x80000000;
-    for (i = 0; i < 32; i++)
+    for (uint32_t i = 0; i < 32; i++)
     {
         if (((TLB::tlb_entry_table[i].vpn2 & (~TLB::tlb_entry_table[i].mask)) ==
             (((_cp0_reg[CP0_ENTRYHI_REG] & 0xFFFFE000) >> 13) & (~TLB::tlb_entry_table[i].mask))) &&

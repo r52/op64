@@ -46,6 +46,7 @@ private:
     void read_flashram_status(uint32_t& address, uint64_t* dest, DataSize size);
     void read_rom(uint32_t& address, uint64_t* dest, DataSize size);
     void read_pif(uint32_t& address, uint64_t* dest, DataSize size);
+    void read_rdramFB(uint32_t& address, uint64_t* dest, DataSize size);
 
     // Write functions
     void write_nomem(uint32_t& address, uint64_t* src, DataSize size);
@@ -67,6 +68,7 @@ private:
     void write_flashram_command(uint32_t& address, uint64_t* src, DataSize size);
     void write_rom(uint32_t& address, uint64_t* src, DataSize size);
     void write_pif(uint32_t& address, uint64_t* src, DataSize size);
+    void write_rdramFB(uint32_t& address, uint64_t* src, DataSize size);
 
     // helpers
     void update_MI_init_mode_reg(void);
