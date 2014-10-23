@@ -75,10 +75,10 @@ namespace Bus
 
     // interrupt state
     bool* SPECIAL_done = nullptr;
-    bool* perform_hard_reset = nullptr;
     bool* interrupt_unsafe_state = nullptr;
 
     // core control
+    std::atomic<bool> doHardReset = false;
     std::atomic<bool> limitVI = true;
 
     // local bus state check. if true, then machine ready to execute
@@ -228,6 +228,17 @@ namespace Bus
         devicesInitialized = false;
 
         return true;
+    }
+
+    void doSoftReset(void)
+    {
+        if (!devicesInitialized)
+        {
+            LOG_ERROR("Bus: reset error. devices not initialized");
+            return;
+        }
+
+        interrupt->soft_reset();
     }
 
 }

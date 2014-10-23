@@ -125,3 +125,18 @@ void Emulator::setupBus(Plugins* plugins, ICPU* cpu, IMemory* mem)
     Bus::connectCPU(cpu);
     Bus::connectPlugins(plugins);
 }
+
+void Emulator::setLimitFPS(bool limit)
+{
+    Bus::limitVI = limit;
+}
+
+void Emulator::gameHardReset(void)
+{
+    Bus::doHardReset = true;
+}
+
+void Emulator::gameSoftReset(void)
+{
+    Bus::doSoftReset();
+}

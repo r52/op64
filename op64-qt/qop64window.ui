@@ -79,7 +79,25 @@
     </property>
     <addaction name="actionShow_Log"/>
    </widget>
+   <widget class="QMenu" name="menuEmulation">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="title">
+     <string>Emulation</string>
+    </property>
+    <widget class="QMenu" name="menuReset">
+     <property name="title">
+      <string>Reset</string>
+     </property>
+     <addaction name="actionSoft_Reset"/>
+     <addaction name="actionHard_Reset"/>
+    </widget>
+    <addaction name="actionLimit_FPS"/>
+    <addaction name="menuReset"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuEmulation"/>
    <addaction name="menuOptions"/>
    <addaction name="menuAdvanced"/>
    <addaction name="menuHelp"/>
@@ -129,6 +147,27 @@
    </property>
    <property name="text">
     <string>Show Log</string>
+   </property>
+  </action>
+  <action name="actionLimit_FPS">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Limit FPS</string>
+   </property>
+  </action>
+  <action name="actionHard_Reset">
+   <property name="text">
+    <string>Hard Reset</string>
+   </property>
+  </action>
+  <action name="actionSoft_Reset">
+   <property name="text">
+    <string>Soft Reset</string>
    </property>
   </action>
  </widget>

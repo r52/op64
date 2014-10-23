@@ -88,10 +88,10 @@ namespace Bus
 
     // interrupt state
     extern bool* SPECIAL_done;
-    extern bool* perform_hard_reset;
     extern bool* interrupt_unsafe_state;
 
     // core control
+    extern std::atomic<bool> doHardReset;
     extern std::atomic<bool> limitVI;
 
     bool connectRom(Rom* dev);
@@ -104,4 +104,6 @@ namespace Bus
     void executeMachine(void);
 
     bool disconnectDevices(void);
+
+    void doSoftReset(void);
 };

@@ -48,6 +48,11 @@ public:
 
     void setState(EmuState newstate);
 
+public slots:
+    void setLimitFPS(bool limit);
+    void gameHardReset(void);
+    void gameSoftReset(void);
+
 
 signals:
     void stateChanged(EmuState newstate);

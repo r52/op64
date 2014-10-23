@@ -55,7 +55,6 @@ InterruptHandler::InterruptHandler(void)
     vi_field = &_vi_field;
     next_interrupt = &_next_interrupt;
     SPECIAL_done = &_SPECIAL_done;
-    perform_hard_reset = &_perform_hard_reset;
     interrupt_unsafe_state = &_interrupt_unsafe_state;
 }
 
@@ -66,7 +65,6 @@ InterruptHandler::~InterruptHandler(void)
     vi_field = nullptr;
     next_interrupt = nullptr;
     SPECIAL_done = nullptr;
-    perform_hard_reset = nullptr;
     interrupt_unsafe_state = nullptr;
 }
 
@@ -130,10 +128,10 @@ void InterruptHandler::gen_interrupt(void)
 
     if (!_interrupt_unsafe_state)
     {
-        if (_perform_hard_reset)
+        if (Bus::doHardReset)
         {
             do_hard_reset();
-            _perform_hard_reset = false;
+            Bus::doHardReset = false;
             return;
         }
     }
@@ -523,4 +521,10 @@ void InterruptHandler::translate_event_queue_by(uint32_t base)
 
     add_interrupt_event_count(COMPARE_INT, Bus::cp0_reg[CP0_COMPARE_REG]);
     add_interrupt_event_count(SPECIAL_INT, 0);
+}
+
+void InterruptHandler::soft_reset(void)
+{
+    add_interrupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
+    add_interrupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
 }

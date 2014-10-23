@@ -147,11 +147,16 @@ void QOP64Window::connectGUIControls(void)
     // file
     connect(ui.actionOpen_ROM, SIGNAL(triggered(bool)), this, SLOT(openRom()));
 
+    // emulation
+    connect(ui.actionLimit_FPS, SIGNAL(toggled(bool)), &EMU, SLOT(setLimitFPS(bool)), Qt::DirectConnection);
+    connect(ui.actionHard_Reset, SIGNAL(triggered()), &EMU, SLOT(gameHardReset()), Qt::DirectConnection);
+    connect(ui.actionSoft_Reset, SIGNAL(triggered()), &EMU, SLOT(gameSoftReset()), Qt::DirectConnection);
+
     // options
-    connect(ui.actionGraphics_Settings, SIGNAL(triggered(bool)), this, SLOT(showGraphicsConfig()));
-    connect(ui.actionAudio_Settings, SIGNAL(triggered(bool)), this, SLOT(showAudioConfig()));
-    connect(ui.actionInput_Settings, SIGNAL(triggered(bool)), this, SLOT(showInputConfig()));
-    connect(ui.actionRSP_Settings, SIGNAL(triggered(bool)), this, SLOT(showRSPConfig()));
+    connect(ui.actionGraphics_Settings, SIGNAL(triggered()), this, SLOT(showGraphicsConfig()));
+    connect(ui.actionAudio_Settings, SIGNAL(triggered()), this, SLOT(showAudioConfig()));
+    connect(ui.actionInput_Settings, SIGNAL(triggered()), this, SLOT(showInputConfig()));
+    connect(ui.actionRSP_Settings, SIGNAL(triggered()), this, SLOT(showRSPConfig()));
     connect(ui.actionEmulator_Settings, SIGNAL(triggered()), this, SLOT(openConfigDialog()));
 
     // advanced
@@ -230,10 +235,12 @@ void QOP64Window::emulatorChangeState(EmuState newstate)
     case HARDWARE_INITIALIZED:
         break;
     case EMU_RUNNING:
+        QMetaObject::invokeMethod(ui.menuEmulation, "setEnabled", Q_ARG(bool, true));
         break;
     case EMU_PAUSED:
         break;
     case EMU_STOPPED:
+        QMetaObject::invokeMethod(ui.menuEmulation, "setEnabled", Q_ARG(bool, false));
         break;
     case HARDWARE_DEINITIALIZED:
         break;

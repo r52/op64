@@ -61,6 +61,8 @@ public:
     void delete_event(int32_t type);
     void translate_event_queue_by(uint32_t base);
 
+    void soft_reset(void);
+
 private:
     void do_hard_reset(void);
     void pop_interrupt_event(void);
@@ -74,5 +76,4 @@ private:
     uint32_t _next_interrupt;
     bool _interrupt_unsafe_state;
     bool _SPECIAL_done;
-    bool _perform_hard_reset = false;
 };
