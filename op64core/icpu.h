@@ -93,6 +93,12 @@ public:
         return *this;
     }
 
+    inline ProgramCounter& operator=(uint32_t&& x)
+    {
+        _addr = std::move(x);
+        return *this;
+    }
+
     inline ProgramCounter& operator=(const ProgramCounter& x)
     {
         _addr = x._addr;

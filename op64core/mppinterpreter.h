@@ -5,20 +5,23 @@
 #include "icpu.h"
 #include "cp0.h"
 
+#include "bus.h"
+#include "imemory.h"
+#include "logger.h"
+
 
 #define NOT_IMPLEMENTED() \
     Bus::stop = true; \
     LOG_ERROR("PC: %x op: %x; Function %s in %s line %i not implemented. Stopping...\n", (uint32_t)_PC, _cur_instr.code, __func__, __FILE__, __LINE__);
 
 #define DO_JUMP(target, condition, link, likely, cop1) \
-    uint32_t t = (target); \
-    bool c = (condition); \
-    if (t == ((uint32_t)_PC) && _check_nop) \
+    if (target == ((uint32_t)_PC) && _check_nop) \
     { \
-        generic_idle(t, c, link, likely, cop1); \
+        generic_idle(target, condition, link, likely, cop1); \
         return; \
     } \
-    generic_jump(t, c, link, likely, cop1);
+    generic_jump(target, condition, link, likely, cop1);
+
 
 class MPPInterpreter : public ICPU
 {
@@ -43,8 +46,22 @@ public:
     virtual void TLB_refill_exception(unsigned int address, int w);
 
 private:
-    void prefetch_opcode(uint32_t op, uint32_t nextop);
-    void prefetch(void);
+    inline void prefetch(void)
+    {
+        uint32_t* mem = Bus::mem->fast_fetch(_PC);
+        if (nullptr != mem)
+        {
+            _check_nop = (mem[1] == 0);
+            _cur_instr.code = mem[0];
+        }
+        else
+        {
+            char buf[250];
+            sprintf_s(buf, "prefetch execution address %x not found. Stopping...\n", (uint32_t)_PC);
+            LOG(buf);
+            Bus::stop = true;
+        }
+    }
 
 private:
 
@@ -68,8 +85,8 @@ private:
 
 protected:
 
-    void generic_jump(uint32_t destination, bool condition, Register64* link, bool likely, bool cop1);
-    void generic_idle(uint32_t destination, bool condition, Register64* link, bool likely, bool cop1);
+    void generic_jump(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1);
+    void generic_idle(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1);
 
     virtual void SPECIAL(void);
     virtual void REGIMM(void);

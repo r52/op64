@@ -9,8 +9,6 @@
 #include "interrupthandler.h"
 #include "cp0.h"
 #include "dma.h"
-#include "bus.h"
-#include "tlb.h"
 #include "pif.h"
 #include "flashram.h"
 #include "plugins.h"
@@ -909,61 +907,61 @@ void MPMemory::read_rdramFB(uint32_t& address, uint64_t* dest, DataSize size)
 }
 
 
-void MPMemory::write_nomem(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_nomem(uint32_t address, uint64_t src, DataSize size)
 {
     MEM_NOT_IMPLEMENTED();
 }
 
-void MPMemory::write_rdram(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_rdram(uint32_t address, uint64_t src, DataSize size)
 {
     switch (size)
     {
     case SIZE_WORD:
-        *((uint32_t*)(Bus::rdram8 + (address & 0xFFFFFF))) = (uint32_t)*src;
+        *((uint32_t*)(Bus::rdram8 + (address & 0xFFFFFF))) = (uint32_t)src;
         break;
     case SIZE_DWORD:
-        *((uint32_t*)(Bus::rdram8 + (address & 0xFFFFFF))) = (uint32_t)(*src >> 32);
-        *((uint32_t*)(Bus::rdram8 + (address & 0xFFFFFF) + 4)) = (uint32_t)(*src & 0xFFFFFFFF);
+        *((uint32_t*)(Bus::rdram8 + (address & 0xFFFFFF))) = (uint32_t)(src >> 32);
+        *((uint32_t*)(Bus::rdram8 + (address & 0xFFFFFF) + 4)) = (uint32_t)(src & 0xFFFFFFFF);
         break;
     case SIZE_HWORD:
-        *(uint16_t*)((Bus::rdram8 + (HES(address & 0xFFFFFF)))) = (uint16_t)*src;
+        *(uint16_t*)((Bus::rdram8 + (HES(address & 0xFFFFFF)))) = (uint16_t)src;
         break;
     case SIZE_BYTE:
-        *((Bus::rdram8 + (BES(address & 0xFFFFFF)))) = (uint8_t)*src;
+        *((Bus::rdram8 + (BES(address & 0xFFFFFF)))) = (uint8_t)src;
         break;
     }
 }
 
-void MPMemory::write_nothing(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_nothing(uint32_t address, uint64_t src, DataSize size)
 {
     // does nothing
 }
 
-void MPMemory::write_rdram_reg(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_rdram_reg(uint32_t address, uint64_t src, DataSize size)
 {
     uint32_t addr_low = address & 0xffff;
 
     switch (size)
     {
     case SIZE_WORD:
-        *readrdram_table[addr_low] = (uint32_t)*src;
+        *readrdram_table[addr_low] = (uint32_t)src;
         break;
     case SIZE_DWORD:
-        *readrdram_table[addr_low] = (uint32_t)(*src >> 32);
-        *readrdram_table[addr_low + 4] = (uint32_t)(*src & 0xFFFFFFFF);
+        *readrdram_table[addr_low] = (uint32_t)(src >> 32);
+        *readrdram_table[addr_low + 4] = (uint32_t)(src & 0xFFFFFFFF);
         break;
     case SIZE_HWORD:
         *((uint16_t*)((uint8_t*)readrdram_table[addr_low & 0xfffc]
-            + (HES(addr_low & 3)))) = (uint16_t)*src;
+            + (HES(addr_low & 3)))) = (uint16_t)src;
         break;
     case SIZE_BYTE:
         *((uint8_t*)readrdram_table[addr_low & 0xfffc]
-            + (BES(addr_low & 3))) = (uint8_t)*src;
+            + (BES(addr_low & 3))) = (uint8_t)src;
         break;
     }
 }
 
-void MPMemory::write_rsp_mem(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_rsp_mem(uint32_t address, uint64_t src, DataSize size)
 {
     uint32_t addr_low = address & 0xffff;
 
@@ -975,17 +973,17 @@ void MPMemory::write_rsp_mem(uint32_t& address, uint64_t* src, DataSize size)
         switch (size)
         {
         case SIZE_WORD:
-            *((uint32_t*)(SP_DMEM + (addr_low))) = (uint32_t)*src;
+            *((uint32_t*)(SP_DMEM + (addr_low))) = (uint32_t)src;
             break;
         case SIZE_BYTE:
-            *(SP_DMEM + BES(addr_low)) = (uint8_t)*src;
+            *(SP_DMEM + BES(addr_low)) = (uint8_t)src;
             break;
         case SIZE_HWORD:
-            *((uint16_t*)(SP_DMEM + HES(addr_low))) = (uint16_t)*src;
+            *((uint16_t*)(SP_DMEM + HES(addr_low))) = (uint16_t)src;
             break;
         case SIZE_DWORD:
-            *((uint32_t*)(SP_DMEM + addr_low)) = (uint32_t)(*src >> 32);
-            *((uint32_t*)(SP_DMEM + addr_low + 4)) = (uint32_t)(*src & 0xFFFFFFFF);
+            *((uint32_t*)(SP_DMEM + addr_low)) = (uint32_t)(src >> 32);
+            *((uint32_t*)(SP_DMEM + addr_low + 4)) = (uint32_t)(src & 0xFFFFFFFF);
             break;
         }
     }
@@ -994,17 +992,17 @@ void MPMemory::write_rsp_mem(uint32_t& address, uint64_t* src, DataSize size)
         switch (size)
         {
         case SIZE_WORD:
-            *((uint32_t*)(SP_IMEM + (addr_low & 0xfff))) = (uint32_t)*src;
+            *((uint32_t*)(SP_IMEM + (addr_low & 0xfff))) = (uint32_t)src;
             break;
         case SIZE_BYTE:
-            *(SP_IMEM + (BES(addr_low & 0xfff))) = (uint8_t)*src;
+            *(SP_IMEM + (BES(addr_low & 0xfff))) = (uint8_t)src;
             break;
         case SIZE_HWORD:
-            *((uint16_t*)(SP_IMEM + (HES(addr_low & 0xfff)))) = (uint16_t)*src;
+            *((uint16_t*)(SP_IMEM + (HES(addr_low & 0xfff)))) = (uint16_t)src;
             break;
         case SIZE_DWORD:
-            *((uint32_t*)(SP_IMEM + (addr_low & 0xfff))) = (uint32_t)(*src >> 32);
-            *((uint32_t*)(SP_IMEM + (addr_low & 0xfff) + 4)) = (uint32_t)(*src & 0xFFFFFFFF);
+            *((uint32_t*)(SP_IMEM + (addr_low & 0xfff))) = (uint32_t)(src >> 32);
+            *((uint32_t*)(SP_IMEM + (addr_low & 0xfff) + 4)) = (uint32_t)(src & 0xFFFFFFFF);
             break;
         }
     }
@@ -1014,7 +1012,7 @@ void MPMemory::write_rsp_mem(uint32_t& address, uint64_t* src, DataSize size)
     }
 }
 
-void MPMemory::write_rsp_reg(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_rsp_reg(uint32_t address, uint64_t src, DataSize size)
 {
     uint32_t addr_low = address & 0xffff;
 
@@ -1025,7 +1023,7 @@ void MPMemory::write_rsp_reg(uint32_t& address, uint64_t* src, DataSize size)
         switch (addr_low)
         {
         case 0x10:
-            _sp_reg[_SP_WRITE_STATUS_REG] = (uint32_t)*src;
+            _sp_reg[_SP_WRITE_STATUS_REG] = (uint32_t)src;
             update_sp_reg();
         case 0x14:
         case 0x18:
@@ -1033,7 +1031,7 @@ void MPMemory::write_rsp_reg(uint32_t& address, uint64_t* src, DataSize size)
             break;
         }
 
-        *readsp_table[addr_low] = (uint32_t)*src;
+        *readsp_table[addr_low] = (uint32_t)src;
 
         switch (addr_low)
         {
@@ -1054,7 +1052,7 @@ void MPMemory::write_rsp_reg(uint32_t& address, uint64_t* src, DataSize size)
         switch (addr_low)
         {
         case 0x10:
-            _sp_reg[_SP_WRITE_STATUS_REG] = (uint32_t)(*src >> 32);
+            _sp_reg[_SP_WRITE_STATUS_REG] = (uint32_t)(src >> 32);
             update_sp_reg();
             return;
             break;
@@ -1064,8 +1062,8 @@ void MPMemory::write_rsp_reg(uint32_t& address, uint64_t* src, DataSize size)
             break;
         }
 
-        *readsp_table[addr_low] = (uint32_t)(*src >> 32);
-        *readsp_table[addr_low + 4] = (uint32_t)(*src & 0xFFFFFFFF);
+        *readsp_table[addr_low] = (uint32_t)(src >> 32);
+        *readsp_table[addr_low + 4] = (uint32_t)(src & 0xFFFFFFFF);
 
         switch (addr_low)
         {
@@ -1083,7 +1081,7 @@ void MPMemory::write_rsp_reg(uint32_t& address, uint64_t* src, DataSize size)
         case 0x10:
         case 0x12:
             *((uint16_t*)((uint8_t*)&_sp_reg[_SP_WRITE_STATUS_REG]
-                + (HES(addr_low & 3)))) = (uint16_t)*src;
+                + (HES(addr_low & 3)))) = (uint16_t)src;
         case 0x14:
         case 0x16:
         case 0x18:
@@ -1093,7 +1091,7 @@ void MPMemory::write_rsp_reg(uint32_t& address, uint64_t* src, DataSize size)
         }
 
         *((uint16_t*)((uint8_t*)readsp_table[addr_low & 0xfffc]
-            + (HES(addr_low & 3)))) = (uint16_t)*src;
+            + (HES(addr_low & 3)))) = (uint16_t)src;
 
         switch (addr_low)
         {
@@ -1121,7 +1119,7 @@ void MPMemory::write_rsp_reg(uint32_t& address, uint64_t* src, DataSize size)
         case 0x12:
         case 0x13:
             *((uint8_t*)&_sp_reg[_SP_WRITE_STATUS_REG]
-                + (BES(addr_low & 3))) = (uint8_t)*src;
+                + (BES(addr_low & 3))) = (uint8_t)src;
         case 0x14:
         case 0x15:
         case 0x16:
@@ -1135,7 +1133,7 @@ void MPMemory::write_rsp_reg(uint32_t& address, uint64_t* src, DataSize size)
         }
 
         *((uint8_t*)readsp_table[addr_low & 0xfffc]
-            + (BES(addr_low & 3))) = (uint8_t)*src;
+            + (BES(addr_low & 3))) = (uint8_t)src;
 
         switch (addr_low)
         {
@@ -1163,41 +1161,41 @@ void MPMemory::write_rsp_reg(uint32_t& address, uint64_t* src, DataSize size)
     }
 }
 
-void MPMemory::write_rsp_stat(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_rsp_stat(uint32_t address, uint64_t src, DataSize size)
 {
     uint32_t addr_low = address & 0xffff;
 
     switch (size)
     {
     case SIZE_WORD:
-        *readsp_stat_table[addr_low] = (uint32_t)*src;
+        *readsp_stat_table[addr_low] = (uint32_t)src;
         break;
     case SIZE_DWORD:
-        *readsp_stat_table[addr_low] = (uint32_t)(*src >> 32);
-        *readsp_stat_table[addr_low + 4] = (uint32_t)(*src & 0xFFFFFFFF);
+        *readsp_stat_table[addr_low] = (uint32_t)(src >> 32);
+        *readsp_stat_table[addr_low + 4] = (uint32_t)(src & 0xFFFFFFFF);
         break;
     case SIZE_HWORD:
         *((uint16_t*)((uint8_t*)readsp_stat_table[addr_low & 0xfffc]
-            + (HES(addr_low & 3)))) = (uint16_t)*src;
+            + (HES(addr_low & 3)))) = (uint16_t)src;
         break;
     case SIZE_BYTE:
         *((uint8_t*)readsp_stat_table[addr_low & 0xfffc]
-            + (BES(addr_low & 3))) = (uint8_t)*src;
+            + (BES(addr_low & 3))) = (uint8_t)src;
         break;
     }
 }
 
-void MPMemory::write_dp(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_dp(uint32_t address, uint64_t src, DataSize size)
 {
     MEM_NOT_IMPLEMENTED();
 }
 
-void MPMemory::write_dps(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_dps(uint32_t address, uint64_t src, DataSize size)
 {
     MEM_NOT_IMPLEMENTED();
 }
 
-void MPMemory::write_mi(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_mi(uint32_t address, uint64_t src, DataSize size)
 {
     uint32_t addr_low = address & 0xffff;
 
@@ -1208,11 +1206,11 @@ void MPMemory::write_mi(uint32_t& address, uint64_t* src, DataSize size)
         switch (addr_low)
         {
         case 0x0:
-            _mi_reg[_MI_WRITE_INIT_MODE_REG] = (uint32_t)*src;
+            _mi_reg[_MI_WRITE_INIT_MODE_REG] = (uint32_t)src;
             update_MI_init_mode_reg();
             break;
         case 0xc:
-            _mi_reg[_MI_WRITE_INTR_MASK_REG] = (uint32_t)*src;
+            _mi_reg[_MI_WRITE_INTR_MASK_REG] = (uint32_t)src;
             update_MI_intr_mask_reg();
 
             Bus::interrupt->check_interrupt();
@@ -1230,11 +1228,11 @@ void MPMemory::write_mi(uint32_t& address, uint64_t* src, DataSize size)
         switch (addr_low)
         {
         case 0x0:
-            _mi_reg[_MI_WRITE_INIT_MODE_REG] = (uint32_t)(*src >> 32);
+            _mi_reg[_MI_WRITE_INIT_MODE_REG] = (uint32_t)(src >> 32);
             update_MI_init_mode_reg();
             break;
         case 0x8:
-            _mi_reg[_MI_WRITE_INTR_MASK_REG] = (uint32_t)(*src & 0xFFFFFFFF);
+            _mi_reg[_MI_WRITE_INTR_MASK_REG] = (uint32_t)(src & 0xFFFFFFFF);
             update_MI_intr_mask_reg();
 
             Bus::interrupt->check_interrupt();
@@ -1253,13 +1251,13 @@ void MPMemory::write_mi(uint32_t& address, uint64_t* src, DataSize size)
         case 0x0:
         case 0x2:
             *((uint16_t*)((uint8_t*)&_mi_reg[_MI_WRITE_INIT_MODE_REG]
-                + (HES(addr_low & 3)))) = (uint16_t)*src;
+                + (HES(addr_low & 3)))) = (uint16_t)src;
             update_MI_init_mode_reg();
             break;
         case 0xc:
         case 0xe:
             *((uint16_t*)((uint8_t*)&_mi_reg[_MI_WRITE_INTR_MASK_REG]
-                + (HES(addr_low & 3)))) = (uint16_t)*src;
+                + (HES(addr_low & 3)))) = (uint16_t)src;
             update_MI_intr_mask_reg();
 
             Bus::interrupt->check_interrupt();
@@ -1280,7 +1278,7 @@ void MPMemory::write_mi(uint32_t& address, uint64_t* src, DataSize size)
         case 0x2:
         case 0x3:
             *((uint8_t*)&_mi_reg[_MI_WRITE_INIT_MODE_REG]
-                + (BES(addr_low & 3))) = (uint8_t)*src;
+                + (BES(addr_low & 3))) = (uint8_t)src;
             update_MI_init_mode_reg();
             break;
         case 0xc:
@@ -1288,7 +1286,7 @@ void MPMemory::write_mi(uint32_t& address, uint64_t* src, DataSize size)
         case 0xe:
         case 0xf:
             *((uint8_t*)&_mi_reg[_MI_WRITE_INTR_MASK_REG]
-                + (BES(addr_low & 3))) = (uint8_t)*src;
+                + (BES(addr_low & 3))) = (uint8_t)src;
             update_MI_intr_mask_reg();
 
             Bus::interrupt->check_interrupt();
@@ -1303,7 +1301,7 @@ void MPMemory::write_mi(uint32_t& address, uint64_t* src, DataSize size)
     }
 }
 
-void MPMemory::write_vi(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_vi(uint32_t address, uint64_t src, DataSize size)
 {
     uint32_t addr_low = address & 0xffff;
 
@@ -1314,17 +1312,17 @@ void MPMemory::write_vi(uint32_t& address, uint64_t* src, DataSize size)
         switch (addr_low)
         {
         case 0x0:
-            if (_vi_reg[VI_STATUS_REG] != (uint32_t)*src)
+            if (_vi_reg[VI_STATUS_REG] != (uint32_t)src)
             {
-                _vi_reg[VI_STATUS_REG] = (uint32_t)*src;
+                _vi_reg[VI_STATUS_REG] = (uint32_t)src;
                 if (Bus::plugins->gfx()->ViStatusChanged != nullptr) { Bus::plugins->gfx()->ViStatusChanged(); }
             }
             return;
             break;
         case 0x8:
-            if (_vi_reg[VI_WIDTH_REG] != (uint32_t)*src)
+            if (_vi_reg[VI_WIDTH_REG] != (uint32_t)src)
             {
-                _vi_reg[VI_WIDTH_REG] = (uint32_t)*src;
+                _vi_reg[VI_WIDTH_REG] = (uint32_t)src;
                 if (Bus::plugins->gfx()->ViWidthChanged != nullptr) { Bus::plugins->gfx()->ViWidthChanged(); }
             }
             return;
@@ -1335,7 +1333,7 @@ void MPMemory::write_vi(uint32_t& address, uint64_t* src, DataSize size)
             return;
             break;
         }
-        *readvi_table[addr_low] = (uint32_t)*src;
+        *readvi_table[addr_low] = (uint32_t)src;
     }
         break;
     case SIZE_DWORD:
@@ -1343,32 +1341,32 @@ void MPMemory::write_vi(uint32_t& address, uint64_t* src, DataSize size)
         switch (addr_low)
         {
         case 0x0:
-            if (_vi_reg[VI_STATUS_REG] != (uint32_t)(*src >> 32))
+            if (_vi_reg[VI_STATUS_REG] != (uint32_t)(src >> 32))
             {
-                _vi_reg[VI_STATUS_REG] = ((uint32_t)(*src >> 32));
+                _vi_reg[VI_STATUS_REG] = ((uint32_t)(src >> 32));
                 if (Bus::plugins->gfx()->ViStatusChanged != nullptr) { Bus::plugins->gfx()->ViStatusChanged(); }
             }
-            _vi_reg[VI_ORIGIN_REG] = (uint32_t)(*src & 0xFFFFFFFF);
+            _vi_reg[VI_ORIGIN_REG] = (uint32_t)(src & 0xFFFFFFFF);
             return;
             break;
         case 0x8:
-            if (_vi_reg[VI_WIDTH_REG] != (uint32_t)(*src >> 32))
+            if (_vi_reg[VI_WIDTH_REG] != (uint32_t)(src >> 32))
             {
-                _vi_reg[VI_WIDTH_REG] = ((uint32_t)(*src >> 32));
+                _vi_reg[VI_WIDTH_REG] = ((uint32_t)(src >> 32));
                 if (Bus::plugins->gfx()->ViWidthChanged != nullptr) { Bus::plugins->gfx()->ViWidthChanged(); }
             }
-            _vi_reg[VI_INTR_REG] = (uint32_t)(*src & 0xFFFFFFFF);
+            _vi_reg[VI_INTR_REG] = (uint32_t)(src & 0xFFFFFFFF);
             return;
             break;
         case 0x10:
             _mi_reg[MI_INTR_REG] &= ~0x8;
             Bus::interrupt->check_interrupt();
-            _vi_reg[VI_BURST_REG] = (uint32_t)(*src & 0xFFFFFFFF);
+            _vi_reg[VI_BURST_REG] = (uint32_t)(src & 0xFFFFFFFF);
             return;
             break;
         }
-        *readvi_table[addr_low] = (uint32_t)(*src >> 32);
-        *readvi_table[addr_low + 4] = (uint32_t)(*src & 0xFFFFFFFF);
+        *readvi_table[addr_low] = (uint32_t)(src >> 32);
+        *readvi_table[addr_low + 4] = (uint32_t)(src & 0xFFFFFFFF);
     }
         break;
     case SIZE_HWORD:
@@ -1380,7 +1378,7 @@ void MPMemory::write_vi(uint32_t& address, uint64_t* src, DataSize size)
         case 0x2:
             temp = _vi_reg[VI_STATUS_REG];
             *((uint16_t*)((uint8_t*)&temp
-                + (HES(addr_low & 3)))) = (uint16_t)*src;
+                + (HES(addr_low & 3)))) = (uint16_t)src;
             if (_vi_reg[VI_STATUS_REG] != temp)
             {
                 _vi_reg[VI_STATUS_REG] = (temp);
@@ -1392,7 +1390,7 @@ void MPMemory::write_vi(uint32_t& address, uint64_t* src, DataSize size)
         case 0xa:
             temp = _vi_reg[VI_STATUS_REG];
             *((uint16_t*)((uint8_t*)&temp
-                + (HES(addr_low & 3)))) = (uint16_t)*src;
+                + (HES(addr_low & 3)))) = (uint16_t)src;
             if (_vi_reg[VI_WIDTH_REG] != temp)
             {
                 _vi_reg[VI_WIDTH_REG] = (temp);
@@ -1408,7 +1406,7 @@ void MPMemory::write_vi(uint32_t& address, uint64_t* src, DataSize size)
             break;
         }
         *((uint16_t*)((uint8_t*)readvi_table[addr_low & 0xfffc]
-            + (HES(addr_low & 3)))) = (uint16_t)*src;
+            + (HES(addr_low & 3)))) = (uint16_t)src;
     }
         break;
     case SIZE_BYTE:
@@ -1422,7 +1420,7 @@ void MPMemory::write_vi(uint32_t& address, uint64_t* src, DataSize size)
         case 0x3:
             temp = _vi_reg[VI_STATUS_REG];
             *((uint8_t*)&temp
-                + (BES(addr_low & 3))) = (uint8_t)*src;
+                + (BES(addr_low & 3))) = (uint8_t)src;
             if (_vi_reg[VI_STATUS_REG] != temp)
             {
                 _vi_reg[VI_STATUS_REG] = (temp);
@@ -1436,7 +1434,7 @@ void MPMemory::write_vi(uint32_t& address, uint64_t* src, DataSize size)
         case 0xb:
             temp = _vi_reg[VI_STATUS_REG];
             *((uint8_t*)&temp
-                + (BES(addr_low & 3))) = (uint8_t)*src;
+                + (BES(addr_low & 3))) = (uint8_t)src;
             if (_vi_reg[VI_WIDTH_REG] != temp)
             {
                 _vi_reg[VI_WIDTH_REG] = (temp);
@@ -1454,13 +1452,13 @@ void MPMemory::write_vi(uint32_t& address, uint64_t* src, DataSize size)
             break;
         }
         *((uint8_t*)readvi_table[addr_low & 0xfffc]
-            + (BES(addr_low & 3))) = (uint8_t)*src;
+            + (BES(addr_low & 3))) = (uint8_t)src;
     }
         break;
     }
 }
 
-void MPMemory::write_ai(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_ai(uint32_t address, uint64_t src, DataSize size)
 {
     uint32_t addr_low = address & 0xffff;
 
@@ -1472,7 +1470,7 @@ void MPMemory::write_ai(uint32_t& address, uint64_t* src, DataSize size)
         switch (addr_low)
         {
         case 0x4:
-            _ai_reg[AI_LEN_REG] = (uint32_t)*src;
+            _ai_reg[AI_LEN_REG] = (uint32_t)src;
             if (Bus::plugins->audio()->LenChanged != nullptr) { Bus::plugins->audio()->LenChanged(); }
 
             freq = Bus::rom->getAiDACRate() / (_ai_reg[AI_DACRATE_REG] + 1);
@@ -1501,15 +1499,15 @@ void MPMemory::write_ai(uint32_t& address, uint64_t* src, DataSize size)
             return;
             break;
         case 0x10:
-            if (_ai_reg[AI_DACRATE_REG] != (uint32_t)*src)
+            if (_ai_reg[AI_DACRATE_REG] != (uint32_t)src)
             {
-                _ai_reg[AI_DACRATE_REG] = (uint32_t)*src;
+                _ai_reg[AI_DACRATE_REG] = (uint32_t)src;
                 Bus::plugins->audio()->DacrateChanged(Bus::rom->getSystemType());
             }
             return;
             break;
         }
-        *readai_table[addr_low] = (uint32_t)*src;
+        *readai_table[addr_low] = (uint32_t)src;
     }
         break;
     case SIZE_DWORD:
@@ -1518,8 +1516,8 @@ void MPMemory::write_ai(uint32_t& address, uint64_t* src, DataSize size)
         switch (addr_low)
         {
         case 0x0:
-            _ai_reg[AI_DRAM_ADDR_REG] = (uint32_t)(*src >> 32);
-            _ai_reg[AI_LEN_REG] = (uint32_t)(*src & 0xFFFFFFFF);
+            _ai_reg[AI_DRAM_ADDR_REG] = (uint32_t)(src >> 32);
+            _ai_reg[AI_LEN_REG] = (uint32_t)(src & 0xFFFFFFFF);
             if (Bus::plugins->audio()->LenChanged != nullptr) { Bus::plugins->audio()->LenChanged(); }
 
             delay = (uint32_t)(((uint64_t)_ai_reg[AI_LEN_REG] * (_ai_reg[AI_DACRATE_REG] + 1) *
@@ -1542,23 +1540,23 @@ void MPMemory::write_ai(uint32_t& address, uint64_t* src, DataSize size)
             return;
             break;
         case 0x8:
-            _ai_reg[AI_CONTROL_REG] = (uint32_t)(*src >> 32);
+            _ai_reg[AI_CONTROL_REG] = (uint32_t)(src >> 32);
             _mi_reg[MI_INTR_REG] &= ~0x4;
             Bus::interrupt->check_interrupt();
             return;
             break;
         case 0x10:
-            if (_ai_reg[AI_DACRATE_REG] != (uint32_t)(*src >> 32))
+            if (_ai_reg[AI_DACRATE_REG] != (uint32_t)(src >> 32))
             {
-                _ai_reg[AI_DACRATE_REG] = (uint32_t)(*src >> 32);
+                _ai_reg[AI_DACRATE_REG] = (uint32_t)(src >> 32);
                 Bus::plugins->audio()->DacrateChanged(Bus::rom->getSystemType());
             }
-            _ai_reg[AI_BITRATE_REG] = (uint32_t)(*src & 0xFFFFFFFF);
+            _ai_reg[AI_BITRATE_REG] = (uint32_t)(src & 0xFFFFFFFF);
             return;
             break;
         }
-        *readai_table[addr_low] = (uint32_t)(*src >> 32);
-        *readai_table[addr_low + 4] = (uint32_t)(*src & 0xFFFFFFFF);
+        *readai_table[addr_low] = (uint32_t)(src >> 32);
+        *readai_table[addr_low + 4] = (uint32_t)(src & 0xFFFFFFFF);
     }
         break;
     case SIZE_HWORD:
@@ -1571,7 +1569,7 @@ void MPMemory::write_ai(uint32_t& address, uint64_t* src, DataSize size)
         case 0x6:
             temp = _ai_reg[AI_LEN_REG];
             *((uint16_t*)((uint8_t*)&temp
-                + (HES(addr_low & 3)))) = (uint16_t)*src;
+                + (HES(addr_low & 3)))) = (uint16_t)src;
             _ai_reg[AI_LEN_REG] = temp;
             if (Bus::plugins->audio()->LenChanged != nullptr) { Bus::plugins->audio()->LenChanged(); }
 
@@ -1604,7 +1602,7 @@ void MPMemory::write_ai(uint32_t& address, uint64_t* src, DataSize size)
         case 0x12:
             temp = _ai_reg[AI_DACRATE_REG];
             *((uint16_t*)((uint8_t*)&temp
-                + (HES(addr_low & 3)))) = (uint16_t)*src;
+                + (HES(addr_low & 3)))) = (uint16_t)src;
             if (_ai_reg[AI_DACRATE_REG] != temp)
             {
                 _ai_reg[AI_DACRATE_REG] = temp;
@@ -1614,7 +1612,7 @@ void MPMemory::write_ai(uint32_t& address, uint64_t* src, DataSize size)
             break;
         }
         *((uint16_t*)((uint8_t*)readai_table[addr_low & 0xfffc]
-            + (HES(addr_low & 3)))) = (uint16_t)*src;
+            + (HES(addr_low & 3)))) = (uint16_t)src;
     }
         break;
     case SIZE_BYTE:
@@ -1629,7 +1627,7 @@ void MPMemory::write_ai(uint32_t& address, uint64_t* src, DataSize size)
         case 0x7:
             temp = _ai_reg[AI_LEN_REG];
             *((uint8_t*)&temp
-                + (BES(addr_low & 3))) = (uint8_t)*src;
+                + (BES(addr_low & 3))) = (uint8_t)src;
             _ai_reg[AI_LEN_REG] = temp;
             if (Bus::plugins->audio()->LenChanged != nullptr) { Bus::plugins->audio()->LenChanged(); }
 
@@ -1667,7 +1665,7 @@ void MPMemory::write_ai(uint32_t& address, uint64_t* src, DataSize size)
         case 0x13:
             temp = _ai_reg[AI_DACRATE_REG];
             *((uint8_t*)&temp
-                + (BES(addr_low & 3))) = (uint8_t)*src;
+                + (BES(addr_low & 3))) = (uint8_t)src;
             if (_ai_reg[AI_DACRATE_REG] != temp)
             {
                 _ai_reg[AI_DACRATE_REG] = temp;
@@ -1677,13 +1675,13 @@ void MPMemory::write_ai(uint32_t& address, uint64_t* src, DataSize size)
             break;
         }
         *((uint8_t*)readai_table[addr_low & 0xfffc]
-            + (BES(addr_low & 3))) = (uint8_t)*src;
+            + (BES(addr_low & 3))) = (uint8_t)src;
     }
         break;
     }
 }
 
-void MPMemory::write_pi(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_pi(uint32_t address, uint64_t src, DataSize size)
 {
     uint32_t addr_low = address & 0xffff;
 
@@ -1694,17 +1692,17 @@ void MPMemory::write_pi(uint32_t& address, uint64_t* src, DataSize size)
         switch (addr_low)
         {
         case 0x8:
-            _pi_reg[PI_RD_LEN_REG] = (uint32_t)*src;
+            _pi_reg[PI_RD_LEN_REG] = (uint32_t)src;
             DMA::readPI();
             return;
             break;
         case 0xc:
-            _pi_reg[PI_WR_LEN_REG] = (uint32_t)*src;
+            _pi_reg[PI_WR_LEN_REG] = (uint32_t)src;
             DMA::writePI();
             return;
             break;
         case 0x10:
-            if (((uint32_t)*src) & 2)
+            if (((uint32_t)src) & 2)
             {
                 _mi_reg[MI_INTR_REG] &= ~0x10;
                 Bus::interrupt->check_interrupt();
@@ -1719,12 +1717,12 @@ void MPMemory::write_pi(uint32_t& address, uint64_t* src, DataSize size)
         case 0x28:
         case 0x2c:
         case 0x30:
-            *readpi_table[addr_low] = ((uint32_t)*src) & 0xFF;
+            *readpi_table[addr_low] = ((uint32_t)src) & 0xFF;
             return;
             break;
         }
 
-        *readpi_table[addr_low] = (uint32_t)*src;
+        *readpi_table[addr_low] = (uint32_t)src;
     }
         break;
     case SIZE_DWORD:
@@ -1732,33 +1730,33 @@ void MPMemory::write_pi(uint32_t& address, uint64_t* src, DataSize size)
         switch (addr_low)
         {
         case 0x8:
-            _pi_reg[PI_RD_LEN_REG] = (uint32_t)(*src >> 32);
+            _pi_reg[PI_RD_LEN_REG] = (uint32_t)(src >> 32);
             DMA::readPI();
-            _pi_reg[PI_WR_LEN_REG] = (uint32_t)(*src & 0xFFFFFFFF);
+            _pi_reg[PI_WR_LEN_REG] = (uint32_t)(src & 0xFFFFFFFF);
             DMA::writePI();
             return;
             break;
         case 0x10:
-            if ((uint32_t)*src)
+            if ((uint32_t)src)
             {
                 _mi_reg[MI_INTR_REG] &= ~0x10;
                 Bus::interrupt->check_interrupt();
             }
-            *readpi_table[addr_low + 4] = (uint32_t)(*src & 0xFF);
+            *readpi_table[addr_low + 4] = (uint32_t)(src & 0xFF);
             return;
             break;
         case 0x18:
         case 0x20:
         case 0x28:
         case 0x30:
-            *readpi_table[addr_low] = (uint32_t)(*src >> 32) & 0xFF;
-            *readpi_table[addr_low + 4] = (uint32_t)(*src & 0xFF);
+            *readpi_table[addr_low] = (uint32_t)(src >> 32) & 0xFF;
+            *readpi_table[addr_low + 4] = (uint32_t)(src & 0xFF);
             return;
             break;
         }
 
-        *readpi_table[addr_low] = (uint32_t)(*src >> 32);
-        *readpi_table[addr_low + 4] = (uint32_t)(*src & 0xFFFFFFFF);
+        *readpi_table[addr_low] = (uint32_t)(src >> 32);
+        *readpi_table[addr_low + 4] = (uint32_t)(src & 0xFFFFFFFF);
     }
         break;
     case SIZE_HWORD:
@@ -1768,20 +1766,20 @@ void MPMemory::write_pi(uint32_t& address, uint64_t* src, DataSize size)
         case 0x8:
         case 0xa:
             *((uint16_t*)((uint8_t*)&_pi_reg[PI_RD_LEN_REG]
-                + (HES(addr_low & 3)))) = (uint16_t)*src;
+                + (HES(addr_low & 3)))) = (uint16_t)src;
             DMA::readPI();
             return;
             break;
         case 0xc:
         case 0xe:
             *((uint16_t*)((uint8_t*)&_pi_reg[PI_WR_LEN_REG]
-                + (HES(addr_low & 3)))) = (uint16_t)*src;
+                + (HES(addr_low & 3)))) = (uint16_t)src;
             DMA::writePI();
             return;
             break;
         case 0x10:
         case 0x12:
-            if ((uint32_t)*src)
+            if ((uint32_t)src)
             {
                 _mi_reg[MI_INTR_REG] &= ~0x10;
                 Bus::interrupt->check_interrupt();
@@ -1797,7 +1795,7 @@ void MPMemory::write_pi(uint32_t& address, uint64_t* src, DataSize size)
         case 0x2e:
         case 0x32:
             *((uint16_t*)((uint8_t*)readpi_table[addr_low & 0xfffc]
-                + (HES(addr_low & 3)))) = ((uint16_t)*src) & 0xFF;
+                + (HES(addr_low & 3)))) = ((uint16_t)src) & 0xFF;
             return;
             break;
         case 0x14:
@@ -1813,7 +1811,7 @@ void MPMemory::write_pi(uint32_t& address, uint64_t* src, DataSize size)
         }
 
         *((uint16_t*)((uint8_t*)readpi_table[addr_low & 0xfffc]
-            + (HES(addr_low & 3)))) = (uint16_t)*src;
+            + (HES(addr_low & 3)))) = (uint16_t)src;
     }
         break;
     case SIZE_BYTE:
@@ -1825,7 +1823,7 @@ void MPMemory::write_pi(uint32_t& address, uint64_t* src, DataSize size)
         case 0xa:
         case 0xb:
             *((uint8_t*)&_pi_reg[PI_RD_LEN_REG]
-                + (BES(addr_low & 3))) = (uint8_t)*src;
+                + (BES(addr_low & 3))) = (uint8_t)src;
             DMA::readPI();
             return;
             break;
@@ -1834,7 +1832,7 @@ void MPMemory::write_pi(uint32_t& address, uint64_t* src, DataSize size)
         case 0xe:
         case 0xf:
             *((uint8_t*)&_pi_reg[PI_WR_LEN_REG]
-                + (BES(addr_low & 3))) = (uint8_t)*src;
+                + (BES(addr_low & 3))) = (uint8_t)src;
             DMA::writePI();
             return;
             break;
@@ -1842,7 +1840,7 @@ void MPMemory::write_pi(uint32_t& address, uint64_t* src, DataSize size)
         case 0x11:
         case 0x12:
         case 0x13:
-            if ((uint32_t)*src)
+            if ((uint32_t)src)
             {
                 _mi_reg[MI_INTR_REG] &= ~0x10;
                 Bus::interrupt->check_interrupt();
@@ -1878,37 +1876,37 @@ void MPMemory::write_pi(uint32_t& address, uint64_t* src, DataSize size)
         }
 
         *((uint8_t*)readpi_table[addr_low & 0xfffc]
-            + (BES(addr_low & 3))) = (uint8_t)*src;
+            + (BES(addr_low & 3))) = (uint8_t)src;
     }
         break;
     }
 }
 
-void MPMemory::write_ri(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_ri(uint32_t address, uint64_t src, DataSize size)
 {
     uint32_t addr_low = address & 0xffff;
 
     switch (size)
     {
     case SIZE_WORD:
-        *readri_table[addr_low] = (uint32_t)*src;
+        *readri_table[addr_low] = (uint32_t)src;
         break;
     case SIZE_DWORD:
-        *readri_table[addr_low] = (uint32_t)(*src >> 32);
-        *readri_table[addr_low + 4] = (uint32_t)(*src & 0xFFFFFFFF);
+        *readri_table[addr_low] = (uint32_t)(src >> 32);
+        *readri_table[addr_low + 4] = (uint32_t)(src & 0xFFFFFFFF);
         break;
     case SIZE_HWORD:
         *((uint16_t*)((uint8_t*)readri_table[addr_low & 0xfffc]
-            + (HES(addr_low & 3)))) = (uint16_t)*src;
+            + (HES(addr_low & 3)))) = (uint16_t)src;
         break;
     case SIZE_BYTE:
         *((uint8_t*)readri_table[addr_low & 0xfffc]
-            + (BES(addr_low & 3))) = (uint8_t)*src;
+            + (BES(addr_low & 3))) = (uint8_t)src;
         break;
     }
 }
 
-void MPMemory::write_si(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_si(uint32_t address, uint64_t src, DataSize size)
 {
     uint32_t addr_low = address & 0xffff;
 
@@ -1919,16 +1917,16 @@ void MPMemory::write_si(uint32_t& address, uint64_t* src, DataSize size)
         switch (addr_low)
         {
         case 0x0:
-            _si_reg[SI_DRAM_ADDR_REG] = (uint32_t)*src;
+            _si_reg[SI_DRAM_ADDR_REG] = (uint32_t)src;
             return;
             break;
         case 0x4:
-            _si_reg[SI_PIF_ADDR_RD64B_REG] = (uint32_t)*src;
+            _si_reg[SI_PIF_ADDR_RD64B_REG] = (uint32_t)src;
             DMA::readSI();
             return;
             break;
         case 0x10:
-            _si_reg[SI_PIF_ADDR_WR64B_REG] = (uint32_t)*src;
+            _si_reg[SI_PIF_ADDR_WR64B_REG] = (uint32_t)src;
             DMA::writeSI();
             return;
             break;
@@ -1946,13 +1944,13 @@ void MPMemory::write_si(uint32_t& address, uint64_t* src, DataSize size)
         switch (addr_low)
         {
         case 0x0:
-            _si_reg[SI_DRAM_ADDR_REG] = (uint32_t)(*src >> 32);
-            _si_reg[SI_PIF_ADDR_RD64B_REG] = (uint32_t)(*src & 0xFFFFFFFF);
+            _si_reg[SI_DRAM_ADDR_REG] = (uint32_t)(src >> 32);
+            _si_reg[SI_PIF_ADDR_RD64B_REG] = (uint32_t)(src & 0xFFFFFFFF);
             DMA::readSI();
             return;
             break;
         case 0x10:
-            _si_reg[SI_PIF_ADDR_WR64B_REG] = (uint32_t)(*src >> 32);
+            _si_reg[SI_PIF_ADDR_WR64B_REG] = (uint32_t)(src >> 32);
             DMA::writeSI();
             return;
             break;
@@ -1972,20 +1970,20 @@ void MPMemory::write_si(uint32_t& address, uint64_t* src, DataSize size)
         case 0x0:
         case 0x2:
             *((uint16_t*)((uint8_t*)&_si_reg[SI_DRAM_ADDR_REG]
-                + (HES(addr_low & 3)))) = (uint16_t)*src;
+                + (HES(addr_low & 3)))) = (uint16_t)src;
             return;
             break;
         case 0x4:
         case 0x6:
             *((uint16_t*)((uint8_t*)&_si_reg[SI_PIF_ADDR_RD64B_REG]
-                + (HES(addr_low & 3)))) = (uint16_t)*src;
+                + (HES(addr_low & 3)))) = (uint16_t)src;
             DMA::readSI();
             return;
             break;
         case 0x10:
         case 0x12:
             *((uint16_t*)((uint8_t*)&_si_reg[SI_PIF_ADDR_WR64B_REG]
-                + (HES(addr_low & 3)))) = (uint16_t)*src;
+                + (HES(addr_low & 3)))) = (uint16_t)src;
             DMA::writeSI();
             return;
             break;
@@ -2008,7 +2006,7 @@ void MPMemory::write_si(uint32_t& address, uint64_t* src, DataSize size)
         case 0x2:
         case 0x3:
             *((uint8_t*)&_si_reg[SI_DRAM_ADDR_REG]
-                + (BES(addr_low & 3))) = (uint8_t)*src;
+                + (BES(addr_low & 3))) = (uint8_t)src;
             return;
             break;
         case 0x4:
@@ -2016,7 +2014,7 @@ void MPMemory::write_si(uint32_t& address, uint64_t* src, DataSize size)
         case 0x6:
         case 0x7:
             *((uint8_t*)&_si_reg[SI_PIF_ADDR_RD64B_REG]
-                + (BES(addr_low & 3))) = (uint8_t)*src;
+                + (BES(addr_low & 3))) = (uint8_t)src;
             DMA::readSI();
             return;
             break;
@@ -2025,7 +2023,7 @@ void MPMemory::write_si(uint32_t& address, uint64_t* src, DataSize size)
         case 0x12:
         case 0x13:
             *((uint8_t*)&_si_reg[SI_PIF_ADDR_WR64B_REG]
-                + (BES(addr_low & 3))) = (uint8_t)*src;
+                + (BES(addr_low & 3))) = (uint8_t)src;
             DMA::writeSI();
             return;
             break;
@@ -2044,11 +2042,11 @@ void MPMemory::write_si(uint32_t& address, uint64_t* src, DataSize size)
     }
 }
 
-void MPMemory::write_flashram_dummy(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_flashram_dummy(uint32_t address, uint64_t src, DataSize size)
 {
 }
 
-void MPMemory::write_flashram_command(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_flashram_command(uint32_t address, uint64_t src, DataSize size)
 {
     if (size != SIZE_WORD)
     {
@@ -2063,7 +2061,7 @@ void MPMemory::write_flashram_command(uint32_t& address, uint64_t* src, DataSize
 
     if (Bus::rom->getSaveType() == SAVETYPE_FLASH_RAM && !(address & 0xffff))
     {
-        Bus::flashram->writeFlashCommand((uint32_t)*src);
+        Bus::flashram->writeFlashCommand((uint32_t)src);
     }
     else
     {
@@ -2071,15 +2069,15 @@ void MPMemory::write_flashram_command(uint32_t& address, uint64_t* src, DataSize
     }
 }
 
-void MPMemory::write_rom(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_rom(uint32_t address, uint64_t src, DataSize size)
 {
     if (size == SIZE_WORD)
     {
-        _rom_lastwrite = (uint32_t)*src;
+        _rom_lastwrite = (uint32_t)src;
     }
 }
 
-void MPMemory::write_pif(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_pif(uint32_t address, uint64_t src, DataSize size)
 {
     uint32_t addr_low = address & 0xffff;
 
@@ -2093,7 +2091,7 @@ void MPMemory::write_pif(uint32_t& address, uint64_t* src, DataSize size)
             return;
         }
 
-        *((uint32_t*)(Bus::pif_ram8 + (address & 0x7FF) - 0x7C0)) = byteswap_u32((uint32_t)*src);
+        *((uint32_t*)(Bus::pif_ram8 + (address & 0x7FF) - 0x7C0)) = byteswap_u32((uint32_t)src);
         if ((address & 0x7FF) == 0x7FC)
         {
             if (Bus::pif_ram8[0x3F] == 0x08)
@@ -2118,9 +2116,9 @@ void MPMemory::write_pif(uint32_t& address, uint64_t* src, DataSize size)
         }
 
         *((uint32_t*)(Bus::pif_ram8 + (address & 0x7FF) - 0x7C0)) =
-            byteswap_u32((uint32_t)(*src >> 32));
+            byteswap_u32((uint32_t)(src >> 32));
         *((uint32_t*)(Bus::pif_ram8 + (address & 0x7FF) - 0x7C0)) = // WTF: shouldn't this be address + 4?????
-            byteswap_u32((uint32_t)(*src & 0xFFFFFFFF));
+            byteswap_u32((uint32_t)(src & 0xFFFFFFFF));
         if ((address & 0x7FF) == 0x7F8)
         {
             if (Bus::pif_ram8[0x3F] == 0x08)
@@ -2144,8 +2142,8 @@ void MPMemory::write_pif(uint32_t& address, uint64_t* src, DataSize size)
             return;
         }
 
-        *(Bus::pif_ram8 + (address & 0x7FF) - 0x7C0) = ((uint16_t)*src) >> 8;
-        *(Bus::pif_ram8 + ((address + 1) & 0x7FF) - 0x7C0) = ((uint16_t)*src) & 0xFF;
+        *(Bus::pif_ram8 + (address & 0x7FF) - 0x7C0) = ((uint16_t)src) >> 8;
+        *(Bus::pif_ram8 + ((address + 1) & 0x7FF) - 0x7C0) = ((uint16_t)src) & 0xFF;
         if ((address & 0x7FF) == 0x7FE)
         {
             if (Bus::pif_ram8[0x3F] == 0x08)
@@ -2167,7 +2165,7 @@ void MPMemory::write_pif(uint32_t& address, uint64_t* src, DataSize size)
             return;
         }
 
-        *(Bus::pif_ram8 + (address & 0x7FF) - 0x7C0) = (uint8_t)*src;
+        *(Bus::pif_ram8 + (address & 0x7FF) - 0x7C0) = (uint8_t)src;
         if ((address & 0x7FF) == 0x7FF)
         {
             if (Bus::pif_ram8[0x3F] == 0x08)
@@ -2185,7 +2183,7 @@ void MPMemory::write_pif(uint32_t& address, uint64_t* src, DataSize size)
 }
 
 
-void MPMemory::write_rdramFB(uint32_t& address, uint64_t* src, DataSize size)
+void MPMemory::write_rdramFB(uint32_t address, uint64_t src, DataSize size)
 {
     for (uint32_t i = 0; i < 6; i++)
     {
@@ -2390,10 +2388,14 @@ void MPMemory::prepare_rsp(void)
         Bus::cpu->getcp0()->update_count();
 
         if (_mi_reg[MI_INTR_REG] & 0x1)
+        {
             Bus::interrupt->add_interrupt_event(SP_INT, 1000);
+        }
 
         if (_mi_reg[MI_INTR_REG] & 0x20)
+        {
             Bus::interrupt->add_interrupt_event(DP_INT, 1000);
+        }
 
         _mi_reg[MI_INTR_REG] &= ~0x21;
         _sp_reg[SP_STATUS_REG] &= ~0x303;
@@ -2452,7 +2454,9 @@ void MPMemory::prepare_rsp(void)
         Bus::cpu->getcp0()->update_count();
 
         if (_mi_reg[MI_INTR_REG] & 0x1)
+        {
             Bus::interrupt->add_interrupt_event(SP_INT, 4000/*500*/);
+        }
 
         _mi_reg[MI_INTR_REG] &= ~0x1;
         _sp_reg[SP_STATUS_REG] &= ~0x303;
@@ -2468,36 +2472,12 @@ void MPMemory::prepare_rsp(void)
         Bus::cpu->getcp0()->update_count();
 
         if (_mi_reg[MI_INTR_REG] & 0x1)
+        {
             Bus::interrupt->add_interrupt_event(SP_INT, 0/*100*/);
+        }
 
         _mi_reg[MI_INTR_REG] &= ~0x1;
         _sp_reg[SP_STATUS_REG] &= ~0x203;
     }
 }
 
-uint32_t* MPMemory::fast_fetch(uint32_t address)
-{
-    if (address < 0x80000000 || address >= 0xc0000000)
-    {
-        address = TLB::virtual_to_physical_address(address, 2);
-    }
-
-    if ((address & 0x1FFFFFFF) >= 0x10000000)
-    {
-        return (uint32_t*)Bus::rom_image + ((address & 0x1FFFFFFF) - 0x10000000) / 4;
-    }
-    else if ((address & 0x1FFFFFFF) < 0x800000)
-    {
-        return (uint32_t *)_rdram + (address & 0x1FFFFFFF) / 4;
-    }
-    else if (address >= 0xa4000000 && address <= 0xa4001000)
-    {
-        return (uint32_t*)_SP_DMEM + (address & 0xFFF) / 4;
-    }
-    else if ((address >= 0xa4001000 && address <= 0xa4002000))
-    {
-        return (uint32_t*)_SP_IMEM + (address & 0xFFF) / 4;
-    }
-    
-    return nullptr;
-}

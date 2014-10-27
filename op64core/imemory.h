@@ -19,7 +19,7 @@ public:
 
     virtual void initialize(void) = 0;
     virtual void readmem(uint32_t& address, uint64_t* dest, DataSize size) = 0;
-    virtual void writemem(uint32_t& address, uint64_t* src, DataSize size) = 0;
+    virtual void writemem(uint32_t address, uint64_t src, DataSize size) = 0;
 
     // shouldn't be using this except with mupen interpreter
     virtual uint32_t* fast_fetch(uint32_t address) = 0;

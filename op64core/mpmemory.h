@@ -3,12 +3,15 @@
 
 #include <cstdint>
 #include "imemory.h"
+#include "bus.h"
+#include "tlb.h"
 
 
 class MPMemory : public IMemory
 {
 
-    typedef void(MPMemory::*memptr)(uint32_t&, uint64_t*, DataSize);
+    typedef void(MPMemory::*memptr_read)(uint32_t&, uint64_t*, DataSize);
+    typedef void(MPMemory::*memptr_write)(uint32_t, uint64_t, DataSize);
 
 public:
     virtual void initialize(void);
@@ -18,12 +21,37 @@ public:
         (this->*readmem_table[address >> 16])(address, dest, size);
     }
 
-    inline virtual void writemem(uint32_t& address, uint64_t* src, DataSize size) final
+    void writemem(uint32_t address, uint64_t src, DataSize size)
     {
         (this->*writemem_table[address >> 16])(address, src, size);
     }
 
-    virtual uint32_t* fast_fetch(uint32_t address);
+    inline virtual uint32_t* fast_fetch(uint32_t address) final
+    {
+        if (address < 0x80000000 || address >= 0xc0000000)
+        {
+            address = TLB::virtual_to_physical_address(address, 2);
+        }
+
+        if ((address & 0x1FFFFFFF) >= 0x10000000)
+        {
+            return (uint32_t*)Bus::rom_image + ((address & 0x1FFFFFFF) - 0x10000000) / 4;
+        }
+        else if ((address & 0x1FFFFFFF) < 0x800000)
+        {
+            return (uint32_t *)_rdram + (address & 0x1FFFFFFF) / 4;
+        }
+        else if (address >= 0xa4000000 && address <= 0xa4001000)
+        {
+            return (uint32_t*)_SP_DMEM + (address & 0xFFF) / 4;
+        }
+        else if ((address >= 0xa4001000 && address <= 0xa4002000))
+        {
+            return (uint32_t*)_SP_IMEM + (address & 0xFFF) / 4;
+        }
+
+        return nullptr;
+    }
 
 private:
 
@@ -49,26 +77,26 @@ private:
     void read_rdramFB(uint32_t& address, uint64_t* dest, DataSize size);
 
     // Write functions
-    void write_nomem(uint32_t& address, uint64_t* src, DataSize size);
-    void write_rdram(uint32_t& address, uint64_t* src, DataSize size);
-    void write_nothing(uint32_t& address, uint64_t* src, DataSize size);
-    void write_rdram_reg(uint32_t& address, uint64_t* src, DataSize size);
-    void write_rsp_mem(uint32_t& address, uint64_t* src, DataSize size);
-    void write_rsp_reg(uint32_t& address, uint64_t* src, DataSize size);
-    void write_rsp_stat(uint32_t& address, uint64_t* src, DataSize size);
-    void write_dp(uint32_t& address, uint64_t* src, DataSize size);
-    void write_dps(uint32_t& address, uint64_t* src, DataSize size);
-    void write_mi(uint32_t& address, uint64_t* src, DataSize size);
-    void write_vi(uint32_t& address, uint64_t* src, DataSize size);
-    void write_ai(uint32_t& address, uint64_t* src, DataSize size);
-    void write_pi(uint32_t& address, uint64_t* src, DataSize size);
-    void write_ri(uint32_t& address, uint64_t* src, DataSize size);
-    void write_si(uint32_t& address, uint64_t* src, DataSize size);
-    void write_flashram_dummy(uint32_t& address, uint64_t* src, DataSize size);
-    void write_flashram_command(uint32_t& address, uint64_t* src, DataSize size);
-    void write_rom(uint32_t& address, uint64_t* src, DataSize size);
-    void write_pif(uint32_t& address, uint64_t* src, DataSize size);
-    void write_rdramFB(uint32_t& address, uint64_t* src, DataSize size);
+    void write_nomem(uint32_t address, uint64_t src, DataSize size);
+    void write_rdram(uint32_t address, uint64_t src, DataSize size);
+    void write_nothing(uint32_t address, uint64_t src, DataSize size);
+    void write_rdram_reg(uint32_t address, uint64_t src, DataSize size);
+    void write_rsp_mem(uint32_t address, uint64_t src, DataSize size);
+    void write_rsp_reg(uint32_t address, uint64_t src, DataSize size);
+    void write_rsp_stat(uint32_t address, uint64_t src, DataSize size);
+    void write_dp(uint32_t address, uint64_t src, DataSize size);
+    void write_dps(uint32_t address, uint64_t src, DataSize size);
+    void write_mi(uint32_t address, uint64_t src, DataSize size);
+    void write_vi(uint32_t address, uint64_t src, DataSize size);
+    void write_ai(uint32_t address, uint64_t src, DataSize size);
+    void write_pi(uint32_t address, uint64_t src, DataSize size);
+    void write_ri(uint32_t address, uint64_t src, DataSize size);
+    void write_si(uint32_t address, uint64_t src, DataSize size);
+    void write_flashram_dummy(uint32_t address, uint64_t src, DataSize size);
+    void write_flashram_command(uint32_t address, uint64_t src, DataSize size);
+    void write_rom(uint32_t address, uint64_t src, DataSize size);
+    void write_pif(uint32_t address, uint64_t src, DataSize size);
+    void write_rdramFB(uint32_t address, uint64_t src, DataSize size);
 
     // helpers
     void update_MI_init_mode_reg(void);
@@ -78,8 +106,8 @@ private:
 
 private:
 
-    memptr readmem_table[0x10000];
-    memptr writemem_table[0x10000];
+    memptr_read readmem_table[0x10000];
+    memptr_write writemem_table[0x10000];
 
     uint32_t* readvi_table[0x10000];
     uint32_t* readmi_table[0x10000];

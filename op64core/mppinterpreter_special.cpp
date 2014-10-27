@@ -11,21 +11,30 @@
 
 void MPPInterpreter::SLL(void)
 {
-    _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>(((int32_t)_reg[_cur_instr.rt].s) << _cur_instr.sa);
+    if (_cur_instr.rd)
+    {
+        _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>(((int32_t)_reg[_cur_instr.rt].s) << _cur_instr.sa);
+    }
     
     ++_PC;
 }
 
 void MPPInterpreter::SRL(void)
 {
-    _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((uint32_t)_reg[_cur_instr.rt].u >> _cur_instr.sa);
+    if (_cur_instr.rd)
+    {
+        _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((uint32_t)_reg[_cur_instr.rt].u >> _cur_instr.sa);
+    }
     
     ++_PC;
 }
 
 void MPPInterpreter::SRA(void)
 {
-    _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rt].s >> _cur_instr.sa);
+    if (_cur_instr.rd)
+    {
+        _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rt].s >> _cur_instr.sa);
+    }
 
     ++_PC;
 }
@@ -42,14 +51,20 @@ void MPPInterpreter::SLLV(void)
 
 void MPPInterpreter::SRLV(void)
 {
-    _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((uint32_t)_reg[_cur_instr.rt].u >> ((uint32_t)_reg[_cur_instr.rs].u & 0x1F));
+    if (_cur_instr.rd)
+    {
+        _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((uint32_t)_reg[_cur_instr.rt].u >> ((uint32_t)_reg[_cur_instr.rs].u & 0x1F));
+    }
 
     ++_PC;
 }
 
 void MPPInterpreter::SRAV(void)
 {
-    _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rt].s >> ((uint32_t)_reg[_cur_instr.rs].u & 0x1F));
+    if (_cur_instr.rd)
+    {
+        _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rt].s >> ((uint32_t)_reg[_cur_instr.rs].u & 0x1F));
+    }
 
     ++_PC;
 }
@@ -57,25 +72,15 @@ void MPPInterpreter::SRAV(void)
 void MPPInterpreter::JR(void)
 {
     //DECLARE_JUMP(JR,   irs32, 1, &reg[0],    0, 0)
-    DO_JUMP(
-        (uint32_t)_reg[_cur_instr.rs].u,
-        true,
-        &_reg[0],
-        false,
-        false
-        );
+
+    generic_jump((uint32_t)_reg[_cur_instr.rs].u, true, &_reg[0], false, false);
 }
 
 void MPPInterpreter::JALR(void)
 {
     // DECLARE_JUMP(JALR, irs32, 1, PC->f.r.rd, 0, 0)
-    DO_JUMP(
-        (uint32_t)_reg[_cur_instr.rs].u,
-        true,
-        &_reg[_cur_instr.rd],
-        false,
-        false
-        );
+
+    generic_jump((uint32_t)_reg[_cur_instr.rs].u, true, &_reg[_cur_instr.rd], false, false);
 }
 
 void MPPInterpreter::SYSCALL(void)
@@ -144,7 +149,7 @@ void MPPInterpreter::MULT(void)
 {
     int64_t result = (int64_t)((int32_t)_reg[_cur_instr.rs].s * (int64_t)((int32_t)_reg[_cur_instr.rt].s));
     _hi.s = signextend<int32_t, int64_t>(result >> 32);
-    _lo.s = signextend<int32_t, int64_t>(result);
+    _lo.s = signextend<int32_t, int64_t>((int32_t)result);
     ++_PC;
 }
 
@@ -152,7 +157,7 @@ void MPPInterpreter::MULTU(void)
 {
     uint64_t result = (uint64_t)((uint32_t)_reg[_cur_instr.rs].u * (uint64_t)((uint32_t)_reg[_cur_instr.rt].u));
     _hi.s = signextend<int32_t, int64_t>(result >> 32);
-    _lo.s = signextend<int32_t, int64_t>(result);
+    _lo.s = signextend<int32_t, int64_t>((int32_t)result);
     ++_PC;
 }
 
@@ -304,28 +309,40 @@ void MPPInterpreter::SUBU(void)
 
 void MPPInterpreter::AND(void)
 {
-    _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s & _reg[_cur_instr.rt].s;
+    if (_cur_instr.rd)
+    {
+        _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s & _reg[_cur_instr.rt].s;
+    }
 
     ++_PC;
 }
 
 void MPPInterpreter::OR(void)
 {
-    _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s | _reg[_cur_instr.rt].s;
+    if (_cur_instr.rd)
+    {
+        _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s | _reg[_cur_instr.rt].s;
+    }
     
     ++_PC;
 }
 
 void MPPInterpreter::XOR(void)
 {
-    _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s ^ _reg[_cur_instr.rt].s;
+    if (_cur_instr.rd)
+    {
+        _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s ^ _reg[_cur_instr.rt].s;
+    }
     
     ++_PC;
 }
 
 void MPPInterpreter::NOR(void)
 {
-    _reg[_cur_instr.rd].s = ~(_reg[_cur_instr.rs].s | _reg[_cur_instr.rt].s);
+    if (_cur_instr.rd)
+    {
+        _reg[_cur_instr.rd].s = ~(_reg[_cur_instr.rs].s | _reg[_cur_instr.rt].s);
+    }
 
     ++_PC;
 }

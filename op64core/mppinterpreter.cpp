@@ -2,13 +2,10 @@
 #include <cstdint>
 
 #include "mppinterpreter.h"
-#include "bus.h"
 #include "cp0.h"
 #include "cp1.h"
 #include "rom.h"
 #include "interrupthandler.h"
-#include "imemory.h"
-#include "logger.h"
 #include "util.h"
 #include "tlb.h"
 
@@ -310,29 +307,6 @@ void MPPInterpreter::execute(void)
     }
 }
 
-void MPPInterpreter::prefetch(void)
-{
-    uint32_t* mem = Bus::mem->fast_fetch(_PC);
-    if (nullptr != mem)
-    {
-        prefetch_opcode(mem[0], mem[1]);
-    }
-    else
-    {
-        char buf[250];
-        sprintf_s(buf, "prefetch execution address %x not found. Stopping...\n", _PC);
-        LOG(buf);
-        Bus::stop = true;
-    }
-
-}
-
-void MPPInterpreter::prefetch_opcode(uint32_t op, uint32_t nextop)
-{
-    _check_nop = (nextop == 0);
-    _cur_instr.code = op;
-}
-
 void MPPInterpreter::SPECIAL(void)
 {
     (this->*special_table[_cur_instr.func])();
@@ -347,7 +321,7 @@ void MPPInterpreter::J(void)
 {
     // DECLARE_JUMP(J,   (PC->f.j.inst_index<<2) | ((PCADDR+4) & 0xF0000000), 1, &reg[0],  0, 0)
     DO_JUMP(
-        (_cur_instr.target << 2) | (((uint32_t)_PC + 4) & 0xF0000000),
+        ((_cur_instr.target << 2) | (((uint32_t)_PC + 4) & 0xF0000000)),
         true,
         &_reg[0],
         false,
@@ -359,7 +333,7 @@ void MPPInterpreter::JAL(void)
 {
     // DECLARE_JUMP(JAL, (PC->f.j.inst_index<<2) | ((PCADDR+4) & 0xF0000000), 1, &reg[31], 0, 0)
     DO_JUMP(
-        (_cur_instr.target << 2) | (((uint32_t)_PC + 4) & 0xF0000000),
+        ((_cur_instr.target << 2) | (((uint32_t)_PC + 4) & 0xF0000000)),
         true,
         &_reg[31],
         false,
@@ -427,7 +401,10 @@ void MPPInterpreter::ADDI(void)
 
 void MPPInterpreter::ADDIU(void)
 {
-    _reg[_cur_instr.rt].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rs].s + signextend<int16_t, int32_t>(_cur_instr.immediate));
+    if (_cur_instr.rt)
+    {
+        _reg[_cur_instr.rt].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rs].s + signextend<int16_t, int32_t>(_cur_instr.immediate));
+    }
 
     ++_PC;
 }
@@ -568,7 +545,10 @@ void MPPInterpreter::DADDI(void)
 
 void MPPInterpreter::DADDIU(void)
 {
-    _reg[_cur_instr.rt].s = _reg[_cur_instr.rs].s + signextend<int16_t, int64_t>(_cur_instr.immediate);
+    if (_cur_instr.rt)
+    {
+        _reg[_cur_instr.rt].s = _reg[_cur_instr.rs].s + signextend<int16_t, int64_t>(_cur_instr.immediate);
+    }
 
     ++_PC;
 }
@@ -588,13 +568,12 @@ void MPPInterpreter::LB(void)
     if (_cur_instr.rt)
     {
         uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
-        uint64_t* dest = &_reg[_cur_instr.rt].u;
 
-        Bus::mem->readmem(addr, dest, SIZE_BYTE);
+        Bus::mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_BYTE);
 
         if (addr)
         {
-            _reg[_cur_instr.rt].s = signextend<int8_t, int64_t>((int8_t)*dest);
+            _reg[_cur_instr.rt].s = signextend<int8_t, int64_t>((int8_t)_reg[_cur_instr.rt].s);
         }
     }
     ++_PC;
@@ -602,16 +581,17 @@ void MPPInterpreter::LB(void)
 
 void MPPInterpreter::LH(void)
 {
-    uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
-    uint64_t* dest = &_reg[_cur_instr.rt].u;
-
-    Bus::mem->readmem(addr, dest, SIZE_HWORD);
-
-    if (addr)
+    if (_cur_instr.rt)
     {
-        _reg[_cur_instr.rt].s = signextend<int16_t, int64_t>((int16_t)*dest);
-    }
+        uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
 
+        Bus::mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_HWORD);
+
+        if (addr)
+        {
+            _reg[_cur_instr.rt].s = signextend<int16_t, int64_t>((int16_t)_reg[_cur_instr.rt].s);
+        }
+    }
     ++_PC;
 }
 
@@ -628,7 +608,7 @@ void MPPInterpreter::LWL(void)
     if (masked_addr)
     {
         _reg[_cur_instr.rt].s = ((int32_t)_reg[_cur_instr.rt].s & LWL_MASK[offset]);
-        _reg[_cur_instr.rt].s += ((int32_t)value << LWL_SHIFT[offset]);
+        _reg[_cur_instr.rt].s += (signextend<int32_t, int64_t>((int32_t)value) << LWL_SHIFT[offset]);
     }
 }
 
@@ -637,13 +617,12 @@ void MPPInterpreter::LW(void)
     if (_cur_instr.rt)
     {
         uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
-        uint64_t* dest = &_reg[_cur_instr.rt].u;
 
-        Bus::mem->readmem(addr, dest, SIZE_WORD);
+        Bus::mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_WORD);
 
         if (addr)
         {
-            _reg[_cur_instr.rt].s = signextend<int32_t, int64_t>((int32_t)*dest);
+            _reg[_cur_instr.rt].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rt].s);
         }
     }
     ++_PC;
@@ -654,9 +633,8 @@ void MPPInterpreter::LBU(void)
     if (_cur_instr.rt)
     {
         uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
-	    uint64_t* dest = &_reg[_cur_instr.rt].u;
 	
-        Bus::mem->readmem(addr, dest, SIZE_BYTE);
+        Bus::mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_BYTE);
     }
     ++_PC;
 }
@@ -666,9 +644,8 @@ void MPPInterpreter::LHU(void)
     if (_cur_instr.rt)
     {
         uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
-        uint64_t* dest = &_reg[_cur_instr.rt].u;
 
-        Bus::mem->readmem(addr, dest, SIZE_HWORD);
+        Bus::mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_HWORD);
     }
     ++_PC;
 }
@@ -695,31 +672,24 @@ void MPPInterpreter::LWU(void)
     if (_cur_instr.rt)
     {
         uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
-        uint64_t* dest = &_reg[_cur_instr.rt].u;
 
-        Bus::mem->readmem(addr, dest, SIZE_WORD);
+        Bus::mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_WORD);
     }
     ++_PC;
 }
 
 void MPPInterpreter::SB(void)
 {
-    uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
-    uint64_t* src = &_reg[_cur_instr.rt].u;
     ++_PC;
 
-    uint64_t data = (uint8_t)(*src & 0xFF);
-    Bus::mem->writemem(addr, &data, SIZE_BYTE);
+    Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), (uint8_t)(_reg[_cur_instr.rt].u & 0xFF), SIZE_BYTE);
 }
 
 void MPPInterpreter::SH(void)
 {
-    uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
-    uint64_t* src = &_reg[_cur_instr.rt].u;
     ++_PC;
 
-    uint64_t data = (uint16_t)(*src & 0xFFFF);
-    Bus::mem->writemem(addr, &data, SIZE_HWORD);
+    Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), (uint16_t)(_reg[_cur_instr.rt].u & 0xFFFF), SIZE_HWORD);
 }
 
 void MPPInterpreter::SWL(void)
@@ -736,18 +706,15 @@ void MPPInterpreter::SWL(void)
         value &= SWL_MASK[offset];
         value += ((uint32_t)_reg[_cur_instr.rt].u >> SWL_SHIFT[offset]);
 
-        Bus::mem->writemem(masked_addr, &value, SIZE_WORD);
+        Bus::mem->writemem(masked_addr, value, SIZE_WORD);
     }
 }
 
 void MPPInterpreter::SW(void)
 {
-    uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
-    uint64_t* src = &_reg[_cur_instr.rt].u;
     ++_PC;
 
-    uint64_t data = (uint32_t)(*src & 0xFFFFFFFF);
-    Bus::mem->writemem(addr, &data, SIZE_WORD);
+    Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), (uint32_t)(_reg[_cur_instr.rt].u & 0xFFFFFFFF), SIZE_WORD);
 }
 
 void MPPInterpreter::SDL(void)
@@ -772,9 +739,9 @@ void MPPInterpreter::SWR(void)
     if (masked_addr)
     {
         value &= SWR_MASK[offset];
-        value += ((uint32_t)_reg[_cur_instr.rt].u << SWR_SHIFT[offset]);
+        value += (_reg[_cur_instr.rt].u << SWR_SHIFT[offset]);
 
-        Bus::mem->writemem(masked_addr, &value, SIZE_WORD);
+        Bus::mem->writemem(masked_addr, value, SIZE_WORD);
     }
 }
 
@@ -790,12 +757,13 @@ void MPPInterpreter::LL(void)
 
 void MPPInterpreter::LWC1(void)
 {
-    uint32_t address = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
-    uint64_t dest = 0;
     if (_cp0->cop1_unusable())
         return;
 
     ++_PC;
+
+    uint32_t address = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
+    uint64_t dest = 0;
 
     Bus::mem->readmem(address, &dest, SIZE_WORD);
 
@@ -812,14 +780,14 @@ void MPPInterpreter::LLD(void)
 
 void MPPInterpreter::LDC1(void)
 {
-    uint32_t address = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
-    uint64_t* dest = (uint64_t*)Bus::d_reg[_cur_instr.ft];
     if (_cp0->cop1_unusable())
         return;
 
     ++_PC;
 
-    Bus::mem->readmem(address, dest, SIZE_DWORD);
+    uint32_t address = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
+
+    Bus::mem->readmem(address, (uint64_t*)Bus::d_reg[_cur_instr.ft], SIZE_DWORD);
 }
 
 void MPPInterpreter::LD(void)
@@ -827,9 +795,8 @@ void MPPInterpreter::LD(void)
     if (_cur_instr.rt)
     {
         uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
-        uint64_t* dest = &_reg[_cur_instr.rt].u;
 
-        Bus::mem->readmem(addr, dest, SIZE_DWORD);
+        Bus::mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_DWORD);
     }
     ++_PC;
 }
@@ -841,14 +808,12 @@ void MPPInterpreter::SC(void)
 
 void MPPInterpreter::SWC1(void)
 {
-    uint32_t address = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
-    uint64_t src = *((int32_t*)Bus::s_reg[_cur_instr.ft]);
     if (_cp0->cop1_unusable())
         return;
 
     ++_PC;
 
-    Bus::mem->writemem(address, &src, SIZE_WORD);
+    Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), *((int32_t*)Bus::s_reg[_cur_instr.ft]), SIZE_WORD);
 }
 
 void MPPInterpreter::SCD(void)
@@ -858,28 +823,23 @@ void MPPInterpreter::SCD(void)
 
 void MPPInterpreter::SDC1(void)
 {
-    uint32_t address = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
-    uint64_t src = *((int64_t*)Bus::d_reg[_cur_instr.ft]);
     if (_cp0->cop1_unusable())
         return;
 
     ++_PC;
 
-    Bus::mem->writemem(address, &src, SIZE_DWORD);
+    Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), *((int64_t*)Bus::d_reg[_cur_instr.ft]), SIZE_DWORD);
 }
 
 void MPPInterpreter::SD(void)
 {
-    uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
-    uint64_t* src = &_reg[_cur_instr.rt].u;
     ++_PC;
 
-    Bus::mem->writemem(addr, src, SIZE_DWORD);
+    Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), _reg[_cur_instr.rt].u, SIZE_DWORD);
 }
 
-void MPPInterpreter::generic_idle(uint32_t destination, bool condition, Register64* link, bool likely, bool cop1)
+void MPPInterpreter::generic_idle(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1)
 {
-    const bool take_jump = condition;
     int32_t skip;
     if (cop1 && _cp0->cop1_unusable())
         return;
@@ -894,28 +854,24 @@ void MPPInterpreter::generic_idle(uint32_t destination, bool condition, Register
         }
         else
         {
-            generic_jump(destination, condition, link, likely, cop1);
+            generic_jump(destination, take_jump, link, likely, cop1);
         }
     }
     else
     {
-        generic_jump(destination, condition, link, likely, cop1);
+        generic_jump(destination, take_jump, link, likely, cop1);
     }
 }
 
-void MPPInterpreter::generic_jump(uint32_t destination, bool condition, Register64* link, bool likely, bool cop1)
+void MPPInterpreter::generic_jump(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1)
 {
-    const bool take_jump = condition;
-    const ProgramCounter jump_target = destination;
-    Register64* link_register = link;
-
     if (cop1 && _cp0->cop1_unusable())
         return;
 
-    if (link_register != &_reg[0])
+    if (link != &_reg[0])
     {
-        (*link_register).s = ((uint32_t)_PC) + 8;
-        (*link_register).s = signextend<int32_t, int64_t>((int32_t)(*link_register).s);
+        (*link).s = ((uint32_t)_PC) + 8;
+        (*link).s = signextend<int32_t, int64_t>((int32_t)(*link).s);
     }
 
     if (!likely || take_jump)
@@ -930,7 +886,7 @@ void MPPInterpreter::generic_jump(uint32_t destination, bool condition, Register
         _delay_slot = false;
         if (take_jump && !_skip_jump)
         {
-            _PC = jump_target;
+            _PC = destination;
         }
     }
     else
