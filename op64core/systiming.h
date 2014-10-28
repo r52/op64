@@ -26,7 +26,6 @@ public:
     void startTimers();
 
     uint64_t doVILimit();
-    void doFreqLimit();
 
     void setLimitMode(LimitMode mode)
     {
@@ -40,5 +39,4 @@ private:
     LimitMode _limitmode;
 
     boost::chrono::high_resolution_clock::time_point _lastVITime;
-    boost::chrono::high_resolution_clock::time_point _lastTick;
 };
