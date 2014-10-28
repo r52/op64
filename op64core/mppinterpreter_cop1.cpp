@@ -259,7 +259,16 @@ void MPPInterpreter::FLOOR_L_S(void)
 
 void MPPInterpreter::ROUND_W_S(void)
 {
-    NOT_IMPLEMENTED();
+    if (_cp0->cop1_unusable())
+        return;
+
+    uint32_t saved_mode = get_rounding();
+
+    set_rounding(ROUND_MODE);
+    *(int32_t*)Bus::s_reg[_cur_instr.fd] = f32_to_i32((float*)Bus::s_reg[_cur_instr.fs]);
+    set_rounding(saved_mode);
+
+    ++_PC;
 }
 
 void MPPInterpreter::TRUNC_W_S(void)
