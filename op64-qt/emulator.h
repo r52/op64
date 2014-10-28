@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <windows.h>
 #include <QObject>
-#include "qwindowdefs.h"
 
 enum EmuState
 {

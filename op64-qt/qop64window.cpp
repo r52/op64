@@ -275,7 +275,7 @@ void QOP64Window::showAboutDialog(void)
         "<br/>"
         "(c) 2014<br/>"
         "Licensed under GPLv2<br/>"
-        "Source code available at <a href=''>GitHub</a>";
+        "Source code available at <a href='https://github.com/r52/op64'>GitHub</a>";
 
     QMessageBox::about(this, tr("About op64"), aboutMsg);
 }
