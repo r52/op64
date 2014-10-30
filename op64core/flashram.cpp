@@ -4,7 +4,7 @@
 #include "logger.h"
 
 
-char emptyBlock[128] = { 0xffu };
+static char emptyBlock[128] = { 0xffu };
 
 FlashRam::FlashRam() :
 _mode(NOPES_MODE),

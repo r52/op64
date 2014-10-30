@@ -11,8 +11,7 @@ enum EmuState
     HARDWARE_INITIALIZED,
     EMU_RUNNING,
     EMU_PAUSED,
-    EMU_STOPPED,
-    HARDWARE_DEINITIALIZED      // dont think this is needed
+    EMU_STOPPED
 };
 
 class Plugins;
@@ -24,12 +23,7 @@ class Emulator : public QObject
     Q_OBJECT
 
 public:
-    static Emulator& getInstance()
-    {
-        static Emulator instance;
-        return instance;
-    }
-
+    Emulator(Plugins* plugins);
     ~Emulator();
 
     // execution
@@ -51,21 +45,25 @@ public slots:
     void setLimitFPS(bool limit);
     void gameHardReset(void);
     void gameSoftReset(void);
-
+    void runEmulator(void);
 
 signals:
     void stateChanged(EmuState newstate);
+    void emulatorFinished(void);
 
 private:
+    // Dont implement
     Emulator(void);
-
     Emulator(Emulator const&);
     void operator=(Emulator const&);
 
     void setupBus(Plugins* plugins, ICPU* cpu, IMemory* mem);
 
     EmuState _state;
-};
 
-#define EMU Emulator::getInstance()
+    // devices
+    Plugins* _plugins;
+    ICPU* _cpu;
+    IMemory* _mem;
+};
 

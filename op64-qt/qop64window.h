@@ -8,7 +8,7 @@
 
 class Plugins;
 class ConfigDialog;
-class EmulatorThread;
+class Emulator;
 class RenderWidget;
 enum EmuState;
 
@@ -50,7 +50,7 @@ private:
     Ui::QOP64WindowClass ui;
     QString _romFile;
     QThread _emuThread;
-    EmulatorThread* _emu;
+    Emulator* _emu;
     Plugins* _plugins;
     ConfigDialog* cfgDialog;
     RenderWidget* renderWidget;

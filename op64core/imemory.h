@@ -17,7 +17,8 @@ class IMemory
 public:
     ~IMemory();
 
-    virtual void initialize(void) = 0;
+    virtual void initialize(void);
+    virtual void uninitialize(void);
     virtual void readmem(uint32_t& address, uint64_t* dest, DataSize size) = 0;
     virtual void writemem(uint32_t address, uint64_t src, DataSize size) = 0;
 

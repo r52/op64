@@ -63,10 +63,10 @@ void GfxPlugin::unloadLibrary(void)
 
     memset(&_pluginInfo, 0, sizeof(_pluginInfo));
 
-    //	CaptureScreen        = NULL;
+    //	CaptureScreen = NULL;
     ChangeWindow = nullptr;
     CloseDLL = nullptr;
-    //	DllAbout             = NULL;
+    //	DllAbout = NULL;
     Config = nullptr;
     RomClosed = nullptr;
     RomOpen = nullptr;
@@ -278,7 +278,7 @@ bool GfxPlugin::initialize(void* renderWindow, void* statusBar)
     Info.VI_X_SCALE_REG = &Bus::vi_reg[VI_X_SCALE_REG];
     Info.VI_Y_SCALE_REG = &Bus::vi_reg[VI_Y_SCALE_REG];
 
-    _initialized = InitiateGFX(Info) != 0;
+    _initialized = (InitiateGFX(Info) != 0);
 
     return _initialized;
 }

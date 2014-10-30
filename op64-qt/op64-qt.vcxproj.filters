@@ -50,15 +50,6 @@
     <ClCompile Include="GeneratedFiles\qrc_qop64window.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_emulatorthread.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_emulatorthread.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="emulatorthread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="emulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -99,9 +90,6 @@
     </CustomBuild>
     <CustomBuild Include="qop64window.qrc">
       <Filter>Resource Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="emulatorthread.h">
-      <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="emulator.h">
       <Filter>Header Files</Filter>

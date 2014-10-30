@@ -202,7 +202,7 @@ namespace Bus
 
         if (nullptr != mem)
         {
-            //delete mem;
+            mem->uninitialize();
             mem = nullptr;
         }
 

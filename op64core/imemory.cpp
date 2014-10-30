@@ -26,11 +26,6 @@ IMemory::IMemory()
     si_reg = _si_reg;
     dp_reg = _dp_reg;
     dps_reg = _dps_reg;
-
-    // Needs to be initialized by concrete memory
-    pif = new PIF();
-    sram = new SRAM();
-    flashram = new FlashRam();
 }
 
 IMemory::~IMemory()
@@ -54,6 +49,40 @@ IMemory::~IMemory()
     si_reg = nullptr;
     dp_reg = nullptr;
     dps_reg = nullptr;
+
+    uninitialize();
+}
+
+void IMemory::initialize(void)
+{
+    using namespace Bus;
+
+    // Sanity checks
+    if (nullptr != pif)
+    {
+        delete pif; pif = nullptr;
+    }
+
+    if (nullptr != sram)
+    {
+        delete sram; sram = nullptr;
+    }
+
+    if (nullptr != flashram)
+    {
+        delete flashram; flashram = nullptr;
+    }
+
+    pif = new PIF();
+    sram = new SRAM();
+    flashram = new FlashRam();
+
+    pif->initialize();
+}
+
+void IMemory::uninitialize(void)
+{
+    using namespace Bus;
 
     if (nullptr != pif)
     {

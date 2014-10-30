@@ -27,7 +27,8 @@ class ConfigDialog : public QDialog
     Q_OBJECT
 
 public:
-    ConfigDialog(Plugins* plugins);
+    ConfigDialog(Plugins* plugins, QWidget* parent = 0);
+    ~ConfigDialog();
 
 public slots:
     void saveAndClose(void);

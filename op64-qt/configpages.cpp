@@ -154,8 +154,8 @@ void PluginPage::populatePluginType(uint16_t type)
     }
 
 
-    QDir* dir = new QDir(QString(ConfigStore::getInstance().getString(CFG_SECTION_CORE, cfgPath).c_str()), LIB_FILTER);
-    QFileInfoList list = dir->entryInfoList();
+    QDir dir(QString(ConfigStore::getInstance().getString(CFG_SECTION_CORE, cfgPath).c_str()), LIB_FILTER);
+    QFileInfoList list = dir.entryInfoList();
 
     for (int i = 0; i < list.size(); ++i)
     {

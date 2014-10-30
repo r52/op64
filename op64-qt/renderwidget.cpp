@@ -5,7 +5,8 @@
 
 
 
-RenderWidget::RenderWidget(QWidget* parent /*= 0*/) :
+RenderWidget::RenderWidget(Emulator* emu, QWidget* parent /*= 0*/) :
+_emu(emu),
 QWidget(parent)
 {
     setAttribute(Qt::WA_PaintOnScreen, true);
@@ -18,9 +19,9 @@ QWidget(parent)
 
 void RenderWidget::closeEvent(QCloseEvent * event)
 {
-    if (EMU.getState() == EMU_RUNNING)
+    if (_emu->getState() == EMU_RUNNING)
     {
-        EMU.stopEmulator();
+        _emu->stopEmulator();
     }
 
     event->accept();
@@ -29,4 +30,10 @@ void RenderWidget::closeEvent(QCloseEvent * event)
 void RenderWidget::displayVI(uint64_t framerate)
 {
     QMetaObject::invokeMethod(this, "setWindowTitle", Q_ARG(QString, QString("%1 VI/s").arg(framerate)));
+}
+
+RenderWidget::~RenderWidget()
+{
+    // Doesn't own it
+    _emu = nullptr;
 }

@@ -1,7 +1,6 @@
 #include <QFileDialog>
 #include "qop64window.h"
 #include "emulator.h"
-#include "emulatorthread.h"
 #include "logger.h"
 
 #include <QTextEdit>
@@ -27,7 +26,7 @@ QOP64Window::QOP64Window(QWidget *parent)
     _plugins = new Plugins();
 
     // Setup config dialog
-    cfgDialog = new ConfigDialog(_plugins);
+    cfgDialog = new ConfigDialog(_plugins, this);
 
     setupDirectories();
 
@@ -38,19 +37,15 @@ QOP64Window::QOP64Window(QWidget *parent)
 
     setupGUI();
     connectGUIControls();
-
-
-    // register statusbar
-    //_plugins->setStatusBar((void*)ui.statusBar->winId());
 }
 
 QOP64Window::~QOP64Window()
 {
-    if (EMU.getState() == EMU_RUNNING)
+    if (_emu->getState() == EMU_RUNNING)
     {
-        EMU.stopEmulator();
+        _emu->stopEmulator();
         QEventLoop loop;
-        connect(_emu, &EmulatorThread::emulatorFinished, &loop, &QEventLoop::quit);
+        connect(_emu, &Emulator::emulatorFinished, &loop, &QEventLoop::quit);
         loop.exec();
     }
 
@@ -70,9 +65,9 @@ void QOP64Window::openRom(void)
 
     if (!_romFile.isEmpty())
     {
-        if (EMU.loadRom(_romFile.toLocal8Bit().data()))
+        if (_emu->loadRom(_romFile.toLocal8Bit().data()))
         {
-            renderWidget = new RenderWidget;
+            renderWidget = new RenderWidget(_emu);
             renderWidget->setGeometry(QRect(0, 0, 640, 480));
             renderWidget->setMinimumSize(QSize(640, 480));
             renderWidget->move(100, 100);
@@ -128,14 +123,12 @@ void QOP64Window::setupDirectories(void)
 void QOP64Window::setupEmulationThread(void)
 {
     // Setup emulation thread
-    _emu = new EmulatorThread(_plugins);
+    _emu = new Emulator(_plugins);
     _emu->moveToThread(&_emuThread);
     connect(&_emuThread, &QThread::finished, _emu, &QObject::deleteLater);
-    connect(_emu, &EmulatorThread::emulatorFinished, this, &QOP64Window::emulationFinished);
-    connect(this, &QOP64Window::runEmulator, _emu, &EmulatorThread::runEmulator);
-
-    EMU.moveToThread(&_emuThread);
-    connect(&EMU, SIGNAL(stateChanged(EmuState)), this, SLOT(emulatorChangeState(EmuState)), Qt::DirectConnection);
+    connect(_emu, &Emulator::emulatorFinished, this, &QOP64Window::emulationFinished);
+    connect(this, &QOP64Window::runEmulator, _emu, &Emulator::runEmulator);
+    connect(_emu, SIGNAL(stateChanged(EmuState)), this, SLOT(emulatorChangeState(EmuState)), Qt::DirectConnection);
 
     _emuThread.start();
 }
@@ -148,9 +141,9 @@ void QOP64Window::connectGUIControls(void)
     connect(ui.actionOpen_ROM, SIGNAL(triggered(bool)), this, SLOT(openRom()));
 
     // emulation
-    connect(ui.actionLimit_FPS, SIGNAL(toggled(bool)), &EMU, SLOT(setLimitFPS(bool)), Qt::DirectConnection);
-    connect(ui.actionHard_Reset, SIGNAL(triggered()), &EMU, SLOT(gameHardReset()), Qt::DirectConnection);
-    connect(ui.actionSoft_Reset, SIGNAL(triggered()), &EMU, SLOT(gameSoftReset()), Qt::DirectConnection);
+    connect(ui.actionLimit_FPS, SIGNAL(toggled(bool)), _emu, SLOT(setLimitFPS(bool)), Qt::DirectConnection);
+    connect(ui.actionHard_Reset, SIGNAL(triggered()), _emu, SLOT(gameHardReset()), Qt::DirectConnection);
+    connect(ui.actionSoft_Reset, SIGNAL(triggered()), _emu, SLOT(gameSoftReset()), Qt::DirectConnection);
 
     // options
     connect(ui.actionGraphics_Settings, SIGNAL(triggered()), this, SLOT(showGraphicsConfig()));
@@ -241,8 +234,6 @@ void QOP64Window::emulatorChangeState(EmuState newstate)
         break;
     case EMU_STOPPED:
         QMetaObject::invokeMethod(ui.menuEmulation, "setEnabled", Q_ARG(bool, false));
-        break;
-    case HARDWARE_DEINITIALIZED:
         break;
     }
 }

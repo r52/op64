@@ -3,12 +3,15 @@
 #include <cstdint>
 #include <QWidget>
 
+class Emulator;
+
 class RenderWidget : public QWidget
 {
     Q_OBJECT;
 
 public:
-    RenderWidget(QWidget* parent = 0);
+    RenderWidget(Emulator* emu, QWidget* parent = 0);
+    ~RenderWidget();
 
     virtual QPaintEngine* paintEngine() const { return 0; }
 
@@ -17,4 +20,7 @@ protected:
 
 private:
     void displayVI(uint64_t framerate);
+
+private:
+    Emulator* _emu;
 };

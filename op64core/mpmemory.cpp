@@ -27,6 +27,8 @@ static char framebufferRead[0x800];
 
 void MPMemory::initialize(void)
 {
+    IMemory::initialize();
+
     fill_array(readmem_table, 0, 0x10000, &MPMemory::read_nomem);
     fill_array(writemem_table, 0, 0x10000, &MPMemory::write_nomem);
 
@@ -331,8 +333,6 @@ void MPMemory::initialize(void)
     fill_array(readmem_table, 0xbfc1, 0x3f, &MPMemory::read_nothing);
     fill_array(writemem_table, 0x9fc1, 0x3f, &MPMemory::write_nothing);
     fill_array(writemem_table, 0xbfc1, 0x3f, &MPMemory::write_nothing);
-
-    Bus::pif->initialize();
 
     fbInfo[0].addr = 0;
 }

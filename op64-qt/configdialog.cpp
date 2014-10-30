@@ -4,8 +4,8 @@
 #include "configpages.h"
 #include "configstore.h"
 
-ConfigDialog::ConfigDialog(Plugins* plugins)
-    : _plugins(plugins)
+ConfigDialog::ConfigDialog(Plugins* plugins, QWidget* parent)
+    : _plugins(plugins), QDialog(parent)
 {
     createConfigWidgets();
 
@@ -131,4 +131,14 @@ void ConfigDialog::saveAndClose(void)
     store.saveConfig();
 
     close();
+}
+
+ConfigDialog::~ConfigDialog()
+{
+    // The actual widgets themselves should be cleaned up properly due to them being
+    // added to the layouts of the config pages
+    if (nullptr != _widgets)
+    {
+        delete _widgets; _widgets = nullptr;
+    }
 }

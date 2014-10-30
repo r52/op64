@@ -1,19 +1,35 @@
 #include "emulator.h"
-#include "icpu.h"
-#include "imemory.h"
 #include "rom.h"
 #include "bus.h"
 #include "plugins.h"
+#include "mppinterpreter.h"
+#include "mpmemory.h"
 
 
-Emulator::Emulator(void) :
-_state(DEAD)
+Emulator::Emulator(Plugins* plugins) :
+_state(DEAD),
+_plugins(plugins),
+_cpu(new MPPInterpreter),
+_mem(new MPMemory)
 {
 }
 
 Emulator::~Emulator()
 {
     Bus::disconnectDevices();
+
+    if (nullptr != _cpu)
+    {
+        delete _cpu; _cpu = nullptr;
+    }
+
+    if (nullptr != _mem)
+    {
+        delete _mem; _mem = nullptr;
+    }
+
+    // Doesn't own it
+    _plugins = nullptr;
 }
 
 bool Emulator::isRomLoaded(void)
@@ -139,4 +155,16 @@ void Emulator::gameHardReset(void)
 void Emulator::gameSoftReset(void)
 {
     Bus::doSoftReset();
+}
+
+void Emulator::runEmulator(void)
+{
+    if (initializeHardware(_plugins, _cpu, _mem))
+    {
+        execute();
+
+        uninitializeHardware();
+    }
+
+    emit emulatorFinished();
 }
