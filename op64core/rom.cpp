@@ -90,14 +90,12 @@ bool Rom::isValidRom(const uint8_t* image)
 
 void Rom::swapRom(uint8_t* rom, uint_fast32_t size)
 {
-    uint32_t i;
-
     switch (rom[0])
     {
         // .v64
     case 0x37:
         _imagetype = V64IMAGE;
-        vec_for (i = 0; i < size; i += 2)
+        vec_for(uint32_t i = 0; i < size; i += 2)
         {
             std::swap(rom[i], rom[i + 1]);
         }
@@ -105,7 +103,7 @@ void Rom::swapRom(uint8_t* rom, uint_fast32_t size)
         // .n64
     case 0x40:
         _imagetype = N64IMAGE;
-        vec_for (i = 0; i < size; i += 4)
+        vec_for(uint32_t i = 0; i < size; i += 4)
         {
             std::swap(rom[i], rom[i + 3]);
             std::swap(rom[i + 1], rom[i + 2]);
@@ -120,9 +118,6 @@ void Rom::swapRom(uint8_t* rom, uint_fast32_t size)
 
 bool Rom::loadRom(const char* name)
 {
-    std::streampos size;
-    uint8_t* image = nullptr;
-
     if (nullptr != _image)
     {
         // just fail
@@ -139,7 +134,7 @@ bool Rom::loadRom(const char* name)
     ifstream file(_filename, std::ios::in | std::ios::binary | std::ios::ate);
     if (file.is_open() && file.good())
     {
-        size = file.tellg();
+        std::streampos size = file.tellg();
 
         if (size < 4096)
         {
@@ -147,7 +142,7 @@ bool Rom::loadRom(const char* name)
         }
 
 
-        image = new uint8_t[static_cast<unsigned int>(size)];
+        uint8_t* image = new uint8_t[static_cast<unsigned int>(size)];
         if (nullptr == image)
         {
             // Couldn't allocate

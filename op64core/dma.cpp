@@ -17,8 +17,6 @@ using namespace Bus;
 
 void DMA::readSP(void)
 {
-    uint32_t i, j;
-
     uint32_t len_reg = sp_reg[SP_WR_LEN_REG];
 
     uint32_t length = ((len_reg & 0xfff) | 7) + 1;
@@ -31,8 +29,8 @@ void DMA::readSP(void)
     uint8_t* spmem = ((sp_reg[SP_MEM_ADDR_REG] & 0x1000) != 0) ? sp_imem8 : sp_dmem8;
     uint8_t* dram = rdram8;
 
-    for (j = 0; j < count; j++) {
-        for (i = 0; i < length; i++) {
+    for (uint32_t j = 0; j < count; j++) {
+        for (uint32_t i = 0; i < length; i++) {
             dram[BES(dramaddr)] = spmem[BES(memaddr)];
             memaddr++;
             dramaddr++;
@@ -43,8 +41,6 @@ void DMA::readSP(void)
 
 void DMA::writeSP(void)
 {
-    uint32_t i, j;
-
     uint32_t len_reg = sp_reg[SP_RD_LEN_REG];
 
     uint32_t length = ((len_reg & 0xfff) | 7) + 1;
@@ -57,8 +53,8 @@ void DMA::writeSP(void)
     uint8_t* spmem = ((sp_reg[SP_MEM_ADDR_REG] & 0x1000) != 0) ? sp_imem8 : sp_dmem8;
     uint8_t* dram = rdram8;
 
-    for (j = 0; j < count; j++) {
-        for (i = 0; i < length; i++) {
+    for (uint32_t j = 0; j < count; j++) {
+        for (uint32_t i = 0; i < length; i++) {
             spmem[BES(memaddr)] = dram[BES(dramaddr)];
             memaddr++;
             dramaddr++;
@@ -107,9 +103,6 @@ void DMA::readPI(void)
 
 void DMA::writePI(void)
 {
-    uint32_t longueur;
-    int32_t i;
-
     if (pi_reg[PI_CART_ADDR_REG] < 0x10000000)
     {
         if (pi_reg[PI_CART_ADDR_REG] >= 0x08000000
@@ -163,8 +156,8 @@ void DMA::writePI(void)
         return;
     }
 
-    longueur = (pi_reg[PI_WR_LEN_REG] & 0xFFFFFF) + 1;
-    i = (pi_reg[PI_CART_ADDR_REG] - 0x10000000) & 0x3FFFFFF;
+    uint32_t longueur = (pi_reg[PI_WR_LEN_REG] & 0xFFFFFF) + 1;
+    int32_t i = (pi_reg[PI_CART_ADDR_REG] - 0x10000000) & 0x3FFFFFF;
     longueur = (i + (int32_t)longueur) > rom->getSize() ?
         (rom->getSize() - i) : longueur;
 
@@ -249,8 +242,6 @@ void DMA::writePI(void)
 
 void DMA::readSI(void)
 {
-    int i;
-
     if (Bus::si_reg[SI_PIF_ADDR_RD64B_REG] != 0x1FC007C0)
     {
         LOG_ERROR("%s: unknown SI use", __FUNCTION__);
@@ -259,7 +250,7 @@ void DMA::readSI(void)
 
     Bus::pif->pifRead();
 
-    vec_for (i = 0; i < (64 / 4); i++)
+    vec_for (uint32_t i = 0; i < (64 / 4); i++)
     {
         Bus::rdram[Bus::si_reg[SI_DRAM_ADDR_REG] / 4 + i] = byteswap_u32(Bus::pif_ram32[i]);
     }
@@ -278,15 +269,13 @@ void DMA::readSI(void)
 
 void DMA::writeSI(void)
 {
-    int i;
-
     if (Bus::si_reg[SI_PIF_ADDR_WR64B_REG] != 0x1FC007C0)
     {
         LOG_ERROR("%s: unknown SI use", __FUNCTION__);
         Bus::stop = true;
     }
 
-    vec_for (i = 0; i < (64 / 4); i++)
+    vec_for (uint32_t i = 0; i < (64 / 4); i++)
     {
         Bus::pif_ram32[i] = byteswap_u32(Bus::rdram[Bus::si_reg[SI_DRAM_ADDR_REG] / 4 + i]);
     }

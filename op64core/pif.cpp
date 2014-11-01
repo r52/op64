@@ -100,13 +100,13 @@ void PIF::pifRead(void)
 
 void PIF::pifWrite(void)
 {
-    char challenge[30], response[30];
     int i = 0, channel = 0;
     if (Bus::pif_ram8[0x3F] > 1)
     {
         switch (Bus::pif_ram8[0x3F])
         {
         case 0x02:
+            char challenge[30], response[30];
             // format the 'challenge' message into 30 nibbles for X-Scale's CIC code
             for (i = 0; i < 15; i++)
             {

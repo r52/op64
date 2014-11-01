@@ -87,9 +87,8 @@ void MemPak::loadMempak(void)
         0x00, 0x71, 0x00, 0x03, 0x00, 0x03, 0x00, 0x03, 0x00, 0x03, 0x00, 0x03, 0x00, 0x03, 0x00, 0x03,
     };
 
-    int i, j;
-    for (i = 0; i < 4; i++) {
-        vec_for (j = 0; j < 0x8000; j += 2) {
+    for (int32_t i = 0; i < 4; i++) {
+        vec_for(int32_t j = 0; j < 0x8000; j += 2) {
             _mempaks[i][j] = 0;
             _mempaks[i][j + 1] = 0x03;
         }
@@ -120,9 +119,8 @@ void MemPak::loadMempak(void)
 
 uint8_t MemPak::calculateCRC(uint8_t* src)
 {
-    int i;
     uint8_t CRC = 0;
-    for (i = 0; i <= 0x20; i++)
+    for (int32_t i = 0; i <= 0x20; i++)
     {
         int mask;
         for (mask = 0x80; mask >= 1; mask >>= 1)

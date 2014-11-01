@@ -13,9 +13,6 @@ unsigned char byte2bcd(int n)
 
 void EEPROM::eepromCommand(uint8_t* command)
 {
-    time_t curtime_time;
-    tm curtime;
-
     if (Bus::rom->getSaveType() == SAVETYPE_AUTO)
     {
         Bus::rom->setSaveType(SAVETYPE_EEPROM_4KB);
@@ -73,8 +70,9 @@ void EEPROM::eepromCommand(uint8_t* command)
             LOG_ERROR("%s: RTC command: read block %d", __FUNCTION__, command[2]);
             break;
         case 2:
+            time_t curtime_time;
             time(&curtime_time);
-            curtime = op::localtime(curtime_time);
+            tm curtime = op::localtime(curtime_time);
             command[4] = byte2bcd(curtime.tm_sec);
             command[5] = byte2bcd(curtime.tm_min);
             command[6] = 0x80 + byte2bcd(curtime.tm_hour);

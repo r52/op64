@@ -76,12 +76,10 @@ void CP1::shuffle_fpr_data(int oldStatus, int newStatus)
 
 void CP1::set_fpr_pointers(int newStatus)
 {
-    int32_t i;
-
     // update the FPR register pointers
     if (newStatus & 0x04000000)
     {
-        vec_for (i = 0; i < 32; i++)
+        vec_for(int32_t i = 0; i < 32; i++)
         {
             _d_reg[i] = (double*)&_fgr[i];
             _s_reg[i] = ((float*)&_fgr[i]) + IS_BIG_ENDIAN;
@@ -89,7 +87,7 @@ void CP1::set_fpr_pointers(int newStatus)
     }
     else
     {
-        vec_for (i = 0; i < 32; i++)
+        vec_for(int32_t i = 0; i < 32; i++)
         {
             _d_reg[i] = (double*)&_fgr[i >> 1];
             _s_reg[i] = ((float*)&_fgr[i >> 1]) + ((i & 1) ^ IS_BIG_ENDIAN);

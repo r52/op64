@@ -21,7 +21,7 @@ public:
         (this->*readmem_table[address >> 16])(address, dest, size);
     }
 
-    void writemem(uint32_t address, uint64_t src, DataSize size)
+    inline virtual void writemem(uint32_t address, uint64_t src, DataSize size) final
     {
         (this->*writemem_table[address >> 16])(address, src, size);
     }
