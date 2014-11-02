@@ -1,10 +1,12 @@
-#include <QFileDialog>
 #include "qop64window.h"
 #include "emulator.h"
 #include "logger.h"
 
+#include <QFileDialog>
 #include <QTextEdit>
-#include <QPlainTextEdit>
+#include <QMessageBox>
+#include <QCloseEvent>
+#include <QSettings>
 
 #include "plugins.h"
 #include "configstore.h"
@@ -14,7 +16,6 @@
 #include "configdialog.h"
 
 #include "renderwidget.h"
-#include <QMessageBox>
 
 
 QOP64Window::QOP64Window(QWidget *parent)
@@ -30,33 +31,18 @@ QOP64Window::QOP64Window(QWidget *parent)
 
     setupDirectories();
 
-    // Set up log callback
-    LOG.setLogCallback(std::bind(&QOP64Window::logCallback, this, std::placeholders::_1));
-
     setupEmulationThread();
 
     setupGUI();
     connectGUIControls();
+
+    // Set up log callback
+    LOG.setLogCallback(std::bind(&QOP64Window::logCallback, this, std::placeholders::_1));
 }
 
 QOP64Window::~QOP64Window()
 {
-    if (_emu->getState() == EMU_RUNNING)
-    {
-        _emu->stopEmulator();
-        QEventLoop loop;
-        connect(_emu, &Emulator::emulatorFinished, &loop, &QEventLoop::quit);
-        loop.exec();
-    }
-
-    _emuThread.quit();
-
-    delete _plugins;
-
-    if (nullptr != renderWidget)
-    {
-        renderWidget->deleteLater(); renderWidget = nullptr;
-    }
+    shudownEverything();
 }
 
 void QOP64Window::openRom(void)
@@ -68,9 +54,8 @@ void QOP64Window::openRom(void)
         if (_emu->loadRom(_romFile.toLocal8Bit().data()))
         {
             renderWidget = new RenderWidget(_emu);
-            renderWidget->setGeometry(QRect(0, 0, 640, 480));
+            renderWidget->setGeometry(QRect(100, 100, 640, 480));
             renderWidget->setMinimumSize(QSize(640, 480));
-            renderWidget->move(100, 100);
 
             _plugins->setRenderWindow((void*)renderWidget->winId());
             renderWidget->show();
@@ -82,7 +67,7 @@ void QOP64Window::openRom(void)
 
 void QOP64Window::logCallback(const char* msg)
 {
-    ui.debugEdit->insertPlainText(QString(msg));
+    _logWindow->insertPlainText(QString(msg));
 }
 
 void QOP64Window::setupDirectories(void)
@@ -161,32 +146,43 @@ void QOP64Window::connectGUIControls(void)
 
 void QOP64Window::toggleShowLog(bool show)
 {
-    ConfigStore::getInstance().set(CFG_SECTION_GUI, CFG_GUI_SHOW_LOG, show);
+    QSettings settings(CFG_GUI_FILENAME, QSettings::IniFormat);
+    settings.setValue(CFG_GUI_SHOW_LOG, show);
+
     if (show)
     {
-        ui.debugEdit->show();
+        _logWindow->show();
     }
     else
     {
-        ui.debugEdit->hide();
+        _logWindow->hide();
     }
 }
 
 void QOP64Window::setupGUI(void)
 {
-    ui.debugEdit->setLineWrapMode(QPlainTextEdit::NoWrap);
-    ui.debugEdit->setReadOnly(true);
+    QSettings settings(CFG_GUI_FILENAME, QSettings::IniFormat);
+    restoreGeometry(settings.value("geometry").toByteArray());
+    restoreState(settings.value("state").toByteArray(), CFG_GUI_VERSION);
 
-    bool showlog = ConfigStore::getInstance().getBool(CFG_SECTION_GUI, CFG_GUI_SHOW_LOG);
+    _logWindow = new QTextEdit();
+    _logWindow->setWindowTitle(tr("op64 Log"));
+    _logWindow->setGeometry(QRect(this->geometry().topRight().x(), this->geometry().topRight().y(), 640, 480));
+    _logWindow->setMinimumSize(QSize(640, 480));
+
+    _logWindow->setLineWrapMode(QTextEdit::NoWrap);
+    _logWindow->setReadOnly(true);
+
+    bool showlog = settings.value(CFG_GUI_SHOW_LOG, true).toBool();
     ui.actionShow_Log->setChecked(showlog);
 
     if (showlog)
     {
-        ui.debugEdit->show();
+        _logWindow->show();
     }
     else
     {
-        ui.debugEdit->hide();
+        _logWindow->hide();
     }
 }
 
@@ -269,5 +265,44 @@ void QOP64Window::showAboutDialog(void)
         "Source code available at <a href='https://github.com/r52/op64'>GitHub</a>";
 
     QMessageBox::about(this, tr("About op64"), aboutMsg);
+}
+
+void QOP64Window::closeEvent(QCloseEvent* event)
+{
+    shudownEverything();
+
+    QSettings settings(CFG_GUI_FILENAME, QSettings::IniFormat);
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("state", saveState(CFG_GUI_VERSION));
+
+    event->accept();
+}
+
+void QOP64Window::shudownEverything(void)
+{
+    if (_emu->getState() == EMU_RUNNING)
+    {
+        _emu->stopEmulator();
+        QEventLoop loop;
+        connect(_emu, &Emulator::emulatorFinished, &loop, &QEventLoop::quit);
+        loop.exec();
+    }
+
+    _emuThread.quit();
+
+    if (nullptr != _plugins)
+    {
+        delete _plugins; _plugins = nullptr;
+    }
+
+    if (nullptr != renderWidget)
+    {
+        renderWidget->deleteLater(); renderWidget = nullptr;
+    }
+
+    if (nullptr != _logWindow)
+    {
+        _logWindow->deleteLater(); _logWindow = nullptr;
+    }
 }
 

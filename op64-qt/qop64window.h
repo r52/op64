@@ -12,6 +12,9 @@ class Emulator;
 class RenderWidget;
 enum EmuState;
 
+class QTextEdit;
+class QSettings;
+
 class QOP64Window : public QMainWindow
 {
     Q_OBJECT
@@ -20,14 +23,18 @@ public:
     QOP64Window(QWidget *parent = 0);
     ~QOP64Window();
 
+protected:
+    virtual void closeEvent(QCloseEvent* event);
+
 private:
     void setupDirectories(void);
     void setupEmulationThread(void);
     void setupGUI(void);
     void connectGUIControls(void);
-    void setupGLFW(void);
 
     void logCallback(const char* msg);
+
+    void shudownEverything(void);
 
 signals:
     void runEmulator(void);
@@ -54,6 +61,7 @@ private:
     Plugins* _plugins;
     ConfigDialog* cfgDialog;
     RenderWidget* renderWidget;
+    QTextEdit* _logWindow;
 };
 
 #endif // QOP64WINDOW_H

@@ -5,7 +5,7 @@
 #include "util.h"
 #include <functional>
 
-enum {
+enum LogLevel {
     LOG_LEVEL_INFO = 0,
     LOG_LEVEL_DEBUG,
     LOG_LEVEL_WARNING,
