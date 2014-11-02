@@ -6,14 +6,15 @@
 #include <functional>
 
 enum LogLevel {
-    LOG_LEVEL_INFO = 0,
-    LOG_LEVEL_DEBUG,
+    LOG_LEVEL_DEBUG = 0,
+    LOG_LEVEL_VERBOSE,
+    LOG_LEVEL_INFO,
     LOG_LEVEL_WARNING,
     LOG_LEVEL_ERROR,
     LOG_LEVEL_NUM
 };
 
-typedef std::function<void(const char*)> LogCallback;
+typedef std::function<void(uint32_t, const char*)> LogCallback;
 
 class Logger
 {
@@ -26,15 +27,15 @@ public:
 
     inline void operator()(const char* msg)
     {
-        log(msg, 0);
+        log(0, msg);
     }
 
-    inline void operator()(const char* msg, uint32_t level)
+    inline void operator()(uint32_t level, const char* msg)
     {
-        log(msg, level);
+        log(level, msg);
     }
 
-    void log(const char* msg, uint32_t level);
+    void log(uint32_t level, const char* msg);
 
     
     /* setLogToFile 
@@ -74,7 +75,6 @@ private:
     Logger(Logger const&);
     void operator=(Logger const&);
 
-    void log(const char* msg);
     
 private:
     bool _logToFile;
@@ -88,29 +88,39 @@ private:
 #define LOG Logger::getInstance()
 
 #define LOG_DEBUG(...) \
-    char buf[250]; \
-    _safe_sprintf(buf, 250, __VA_ARGS__); \
-    LOG(buf, LOG_LEVEL_DEBUG);
+    { \
+        char buf[250]; \
+        _safe_sprintf(buf, 250, __VA_ARGS__); \
+        LOG(LOG_LEVEL_DEBUG, buf); \
+    }
 
 #define LOG_ERROR(...) \
-    char buf[250]; \
-    _safe_sprintf(buf, 250, __VA_ARGS__); \
-    LOG(buf, LOG_LEVEL_ERROR);
+    { \
+        char buf[250]; \
+        _safe_sprintf(buf, 250, __VA_ARGS__); \
+        LOG(LOG_LEVEL_ERROR, buf); \
+    }
 
 #define LOG_INFO(...) \
-    char buf[250]; \
-    _safe_sprintf(buf, 250, __VA_ARGS__); \
-    LOG(buf, LOG_LEVEL_INFO);
+    { \
+        char buf[250]; \
+        _safe_sprintf(buf, 250, __VA_ARGS__); \
+        LOG(LOG_LEVEL_INFO, buf); \
+    }
 
 #define LOG_WARNING(...) \
-    char buf[250]; \
-    _safe_sprintf(buf, 250, __VA_ARGS__); \
-    LOG(buf, LOG_LEVEL_WARNING);
+    { \
+        char buf[250]; \
+        _safe_sprintf(buf, 250, __VA_ARGS__); \
+        LOG(LOG_LEVEL_WARNING, buf); \
+    }
 
-#define LOG_WARNING(...) \
-    char buf[250]; \
-    _safe_sprintf(buf, 250, __VA_ARGS__); \
-    LOG(buf, LOG_LEVEL_WARNING);
+#define LOG_VERBOSE(...) \
+    { \
+        char buf[250]; \
+        _safe_sprintf(buf, 250, __VA_ARGS__); \
+        LOG(LOG_LEVEL_VERBOSE, buf); \
+    }
 
 #ifdef _DEBUG
 #define LOG_PC \
@@ -118,9 +128,8 @@ private:
     { \
         char buf[20]; \
         _safe_sprintf(buf, 20, "0x%x", (uint32_t)_PC); \
-        LOG(buf, LOG_LEVEL_INFO); \
+        LOG(LOG_LEVEL_INFO, buf); \
     }
 #else
 #define LOG_PC
 #endif
-

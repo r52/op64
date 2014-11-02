@@ -4,27 +4,22 @@
 using namespace std;
 
 static const char* log_levels[LOG_LEVEL_NUM] = {
-    "[INFO]",
     "[DEBUG]",
+    "[INFO]",
     "[WARNING]",
     "[ERROR]"
 };
 
-void Logger::log(const char* msg)
+
+void Logger::log(uint32_t level, const char* msg)
 {
+    // Allow the callback receiver to do whatever they
+    // want with the message rather than follow the rules here
     if (_callback)
     {
-        _callback(msg);
+        _callback(level, msg);
     }
 
-    if (_logToFile && _logFile.is_open())
-    {
-        _logFile << msg;
-    }
-}
-
-void Logger::log(const char* msg, uint32_t level)
-{
     if (level < _minlevel)
         return;
 
@@ -46,7 +41,10 @@ void Logger::log(const char* msg, uint32_t level)
         _safe_sprintf(buf, 350, "%s\n", msg);
     }
 
-    log(buf);
+    if (_logToFile && _logFile.is_open())
+    {
+        _logFile << msg;
+    }
 }
 
 bool Logger::setLogToFile(bool toFile)

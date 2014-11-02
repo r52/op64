@@ -85,7 +85,7 @@ void InterruptHandler::initialize(void)
 void InterruptHandler::add_interrupt_event(int32_t type, uint32_t delay)
 {
     if (find_event(type)) {
-        LOG_WARNING("two events of type 0x%x in interrupt queue\n", type);
+        LOG_WARNING("Two events of type 0x%x in interrupt queue", type);
     }
 
     uint32_t count = Bus::cp0_reg[CP0_COUNT_REG] + delay;
@@ -426,7 +426,7 @@ void InterruptHandler::gen_interrupt(void)
         break;
     default:
     {
-        LOG_DEBUG("ERROR: Unknown interrupt queue event type %.8X.\n", top.type);
+        LOG_WARNING("Unknown interrupt queue event type %.8X.", top.type);
         pop_interrupt_event();
     }
         break;

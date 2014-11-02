@@ -188,7 +188,7 @@ void MPPInterpreter::DIV_S(void)
 
     if ((*Bus::FCR31 & 0x400) && *Bus::s_reg[_cur_instr.ft] == 0)
     {
-        LOG_ERROR("DIV_S by 0");
+        LOG_WARNING("DIV_S by 0");
     }
 
     set_rounding();
@@ -417,7 +417,7 @@ void MPPInterpreter::C_LT_S(void)
     if (result == CMP_UNORDERED)
     {
         LOG_ERROR("NaN in %s", __FUNCTION__);
-        Bus::stop = 1;
+        Bus::stop = true;
     }
 
     *(Bus::FCR31) = (result == CMP_LESS_THAN) ? *(Bus::FCR31) | 0x800000 : *(Bus::FCR31)&~0x800000;
@@ -440,7 +440,7 @@ void MPPInterpreter::C_LE_S(void)
     if (result == CMP_UNORDERED)
     {
         LOG_ERROR("NaN in %s", __FUNCTION__);
-        Bus::stop = 1;
+        Bus::stop = true;
     }
 
     *(Bus::FCR31) = ((result == CMP_LESS_THAN) || (result == CMP_EQUAL)) ? *(Bus::FCR31) | 0x800000 : *(Bus::FCR31)&~0x800000;
@@ -490,7 +490,7 @@ void MPPInterpreter::DIV_D(void)
 
     if ((*Bus::FCR31 & 0x400) && *Bus::d_reg[_cur_instr.ft] == 0)
     {
-        LOG_ERROR("DIV_D by 0");
+        LOG_WARNING("DIV_D by 0");
     }
 
     set_rounding();
@@ -703,7 +703,7 @@ void MPPInterpreter::C_LT_D(void)
     if (result == CMP_UNORDERED)
     {
         LOG_ERROR("NaN in %s", __FUNCTION__);
-        Bus::stop = 1;
+        Bus::stop = true;
     }
 
     *(Bus::FCR31) = (result == CMP_LESS_THAN) ? *(Bus::FCR31) | 0x800000 : *(Bus::FCR31)&~0x800000;
@@ -726,7 +726,7 @@ void MPPInterpreter::C_LE_D(void)
     if (result == CMP_UNORDERED)
     {
         LOG_ERROR("NaN in %s", __FUNCTION__);
-        Bus::stop = 1;
+        Bus::stop = true;
     }
 
     *(Bus::FCR31) = ((result == CMP_LESS_THAN) || (result == CMP_EQUAL)) ? *(Bus::FCR31) | 0x800000 : *(Bus::FCR31)&~0x800000;

@@ -480,10 +480,8 @@ void MPPInterpreter::COP1(void)
 
 void MPPInterpreter::SV(void)
 {
-    Bus::stop = 1;
-    char buf[250];
-    sprintf_s(buf, "OP: %x; Opcode %u reserved. Stopping...\n", _cur_instr.code, _cur_instr.op);
-    LOG(buf);
+    Bus::stop = true;
+    LOG_ERROR("OP: %x; Opcode %u reserved. Stopping...", _cur_instr.code, _cur_instr.op);
 }
 
 void MPPInterpreter::BEQL(void)

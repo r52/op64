@@ -67,7 +67,7 @@ void EEPROM::eepromCommand(uint8_t* command)
             command[12] = 0x00;
             break;
         case 1:
-            LOG_ERROR("%s: RTC command: read block %d", __FUNCTION__, command[2]);
+            LOG_WARNING("%s: RTC command: read block %d", __FUNCTION__, command[2]);
             break;
         case 2:
             time_t curtime_time;
@@ -88,12 +88,12 @@ void EEPROM::eepromCommand(uint8_t* command)
     case 8:
     {
         // write RTC block
-        LOG_ERROR("%s: RTC write: %d not yet implemented", __FUNCTION__, command[2]);
+        LOG_WARNING("%s: RTC write: %d not yet implemented", __FUNCTION__, command[2]);
     }
         break;
     default:
     {
-        LOG_ERROR("%s: unknown command: %x", __FUNCTION__, command[2]);
+        LOG_WARNING("%s: unknown command: %x", __FUNCTION__, command[2]);
     }
         break;
     }

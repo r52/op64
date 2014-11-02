@@ -5,6 +5,7 @@
 #include "ui_qop64window.h"
 #include <QThread>
 
+#include <cstdint>
 
 class Plugins;
 class ConfigDialog;
@@ -32,7 +33,7 @@ private:
     void setupGUI(void);
     void connectGUIControls(void);
 
-    void logCallback(const char* msg);
+    void logCallback(uint32_t level, const char* msg);
 
     void shudownEverything(void);
 

@@ -93,7 +93,7 @@ void DMA::readPI(void)
     }
     else
     {
-        LOG_DEBUG("%s: Unknown dma read", __FUNCTION__);
+        LOG_WARNING("%s: Unknown dma read", __FUNCTION__);
     }
 
     pi_reg[PI_STATUS_REG] |= 1;
@@ -137,7 +137,7 @@ void DMA::writePI(void)
         }
         else
         {
-            LOG_DEBUG("%s: Unknown dma write 0x%x", __FUNCTION__, (int32_t)pi_reg[PI_CART_ADDR_REG]);
+            LOG_WARNING("%s: Unknown dma write 0x%x", __FUNCTION__, (int32_t)pi_reg[PI_CART_ADDR_REG]);
         }
 
         pi_reg[PI_STATUS_REG] |= 1;

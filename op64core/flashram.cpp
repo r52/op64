@@ -138,7 +138,7 @@ void FlashRam::writeFlashCommand(uint32_t command)
         case STATUS_MODE:
             break;
         default:
-            LOG_WARNING("unknown flashram command with mode:%x", _mode);
+            LOG_ERROR("Unknown flashram command with mode: %x", _mode);
             Bus::stop = true;
             break;
         }
@@ -153,7 +153,7 @@ void FlashRam::writeFlashCommand(uint32_t command)
         _status = 0x11118004f0000000;
         break;
     default:
-        LOG_WARNING("unknown flashram command: %x", command);
+        LOG_WARNING("Unknown flashram command: %x", command);
         break;
     }
 }

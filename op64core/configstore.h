@@ -62,7 +62,7 @@ public:
             }
             else
             {
-                LOG_ERROR("%s: invalid callback id", __FUNCTION__);
+                LOG_WARNING("%s: invalid callback id", __FUNCTION__);
             }
         }
     }

@@ -170,7 +170,7 @@ void MPPInterpreter::DIV(void)
     }
     else
     {
-        LOG_ERROR("DIV: divide by 0");
+        LOG_WARNING("DIV: divide by 0");
     }
     ++_PC;
 }
@@ -184,7 +184,7 @@ void MPPInterpreter::DIVU(void)
     }
     else
     {
-        LOG_ERROR("DIVU: divide by 0");
+        LOG_WARNING("DIVU: divide by 0");
     }
     ++_PC;
 }
@@ -260,7 +260,7 @@ void MPPInterpreter::DDIV(void)
     }
     else
     {
-        LOG_ERROR("DDIV: divide by 0");
+        LOG_WARNING("DDIV: divide by 0");
     }
     ++_PC;
 }
@@ -274,7 +274,7 @@ void MPPInterpreter::DDIVU(void)
     }
     else
     {
-        LOG_ERROR("DDIVU: divide by 0");
+        LOG_WARNING("DDIVU: divide by 0");
     }
     ++_PC;
 }

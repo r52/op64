@@ -1,6 +1,9 @@
 #include "qop64window.h"
 #include "emulator.h"
 #include "logger.h"
+#include "version.h"
+#include "plugins.h"
+#include "configstore.h"
 
 #include <QFileDialog>
 #include <QTextEdit>
@@ -8,20 +11,33 @@
 #include <QCloseEvent>
 #include <QSettings>
 
-#include "plugins.h"
-#include "configstore.h"
-
 #include <boost/filesystem.hpp>
 #include "guiconfig.h"
 #include "configdialog.h"
-
 #include "renderwidget.h"
 
+
+static const char* logLevelFormatting[LOG_LEVEL_NUM] = {
+    "<font color='mediumblue'><b>%1<b></font><br>",
+    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%1<br>",
+    "<font color='forestgreen'><b>%1</font><br>",
+    "<font color='orange'><b>%1<b></font><br>",
+    "<font color='maroon'><b>%1</b></font><br>"
+};
 
 QOP64Window::QOP64Window(QWidget *parent)
     : QMainWindow(parent), renderWidget(nullptr)
 {
     ui.setupUi(this);
+
+    setupDirectories();
+
+    setupGUI();
+    // Set up log callback
+    LOG.setLogCallback(std::bind(&QOP64Window::logCallback, this, std::placeholders::_1, std::placeholders::_2));
+
+    LOG_INFO("op64 %s compiled %s", OP64_VERSION, __DATE__);
+    _logWindow->insertHtml("<br>");
 
     // Setup plugins
     _plugins = new Plugins();
@@ -29,15 +45,8 @@ QOP64Window::QOP64Window(QWidget *parent)
     // Setup config dialog
     cfgDialog = new ConfigDialog(_plugins, this);
 
-    setupDirectories();
-
     setupEmulationThread();
-
-    setupGUI();
     connectGUIControls();
-
-    // Set up log callback
-    LOG.setLogCallback(std::bind(&QOP64Window::logCallback, this, std::placeholders::_1));
 }
 
 QOP64Window::~QOP64Window()
@@ -65,9 +74,9 @@ void QOP64Window::openRom(void)
     }
 }
 
-void QOP64Window::logCallback(const char* msg)
+void QOP64Window::logCallback(uint32_t level, const char* msg)
 {
-    _logWindow->insertPlainText(QString(msg));
+    QMetaObject::invokeMethod(_logWindow, "insertHtml", Q_ARG(QString, QString(logLevelFormatting[level]).arg(QString(msg))));
 }
 
 void QOP64Window::setupDirectories(void)
@@ -151,6 +160,7 @@ void QOP64Window::toggleShowLog(bool show)
 
     if (show)
     {
+        _logWindow->setGeometry(QRect(this->geometry().topRight().x(), this->geometry().topRight().y(), 640, 480));
         _logWindow->show();
     }
     else
@@ -166,6 +176,7 @@ void QOP64Window::setupGUI(void)
     restoreState(settings.value("state").toByteArray(), CFG_GUI_VERSION);
 
     _logWindow = new QTextEdit();
+    _logWindow->moveToThread(&_emuThread);
     _logWindow->setWindowTitle(tr("op64 Log"));
     _logWindow->setGeometry(QRect(this->geometry().topRight().x(), this->geometry().topRight().y(), 640, 480));
     _logWindow->setMinimumSize(QSize(640, 480));
@@ -173,7 +184,7 @@ void QOP64Window::setupGUI(void)
     _logWindow->setLineWrapMode(QTextEdit::NoWrap);
     _logWindow->setReadOnly(true);
 
-    bool showlog = settings.value(CFG_GUI_SHOW_LOG, true).toBool();
+    bool showlog = settings.value(CFG_GUI_SHOW_LOG, false).toBool();
     ui.actionShow_Log->setChecked(showlog);
 
     if (showlog)
@@ -245,7 +256,7 @@ void QOP64Window::emulationFinished()
 void QOP64Window::showAboutDialog(void)
 {
     static QString aboutMsg =
-        "op64<br/>"
+        "op64 version " OP64_VERSION "<br/>"
 #ifdef _DEBUG
         "DEBUG BUILD<br/>"
 #endif

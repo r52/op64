@@ -86,6 +86,8 @@ namespace Bus
 
     bool connectRom(Rom* dev)
     {
+        LOG_INFO("Bus: connecting rom");
+
         if (nullptr != rom)
         {
             LOG_WARNING("Bus: old rom not properly destroyed");
@@ -98,6 +100,8 @@ namespace Bus
 
     bool connectMemory(IMemory* dev)
     {
+        LOG_INFO("Bus: connecting memory module");
+
         if (nullptr != mem)
         {
             LOG_WARNING("Bus: old memory not properly destroyed");
@@ -110,6 +114,8 @@ namespace Bus
 
     bool connectCPU(ICPU* dev)
     {
+        LOG_INFO("Bus: connecting cpu module");
+
         if (nullptr != cpu)
         {
             LOG_WARNING("Bus: old cpu not properly destroyed");
@@ -122,6 +128,8 @@ namespace Bus
 
     bool connectPlugins(Plugins* dev)
     {
+        LOG_INFO("Bus: connecting plugins");
+
         if (nullptr != plugins)
         {
             LOG_WARNING("Bus: old plugins not properly cleared");
@@ -133,6 +141,8 @@ namespace Bus
 
     bool initializeDevices(void)
     {
+        LOG_INFO("Bus: initializing devices");
+
         if (nullptr == rom)
         {
             LOG_ERROR("Bus: no rom connected");
@@ -168,6 +178,7 @@ namespace Bus
         }
 
         devicesInitialized = true;
+        LOG_INFO("Bus: devices successfully initialized");
 
         return true;
     }
@@ -180,12 +191,16 @@ namespace Bus
             return;
         }
 
+        LOG_INFO("Bus: executing emulator...");
+
         plugins->RomOpened();
 
         systimer = new SysTiming(rom->getViLimit());
         systimer->startTimers();
 
         cpu->execute();
+
+        LOG_INFO("Bus: stopping emulator...");
 
         plugins->RomClosed();
 
@@ -199,6 +214,8 @@ namespace Bus
             LOG_ERROR("Bus: cannot destroy devices while machine is running!");
             return false;
         }
+
+        LOG_INFO("Bus: uninitializing devices");
 
         if (nullptr != mem)
         {
@@ -237,6 +254,8 @@ namespace Bus
             LOG_ERROR("Bus: reset error. devices not initialized");
             return;
         }
+
+        LOG_INFO("Soft resetting emulator...");
 
         interrupt->soft_reset();
     }

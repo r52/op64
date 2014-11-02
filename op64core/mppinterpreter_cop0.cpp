@@ -32,7 +32,7 @@ void MPPInterpreter::MTC0(void)
         _cp0_reg[CP0_INDEX_REG] = (uint32_t)_reg[_cur_instr.rt].u & 0x8000003F;
         if ((_cp0_reg[CP0_INDEX_REG] & 0x3F) > 31)
         {
-            LOG_DEBUG("ERROR: MTC0 instruction writing Index register with TLB index > 31");
+            LOG_ERROR("MTC0 instruction writing Index register with TLB index > 31");
             Bus::stop = true;
         }
         break;
@@ -100,7 +100,7 @@ void MPPInterpreter::MTC0(void)
     case CP0_CAUSE_REG:
         if ((int64_t)_reg[_cur_instr.rt].s != 0)
         {
-            LOG_DEBUG("ERROR: MTC0 instruction trying to write Cause register with non-0 value");
+            LOG_ERROR("MTC0 instruction trying to write Cause register with non-0 value");
             Bus::stop = true;
         }
         else
@@ -129,7 +129,7 @@ void MPPInterpreter::MTC0(void)
         _cp0_reg[CP0_TAGHI_REG] = 0;
         break;
     default:
-        LOG_DEBUG("ERROR: Unknown MTC0 write: %d", _cur_instr.fs);
+        LOG_ERROR("Unknown MTC0 write: %d", _cur_instr.fs);
         Bus::stop = true;
         break;
     }
@@ -220,7 +220,7 @@ void MPPInterpreter::ERET(void)
     _cp0->update_count();
     if (_cp0_reg[CP0_STATUS_REG] & 0x4)
     {
-        LOG_ERROR("error in ERET");
+        LOG_ERROR("Error in ERET");
         Bus::stop = true;
     }
     else

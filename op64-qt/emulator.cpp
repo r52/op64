@@ -144,11 +144,13 @@ void Emulator::setupBus(Plugins* plugins, ICPU* cpu, IMemory* mem)
 
 void Emulator::setLimitFPS(bool limit)
 {
+    LOG_INFO("Speed limit %s", limit ? "on" : "off");
     Bus::limitVI = limit;
 }
 
 void Emulator::gameHardReset(void)
 {
+    LOG_INFO("Hard resetting emulator...");
     Bus::doHardReset = true;
 }
 

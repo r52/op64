@@ -19,7 +19,7 @@
 
 #define MEM_NOT_IMPLEMENTED() \
     Bus::stop = true; \
-    LOG_ERROR("OP: %x; Function %s in %s line %i not implemented. Stopping...\n", Bus::cur_instr->code, __func__, __FILE__, __LINE__);
+    LOG_ERROR("OP: %x; Function %s in %s line %i not implemented. Stopping...", Bus::cur_instr->code, __func__, __FILE__, __LINE__);
 
 
 static FrameBufferInfo fbInfo[6];
@@ -798,7 +798,7 @@ void MPMemory::read_flashram_status(uint32_t& address, uint64_t* dest, DataSize 
 {
     if (size != SIZE_WORD)
     {
-        LOG_ERROR("Reading flashram status as non-word");
+        LOG_WARNING("Reading flashram status as non-word");
         return;
     }
 
@@ -813,7 +813,7 @@ void MPMemory::read_flashram_status(uint32_t& address, uint64_t* dest, DataSize 
     }
     else
     {
-        LOG_ERROR("Reading flashram command with non-flashram save type");
+        LOG_WARNING("Reading flashram command with non-flashram save type");
     }
 }
 
@@ -853,7 +853,7 @@ void MPMemory::read_pif(uint32_t& address, uint64_t* dest, DataSize size)
 
     if ((addr_low > 0x7FF) || (addr_low < 0x7C0))
     {
-        LOG_ERROR("reading a byte in PIF at invalid address 0x%x", address);
+        LOG_WARNING("Reading a byte in PIF at invalid address 0x%x", address);
         *dest = 0;
         return;
     }
@@ -2050,7 +2050,7 @@ void MPMemory::write_flashram_command(uint32_t address, uint64_t src, DataSize s
 {
     if (size != SIZE_WORD)
     {
-        LOG_ERROR("Writing flashram command as non-word");
+        LOG_WARNING("Writing flashram command as non-word");
         return;
     }
 
@@ -2065,7 +2065,7 @@ void MPMemory::write_flashram_command(uint32_t address, uint64_t src, DataSize s
     }
     else
     {
-        LOG_ERROR("Writing flashram command with non-flashram save type");
+        LOG_WARNING("Writing flashram command with non-flashram save type");
     }
 }
 
@@ -2087,7 +2087,7 @@ void MPMemory::write_pif(uint32_t address, uint64_t src, DataSize size)
     {
         if ((addr_low > 0x7FF) || (addr_low < 0x7C0))
         {
-            LOG_ERROR("writing a word in PIF at invalid address 0x%x", address);
+            LOG_WARNING("Writing a word in PIF at invalid address 0x%x", address);
             return;
         }
 
@@ -2111,7 +2111,7 @@ void MPMemory::write_pif(uint32_t address, uint64_t src, DataSize size)
     {
         if ((addr_low > 0x7FF) || (addr_low < 0x7C0))
         {
-            LOG_ERROR("writing a double word in PIF at 0x%x", address);
+            LOG_WARNING("Writing a double word in PIF at 0x%x", address);
             return;
         }
 
@@ -2138,7 +2138,7 @@ void MPMemory::write_pif(uint32_t address, uint64_t src, DataSize size)
     {
         if ((addr_low > 0x7FF) || (addr_low < 0x7C0))
         {
-            LOG_ERROR("writing a hword in PIF at invalid address 0x%x", address);
+            LOG_WARNING("Writing a hword in PIF at invalid address 0x%x", address);
             return;
         }
 
@@ -2161,7 +2161,7 @@ void MPMemory::write_pif(uint32_t address, uint64_t src, DataSize size)
     {
         if ((addr_low > 0x7FF) || (addr_low < 0x7C0))
         {
-            LOG_ERROR("writing a byte in PIF at invalid address 0x%x", address);
+            LOG_WARNING("Writing a byte in PIF at invalid address 0x%x", address);
             return;
         }
 

@@ -33,6 +33,12 @@
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="Header Files\Config Dialog">
+      <UniqueIdentifier>{1fa5e040-4945-436f-abd7-731e0b847576}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Config Dialog">
+      <UniqueIdentifier>{3be2fb7f-37d3-485c-bd0d-25a245b39fde}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -62,12 +68,6 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_configdialog.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="configdialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="configpages.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_configdialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
@@ -79,6 +79,12 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_renderwidget.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="configdialog.cpp">
+      <Filter>Source Files\Config Dialog</Filter>
+    </ClCompile>
+    <ClCompile Include="configpages.cpp">
+      <Filter>Source Files\Config Dialog</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -94,11 +100,11 @@
     <CustomBuild Include="emulator.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="configdialog.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="renderwidget.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="configdialog.h">
+      <Filter>Header Files\Config Dialog</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -108,11 +114,11 @@
     <ClInclude Include="guiconfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="configpages.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="configpages.h">
+      <Filter>Header Files\Config Dialog</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

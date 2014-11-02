@@ -129,7 +129,7 @@ void PIF::pifWrite(void)
             Bus::pif_ram8[0x3F] = 0;
             break;
         default:
-            LOG_ERROR("%s: error in write: %x", __FUNCTION__, Bus::pif_ram8[0x3F]);
+            LOG_WARNING("%s: error in write: %x", __FUNCTION__, Bus::pif_ram8[0x3F]);
             break;
         }
         return;
@@ -171,7 +171,7 @@ void PIF::pifWrite(void)
                 }
                 else
                 {
-                    LOG_ERROR("%s: channel >= 4", __FUNCTION__);
+                    LOG_WARNING("%s: channel >= 4", __FUNCTION__);
                 }
 
                 i += Bus::pif_ram8[i] + (Bus::pif_ram8[(i + 1)] & 0x3F) + 1;

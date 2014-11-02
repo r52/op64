@@ -12,7 +12,7 @@
 
 #define NOT_IMPLEMENTED() \
     Bus::stop = true; \
-    LOG_ERROR("PC: %x op: %x; Function %s in %s line %i not implemented. Stopping...\n", (uint32_t)_PC, _cur_instr.code, __func__, __FILE__, __LINE__);
+    LOG_ERROR("PC: %x op: %x; Function %s in %s line %i not implemented. Stopping...", (uint32_t)_PC, _cur_instr.code, __func__, __FILE__, __LINE__);
 
 #define DO_JUMP(target, condition, link, likely, cop1) \
     if (target == ((uint32_t)_PC) && _check_nop) \
@@ -56,9 +56,7 @@ private:
         }
         else
         {
-            char buf[250];
-            sprintf_s(buf, "prefetch execution address %x not found. Stopping...\n", (uint32_t)_PC);
-            LOG(buf);
+            LOG_ERROR("Prefetch execution address %x not found. Stopping...", (uint32_t)_PC);
             Bus::stop = true;
         }
     }

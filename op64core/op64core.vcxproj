@@ -109,6 +109,7 @@
     <ClInclude Include="sram.h" />
     <ClInclude Include="systiming.h" />
     <ClInclude Include="tlb.h" />
+    <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="audioplugin.cpp" />
