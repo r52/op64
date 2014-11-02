@@ -560,7 +560,16 @@ void MPPInterpreter::FLOOR_L_D(void)
 
 void MPPInterpreter::ROUND_W_D(void)
 {
-    NOT_IMPLEMENTED();
+    if (_cp0->cop1_unusable())
+        return;
+
+    uint32_t saved_mode = get_rounding();
+
+    set_rounding(ROUND_MODE);
+    *(int32_t*)Bus::s_reg[_cur_instr.fd] = f64_to_i32((double*)Bus::d_reg[_cur_instr.fs]);
+    set_rounding(saved_mode);
+
+    ++_PC;
 }
 
 void MPPInterpreter::TRUNC_W_D(void)
@@ -602,7 +611,7 @@ void MPPInterpreter::CVT_W_D(void)
         return;
 
     set_rounding();
-    *((int32_t*)Bus::s_reg[_cur_instr.fd]) = f64_to_i32(*(double*)Bus::d_reg[_cur_instr.fs]);
+    *((int32_t*)Bus::s_reg[_cur_instr.fd]) = f64_to_i32((double*)Bus::d_reg[_cur_instr.fs]);
     ++_PC;
 }
 

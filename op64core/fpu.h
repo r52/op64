@@ -102,14 +102,14 @@ inline double i32_to_f64(int i)
     return result;
 }
 
-inline int32_t f64_to_i32(double d)
+inline int32_t f64_to_i32(double* d)
 {
-    return _mm_cvtsd_si32(_mm_load_sd(&d));
+    return _mm_cvtsd_si32(_mm_load_sd(d));
 }
 
-inline int64_t f64_to_i64(double d)
+inline int64_t f64_to_i64(double* d)
 {
-    return _mm_cvtsd_si64(_mm_load_sd(&d));
+    return _mm_cvtsd_si64(_mm_load_sd(d));
 }
 
 inline float i64_to_f32(int64_t i)
