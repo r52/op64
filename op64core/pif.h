@@ -13,6 +13,7 @@ public:
     ~PIF(void);
 
     void initialize(void);
+    void uninitialize(void);
     void pifRead(void);
     void pifWrite(void);
 

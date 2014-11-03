@@ -26,6 +26,9 @@ IMemory::IMemory()
     si_reg = _si_reg;
     dp_reg = _dp_reg;
     dps_reg = _dps_reg;
+
+    // The pif needs to be persistent in pj64 spec
+    pif = new PIF();
 }
 
 IMemory::~IMemory()
@@ -51,6 +54,11 @@ IMemory::~IMemory()
     dps_reg = nullptr;
 
     uninitialize();
+
+    if (nullptr != pif)
+    {
+        delete pif; pif = nullptr;
+    }
 }
 
 void IMemory::initialize(void)
@@ -58,10 +66,6 @@ void IMemory::initialize(void)
     using namespace Bus;
 
     // Sanity checks
-    if (nullptr != pif)
-    {
-        delete pif; pif = nullptr;
-    }
 
     if (nullptr != sram)
     {
@@ -73,7 +77,6 @@ void IMemory::initialize(void)
         delete flashram; flashram = nullptr;
     }
 
-    pif = new PIF();
     sram = new SRAM();
     flashram = new FlashRam();
 
@@ -84,10 +87,7 @@ void IMemory::uninitialize(void)
 {
     using namespace Bus;
 
-    if (nullptr != pif)
-    {
-        delete pif; pif = nullptr;
-    }
+    pif->uninitialize();
 
     if (nullptr != sram)
     {

@@ -9,23 +9,15 @@
 
 
 PIF::PIF(void) :
-_eeprom(new EEPROM),
-_mempak(new MemPak)
+_eeprom(nullptr),
+_mempak(nullptr)
 {
     Bus::controllers = _controllers;
 }
 
 PIF::~PIF(void)
 {
-    if (_eeprom != nullptr)
-    {
-        delete _eeprom; _eeprom = nullptr;
-    }
-
-    if (_mempak != nullptr)
-    {
-        delete _mempak; _mempak = nullptr;
-    }
+    uninitialize();
 
     Bus::controllers = nullptr;
 }
@@ -38,6 +30,24 @@ void PIF::initialize(void)
         _controllers[i].Present = 0;
         _controllers[i].RawData = 0;
         _controllers[i].Plugin = PLUGIN_NONE;
+    }
+
+    uninitialize();
+
+    _eeprom = new EEPROM;
+    _mempak = new MemPak;
+}
+
+void PIF::uninitialize(void)
+{
+    if (_eeprom != nullptr)
+    {
+        delete _eeprom; _eeprom = nullptr;
+    }
+
+    if (_mempak != nullptr)
+    {
+        delete _mempak; _mempak = nullptr;
     }
 }
 
