@@ -9,7 +9,8 @@ enum SystemType
 {
     SYSTEM_NTSC = 0,
     SYSTEM_PAL,
-    SYSTEM_MPAL
+    SYSTEM_MPAL,
+    SYSTEM_NUM_TYPES
 };
 
 enum CIC
@@ -19,7 +20,8 @@ enum CIC
     CIC_NUS_6102,
     CIC_NUS_6103,
     CIC_NUS_6105,
-    CIC_NUS_6106
+    CIC_NUS_6106,
+    CIC_NUM_TYPES
 };
 
 enum ImageType
@@ -36,7 +38,8 @@ enum SaveType
     SAVETYPE_EEPROM_16KB,
     SAVETYPE_SRAM,
     SAVETYPE_FLASH_RAM,
-    CONTROLLER_PACK
+    CONTROLLER_PACK,
+    SAVETYPE_NUM_TYPES
 };
 
 typedef struct
@@ -60,9 +63,6 @@ typedef struct
 
 class Rom
 {
-    friend class MPPInterpreter;
-    friend class MPMemory;
-
 public:
     Rom(void);
     ~Rom(void);

@@ -136,6 +136,7 @@ void InputPlugin::loadLibrary(const char* libPath)
 
     if (!opLoadLib(&_libHandle, libPath))
     {
+        LOG_ERROR("%s failed to load", libPath);
         unloadLibrary();
         return;
     }
@@ -143,10 +144,20 @@ void InputPlugin::loadLibrary(const char* libPath)
     //Get DLL information
     void (*GetDllInfo)(PLUGIN_INFO* PluginInfo);
     GetDllInfo = (void(*)(PLUGIN_INFO*))opLibGetFunc(_libHandle, "GetDllInfo");
-    if (GetDllInfo == nullptr) { unloadLibrary(); return; }
+    if (GetDllInfo == nullptr)
+    {
+        LOG_ERROR("%s: invalid plugin", libPath);
+        unloadLibrary();
+        return;
+    }
 
     GetDllInfo(&_pluginInfo);
-    if (!Plugins::ValidPluginVersion(_pluginInfo)) { unloadLibrary(); return; }
+    if (!Plugins::ValidPluginVersion(_pluginInfo))
+    {
+        LOG_ERROR("%s: unsupported plugin version", libPath);
+        unloadLibrary();
+        return;
+    }
 
     //Find entries for functions in DLL
     void (*InitFunc)(void);

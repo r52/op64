@@ -90,6 +90,7 @@ MPPInterpreter::~MPPInterpreter(void)
 
 void MPPInterpreter::initialize(void)
 {
+    LOG_INFO("Interpreter: initializing...");
     _cp0_reg = Bus::cp0_reg;
     _fgr = Bus::fgr;
     hard_reset();
@@ -292,6 +293,7 @@ void MPPInterpreter::soft_reset(void)
 
 void MPPInterpreter::execute(void)
 {
+    LOG_INFO("Interpreter: running...");
     _delay_slot = false;
     Bus::stop = false;
 

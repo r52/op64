@@ -86,8 +86,6 @@ namespace Bus
 
     bool connectRom(Rom* dev)
     {
-        LOG_INFO("Bus: connecting rom");
-
         if (nullptr != rom)
         {
             LOG_WARNING("Bus: old rom not properly destroyed");
@@ -100,8 +98,6 @@ namespace Bus
 
     bool connectMemory(IMemory* dev)
     {
-        LOG_INFO("Bus: connecting memory module");
-
         if (nullptr != mem)
         {
             LOG_WARNING("Bus: old memory not properly destroyed");
@@ -114,8 +110,6 @@ namespace Bus
 
     bool connectCPU(ICPU* dev)
     {
-        LOG_INFO("Bus: connecting cpu module");
-
         if (nullptr != cpu)
         {
             LOG_WARNING("Bus: old cpu not properly destroyed");
@@ -128,8 +122,6 @@ namespace Bus
 
     bool connectPlugins(Plugins* dev)
     {
-        LOG_INFO("Bus: connecting plugins");
-
         if (nullptr != plugins)
         {
             LOG_WARNING("Bus: old plugins not properly cleared");

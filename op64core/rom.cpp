@@ -8,6 +8,23 @@
 
 using namespace boost::filesystem;
 
+static const char* systemTypeString[SYSTEM_NUM_TYPES] =
+{
+    "NTSC",
+    "PAL",
+    "MPAL"
+};
+
+static const char* saveTypeString[SAVETYPE_NUM_TYPES] =
+{
+    "Auto",
+    "EEPROM 4KB",
+    "EEPROM 16KB",
+    "SRAM",
+    "Flash RAM",
+    "Controller Pak"
+};
+
 static SystemType rom_country_code_to_system_type(uint16_t cc)
 {
     switch (cc & 0xFF)
@@ -120,7 +137,7 @@ bool Rom::loadRom(const char* name)
 {
     if (nullptr != _image)
     {
-        // just fail
+        LOG_ERROR("ROM: unrecoverable error");
         return false;
     }
 
@@ -128,12 +145,15 @@ bool Rom::loadRom(const char* name)
     if (!exists(_filename) || !is_regular_file(_filename))
     {
         // file doesn't exist or is bad
+        LOG_ERROR("ROM: file %s not found or is an invalid file", name);
         return false;
     }
 
     ifstream file(_filename, std::ios::in | std::ios::binary | std::ios::ate);
     if (file.is_open() && file.good())
     {
+        LOG_INFO("ROM: Loading %s", name);
+
         std::streampos size = file.tellg();
 
         if (size < 4096)
@@ -141,11 +161,10 @@ bool Rom::loadRom(const char* name)
             return false;
         }
 
-
         uint8_t* image = new uint8_t[static_cast<unsigned int>(size)];
         if (nullptr == image)
         {
-            // Couldn't allocate
+            LOG_ERROR("ROM: error allocating %u bytes for ROM!", size);
             return false;
         }
 
@@ -155,6 +174,7 @@ bool Rom::loadRom(const char* name)
 
         if (!isValidRom(image))
         {
+            LOG_ERROR("ROM: invalid N64 ROM");
             delete[] image;
             return false;
         }
@@ -172,6 +192,12 @@ bool Rom::loadRom(const char* name)
         _aidacrate = rom_system_type_to_ai_dac_rate(_systemtype);
         // TODO future count per op
 
+        LOG_VERBOSE("Name: %s", _header.Name);
+        LOG_VERBOSE("CRC1: %X", _header.CRC1);
+        LOG_VERBOSE("CRC2: %X", _header.CRC2);
+        LOG_VERBOSE("System Type: %s", systemTypeString[_systemtype]);
+        LOG_VERBOSE("Save Type: %s", saveTypeString[_savetype]);
+
         // Swap it again because little endian cpu
         uint32_t* roml = (uint32_t*)_image;
         vec_for (uint32_t i = 0; i < (_imagesize / 4); i++)
@@ -181,6 +207,8 @@ bool Rom::loadRom(const char* name)
 
         Bus::rom_image = _image;
         calculateCIC();
+
+        LOG_INFO("ROM: ROM loaded");
 
         return true;
     }

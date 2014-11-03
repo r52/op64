@@ -12,7 +12,8 @@
 
 #define NOT_IMPLEMENTED() \
     Bus::stop = true; \
-    LOG_ERROR("PC: %x op: %x; Function %s in %s line %i not implemented. Stopping...", (uint32_t)_PC, _cur_instr.code, __func__, __FILE__, __LINE__);
+    LOG_ERROR("Interpreter: Function %s in %s line %i not implemented. Stopping...", __func__, __FILE__, __LINE__); \
+    LOG_VERBOSE("PC: %X OP: %X", (uint32_t)_PC, _cur_instr.code);
 
 #define DO_JUMP(target, condition, link, likely, cop1) \
     if (target == ((uint32_t)_PC) && _check_nop) \

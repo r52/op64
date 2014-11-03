@@ -72,7 +72,7 @@ void Plugins::pluginsChanged(void)
 
 void Plugins::loadPlugins(void)
 {
-    LOG_INFO("Loading plugins");
+    LOG_INFO("Plugins: Loading plugins");
 
     if (nullptr == _gfx)
     {
@@ -176,7 +176,7 @@ void Plugins::DestroyGfxPlugin(void)
         return;
     }
 
-    LOG_INFO("Destroying Graphics plugin");
+    LOG_INFO("Plugins: Destroying Graphics plugin");
 
     delete _gfx; _gfx = nullptr;
     DestroyRspPlugin();
@@ -189,7 +189,7 @@ void Plugins::DestroyAudioPlugin(void)
         return;
     }
 
-    LOG_INFO("Destroying Audio plugin");
+    LOG_INFO("Plugins: Destroying Audio plugin");
 
     _audio->close();
     delete _audio;  _audio = nullptr;
@@ -203,7 +203,7 @@ void Plugins::DestroyRspPlugin(void)
         return;
     }
 
-    LOG_INFO("Destroying RSP plugin");
+    LOG_INFO("Plugins: Destroying RSP plugin");
 
     _rsp->close();
     delete _rsp; _rsp = nullptr;
@@ -216,7 +216,7 @@ void Plugins::DestroyInputPlugin(void)
         return;
     }
 
-    LOG_INFO("Destroying Input plugin");
+    LOG_INFO("Plugins: Destroying Input plugin");
 
     _input->close();
     delete _input; _input = nullptr;
@@ -240,6 +240,7 @@ void Plugins::GameReset(void)
 
 void Plugins::RomOpened(void)
 {
+    LOG_INFO("Plugins: ROM opened");
     _gfx->onRomOpen();
     _rsp->onRomOpen();
     _audio->onRomOpen();
@@ -248,6 +249,7 @@ void Plugins::RomOpened(void)
 
 void Plugins::RomClosed(void)
 {
+    LOG_INFO("Plugins: ROM closed");
     _gfx->onRomClose();
     _rsp->onRomClose();
     _audio->onRomClose();
@@ -256,56 +258,56 @@ void Plugins::RomClosed(void)
 
 bool Plugins::initialize(void)
 {
-    LOG_INFO("Initializing plugins...");
+    LOG_INFO("Plugins: initializing...");
 
     if (_gfx == nullptr)
     {
-        LOG_ERROR("No graphics plugin loaded");
+        LOG_ERROR("Plugins: No graphics plugin loaded");
         return false;
     }
 
     if (_audio == nullptr)
     {
-        LOG_ERROR("No audio plugin loaded");
+        LOG_ERROR("Plugins: No audio plugin loaded");
         return false;
     }
     if (_rsp == nullptr)
     {
-        LOG_ERROR("No rsp plugin loaded");
+        LOG_ERROR("Plugins: No rsp plugin loaded");
         return false;
     }
 
     if (_input == nullptr)
     {
-        LOG_ERROR("No input plugin loaded");
+        LOG_ERROR("Plugins: No input plugin loaded");
         return false;
     }
 
     if (!_gfx->initialize(_renderWindow, _statusBar))
     {
-        LOG_ERROR("Graphics plugin failed to initialize");
+        LOG_ERROR("Plugins: Graphics plugin failed to initialize");
         return false;
     }
 
     if (!_audio->initialize(_renderWindow, _statusBar))
     {
-        LOG_ERROR("Audio plugin failed to initialize");
+        LOG_ERROR("Plugins: Audio plugin failed to initialize");
         return false;
     }
 
     if (!_input->initialize(_renderWindow, _statusBar))
     {
-        LOG_ERROR("Input plugin failed to initialize");
+        LOG_ERROR("Plugins: Input plugin failed to initialize");
         return false;
     }
 
     if (!_rsp->initialize(this, _renderWindow, _statusBar))
     {
-        LOG_ERROR("RSP plugin failed to initialize");
+        LOG_ERROR("Plugins: RSP plugin failed to initialize");
         return false;
     }
 
-    LOG_INFO("Plugins initialized successfully");
+    LOG_INFO("Plugins: successfully initialized");
 
     return true;
 }
