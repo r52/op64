@@ -223,15 +223,11 @@ void DMA::writePI(void)
         case 2:
         case 3:
         case 6:
-        {
-                rdram[0x318 / 4] = 0x800000;
+            rdram[0x318 / 4] = 0x800000;
             break;
-        }
         case 5:
-        {
-                rdram[0x3F0 / 4] = 0x800000;
+            rdram[0x3F0 / 4] = 0x800000;
             break;
-        }
         }
     }
 

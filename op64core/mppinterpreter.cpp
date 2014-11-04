@@ -160,135 +160,93 @@ void MPPInterpreter::hard_reset(void)
     }
 }
 
-void MPPInterpreter::soft_reset(void)
+static uint32_t get_system_type_reg(SystemType type)
 {
-    // copy boot code
-    memcpy(Bus::sp_dmem8 + 0x40, Bus::rom->getImage() + 0x40, 0xFBC);
-
-    _reg[6].s = 0xFFFFFFFFA4001F0C;
-    _reg[7].s = 0xFFFFFFFFA4001F08;
-    _reg[8].s = 0x00000000000000C0;
-    _reg[10].s = 0x0000000000000040;
-    _reg[11].s = 0xFFFFFFFFA4000040;
-    _reg[29].s = 0xFFFFFFFFA4001FF0;
-
-
-    uint32_t* sp_dmem = Bus::sp_dmem32;
-    uint32_t* sp_imem = Bus::sp_imem32;    
-
-    switch (Bus::rom->getSystemType())
+    switch (type)
     {
-    case SYSTEM_PAL:
-    {
-        switch (Bus::rom->getCICChip()) {
-        case CIC_NUS_6102:
-            _reg[5].s = 0xFFFFFFFFC0F1D859;
-            _reg[14].s = 0x000000002DE108EA;
-            break;
-        case CIC_NUS_6103:
-            _reg[5].s = 0xFFFFFFFFD4646273;
-            _reg[14].s = 0x000000001AF99984;
-            break;
-        case CIC_NUS_6105:
-            sp_imem[1] = 0xBDA807FC;
-            _reg[5].s = 0xFFFFFFFFDECAAAD1;
-            _reg[14].s = 0x000000000CF85C13;
-            _reg[24].s = 0x0000000000000002;
-            break;
-        case CIC_NUS_6106:
-            _reg[5].s = 0xFFFFFFFFB04DC903;
-            _reg[14].s = 0x000000001AF99984;
-            _reg[24].s = 0x0000000000000002;
-            break;
-        }
-        _reg[23].s = 0x0000000000000006;
-        _reg[31].s = 0xFFFFFFFFA4001554;
-    }
-        break;
     case SYSTEM_NTSC:
-    default:
+        return 1;
+        break;
+    case SYSTEM_PAL:
+        return 0;
+        break;
+    case SYSTEM_MPAL:
+        return 2;
+        break;
+    }
+}
+
+static uint32_t get_cic_seed(uint32_t chip)
+{
+    switch (chip)
     {
-        switch (Bus::rom->getCICChip()) {
-        case CIC_NUS_6102:
-            _reg[5].s = 0xFFFFFFFFC95973D5;
-            _reg[14].s = 0x000000002449A366;
-            break;
-        case CIC_NUS_6103:
-            _reg[5].s = 0xFFFFFFFF95315A28;
-            _reg[14].s = 0x000000005BACA1DF;
-            break;
-        case CIC_NUS_6105:
-            sp_imem[1] = 0x8DA807FC;
-            _reg[5].s = 0x000000005493FB9A;
-            _reg[14].s = 0xFFFFFFFFC2C20384;
-            break;
-        case CIC_NUS_6106:
-            _reg[5].s = 0xFFFFFFFFE067221F;
-            _reg[14].s = 0x000000005CD2B70F;
-            break;
-        }
-        _reg[20].s = 0x0000000000000001;
-        _reg[24].s = 0x0000000000000003;
-        _reg[31].s = 0xFFFFFFFFA4001550;
-    }
-        break;
-    }
-
-
-    switch (Bus::rom->getCICChip()) {
+    case CIC_UNKNOWN:
     case CIC_NUS_6101:
-        _reg[22].s = 0x000000000000003F;
-        break;
     case CIC_NUS_6102:
-        _reg[1].s = 0x0000000000000001;
-        _reg[2].s = 0x000000000EBDA536;
-        _reg[3].s = 0x000000000EBDA536;
-        _reg[4].s = 0x000000000000A536;
-        _reg[12].s = 0xFFFFFFFFED10D0B3;
-        _reg[13].s = 0x000000001402A4CC;
-        _reg[15].s = 0x000000003103E121;
-        _reg[22].s = 0x000000000000003F;
-        _reg[25].s = 0xFFFFFFFF9DEBB54F;
+        return 0x3f;
         break;
     case CIC_NUS_6103:
-        _reg[1].s = 0x0000000000000001;
-        _reg[2].s = 0x0000000049A5EE96;
-        _reg[3].s = 0x0000000049A5EE96;
-        _reg[4].s = 0x000000000000EE96;
-        _reg[12].s = 0xFFFFFFFFCE9DFBF7;
-        _reg[13].s = 0xFFFFFFFFCE9DFBF7;
-        _reg[15].s = 0x0000000018B63D28;
-        _reg[22].s = 0x0000000000000078;
-        _reg[25].s = 0xFFFFFFFF825B21C9;
+        return 0x78;
         break;
     case CIC_NUS_6105:
-        sp_imem[0] = 0x3C0DBFC0;
-        sp_imem[2] = 0x25AD07C0;
-        sp_imem[3] = 0x31080080;
-        sp_imem[4] = 0x5500FFFC;
-        sp_imem[5] = 0x3C0DBFC0;
-        sp_imem[6] = 0x8DA80024;
-        sp_imem[7] = 0x3C0BB000;
-        _reg[2].s = 0xFFFFFFFFF58B0FBF;
-        _reg[3].s = 0xFFFFFFFFF58B0FBF;
-        _reg[4].s = 0x0000000000000FBF;
-        _reg[12].s = 0xFFFFFFFF9651F81E;
-        _reg[13].s = 0x000000002D42AAC5;
-        _reg[15].s = 0x0000000056584D60;
-        _reg[22].s = 0x0000000000000091;
-        _reg[25].s = 0xFFFFFFFFCDCE565F;
+        return 0x91;
         break;
     case CIC_NUS_6106:
-        _reg[2].s = 0xFFFFFFFFA95930A4;
-        _reg[3].s = 0xFFFFFFFFA95930A4;
-        _reg[4].s = 0x00000000000030A4;
-        _reg[12].s = 0xFFFFFFFFBCB59510;
-        _reg[13].s = 0xFFFFFFFFBCB59510;
-        _reg[15].s = 0x000000007A3C07F4;
-        _reg[22].s = 0x0000000000000085;
-        _reg[25].s = 0x00000000465E3F72;
+        return 0x85;
         break;
     }
+}
+
+void MPPInterpreter::soft_reset(void)
+{
+    _cp0_reg[CP0_STATUS_REG] = 0x34000000;
+    _cp0_reg[CP0_CONFIG_REG] = 0x0006E463;
+
+    Bus::sp_reg[SP_STATUS_REG] = 1;
+    Bus::sp_reg[SP_PC_REG] = 0;
+
+    uint32_t bsd_dom1_config = *(uint32_t*)Bus::rom->getImage();
+    Bus::pi_reg[PI_BSD_DOM1_LAT_REG] = bsd_dom1_config & 0xff;
+    Bus::pi_reg[PI_BSD_DOM1_PWD_REG] = (bsd_dom1_config >> 8) & 0xff;
+    Bus::pi_reg[PI_BSD_DOM1_PGS_REG] = (bsd_dom1_config >> 16) & 0x0f;
+    Bus::pi_reg[PI_BSD_DOM1_RLS_REG] = (bsd_dom1_config >> 20) & 0x03;
+    Bus::pi_reg[PI_STATUS_REG] = 0;
+
+    Bus::ai_reg[AI_DRAM_ADDR_REG] = 0;
+    Bus::ai_reg[AI_LEN_REG] = 0;
+
+    Bus::vi_reg[VI_INTR_REG] = 1023;
+    Bus::vi_reg[VI_CURRENT_REG] = 0;
+    Bus::vi_reg[VI_H_START_REG] = 0;
+
+    Bus::mi_reg[MI_INTR_REG] &= ~(0x10 | 0x8 | 0x4 | 0x1);
+
+    // copy boot code
+    memcpy(Bus::sp_dmem8 + 0x40, Bus::rom->getImage() + 0x40, 0xFC0);
+
+    _reg[19].u = 0; /* 0:Cart, 1:DD */
+    _reg[20].u = get_system_type_reg(Bus::rom->getSystemType());    /* 0:PAL, 1:NTSC, 2:MPAL */
+    _reg[21].u = 0; /* 0:ColdReset, 1:NMI */
+    _reg[22].u = get_cic_seed(Bus::rom->getCICChip());
+    _reg[23].u = 0; /*???*/
+
+    uint32_t* sp_dmem = Bus::sp_dmem32;
+    uint32_t* sp_imem = Bus::sp_imem32;
+
+    /* required by CIC x105 */
+    sp_imem[0] = 0x3C0DBFC0;
+    sp_imem[1] = 0x8DA807FC;
+    sp_imem[2] = 0x25AD07C0;
+    sp_imem[3] = 0x31080080;
+    sp_imem[4] = 0x5500FFFC;
+    sp_imem[5] = 0x3C0DBFC0;
+    sp_imem[6] = 0x8DA80024;
+    sp_imem[7] = 0x3C0BB000;
+
+    /* required by CIC x105 */
+    _reg[11].u = 0xFFFFFFFFA4000040;
+    _reg[29].u = 0xFFFFFFFFA4001FF0;
+    _reg[31].u = 0xFFFFFFFFA4001550;
 }
 
 void MPPInterpreter::execute(void)
