@@ -930,7 +930,10 @@ void MPMemory::read_rdramFB(uint32_t& address, uint64_t* dest, DataSize size)
 
 void MPMemory::write_nomem(uint32_t address, uint64_t src, DataSize size)
 {
-    MEM_NOT_IMPLEMENTED();
+    address = TLB::virtual_to_physical_address(address, 1);
+    if (address == 0x00000000) return;
+
+    writemem(address, src, size);
 }
 
 void MPMemory::write_rdram(uint32_t address, uint64_t src, DataSize size)
