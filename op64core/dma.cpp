@@ -97,7 +97,7 @@ void DMA::readPI(void)
     }
 
     pi_reg[PI_STATUS_REG] |= 1;
-    cpu->getcp0()->update_count();
+    cpu->getcp0()->update_count(*PC);
     interrupt->add_interrupt_event(PI_INT, 0x1000/*pi_register.pi_rd_len_reg*/);
 }
 
@@ -141,7 +141,7 @@ void DMA::writePI(void)
         }
 
         pi_reg[PI_STATUS_REG] |= 1;
-        cpu->getcp0()->update_count();
+        cpu->getcp0()->update_count(*PC);
         interrupt->add_interrupt_event(PI_INT, /*pi_register.pi_wr_len_reg*/0x1000);
 
         return;
@@ -150,7 +150,7 @@ void DMA::writePI(void)
     if (pi_reg[PI_CART_ADDR_REG] >= 0x1fc00000) // for paper mario
     {
         pi_reg[PI_STATUS_REG] |= 1;
-        cpu->getcp0()->update_count();
+        cpu->getcp0()->update_count(*PC);
         interrupt->add_interrupt_event(PI_INT, 0x1000);
 
         return;
@@ -167,7 +167,7 @@ void DMA::writePI(void)
     if (i > rom->getSize() || pi_reg[PI_DRAM_ADDR_REG] > 0x7FFFFF)
     {
         pi_reg[PI_STATUS_REG] |= 3;
-        cpu->getcp0()->update_count();
+        cpu->getcp0()->update_count(*PC);
         interrupt->add_interrupt_event(PI_INT, longueur / 8);
 
         return;
@@ -232,7 +232,7 @@ void DMA::writePI(void)
     }
 
     pi_reg[PI_STATUS_REG] |= 3;
-    cpu->getcp0()->update_count();
+    cpu->getcp0()->update_count(*PC);
     interrupt->add_interrupt_event(PI_INT, longueur / 8);
 }
 
@@ -251,7 +251,7 @@ void DMA::readSI(void)
         Bus::rdram[Bus::si_reg[SI_DRAM_ADDR_REG] / 4 + i] = byteswap_u32(Bus::pif_ram32[i]);
     }
 
-    Bus::cpu->getcp0()->update_count();
+    Bus::cpu->getcp0()->update_count(*Bus::PC);
 
     if (ConfigStore::getInstance().getBool(CFG_SECTION_CORE, CFG_DELAY_SI)) {
         Bus::interrupt->add_interrupt_event(SI_INT, /*0x100*/0x900);
@@ -277,7 +277,7 @@ void DMA::writeSI(void)
     }
 
     Bus::pif->pifWrite();
-    Bus::cpu->getcp0()->update_count();
+    Bus::cpu->getcp0()->update_count(*Bus::PC);
 
     if (ConfigStore::getInstance().getBool(CFG_SECTION_CORE, CFG_DELAY_SI)) {
         Bus::interrupt->add_interrupt_event(SI_INT, /*0x100*/0x900);

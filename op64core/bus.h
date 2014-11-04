@@ -38,27 +38,16 @@ namespace Bus
 
 
     // regs
-    extern Register64* reg;
-    extern Register64* hi;
-    extern Register64* lo;
-    extern bool* llbit;
     extern uint32_t* cp0_reg;
-    extern uint32_t* FCR0;
-    extern uint32_t* FCR31;
-    extern float** s_reg;
-    extern double** d_reg;
-    extern uint64_t* fgr;
 
     // cpu state
     extern ProgramCounter* PC;
-    extern uint32_t* last_instr_addr;
-    extern uint32_t* next_interrupt;
-    extern Instruction* cur_instr;
-    extern uint32_t* skip_jump;
+    extern uint32_t last_jump_addr;
+    extern uint32_t next_interrupt;
+    extern uint32_t skip_jump;
     extern std::atomic<bool> stop;
-    extern bool* delay_slot;
 
-    // mem
+    // mem pointers
     extern uint8_t* rom_image;
     extern uint32_t* sp_dmem32;
     extern uint32_t* sp_imem32;
@@ -83,12 +72,11 @@ namespace Bus
     extern uint32_t* dps_reg;
 
     // vi state
-    extern uint32_t* next_vi;
-    extern int32_t* vi_field;
+    extern uint32_t next_vi;
+    extern int32_t vi_field;
 
     // interrupt state
-    extern bool* SPECIAL_done;
-    extern bool* interrupt_unsafe_state;
+    extern bool interrupt_unsafe_state;
 
     // core control
     extern std::atomic<bool> doHardReset;

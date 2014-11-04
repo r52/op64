@@ -65,34 +65,30 @@ const int LDL_SHIFT[8] = { 0, 8, 16, 24, 32, 40, 48, 56 };
 const int LDR_SHIFT[8] = { 56, 48, 40, 32, 24, 16, 8, 0 };
 
 MPPInterpreter::MPPInterpreter(void) :
-_check_nop(false),
-_delay_slot(false),
-_skip_jump(0)
+_check_nop(false)
 {
-    // forward internals
-    using namespace Bus;
-    last_instr_addr = &_last_instr_addr;
-    delay_slot = &_delay_slot;
-    skip_jump = &_skip_jump;
 }
 
 
 MPPInterpreter::~MPPInterpreter(void)
 {
     _cp0_reg = nullptr;
-
-    using namespace Bus;
-    last_instr_addr = nullptr;
-    delay_slot = nullptr;
-    skip_jump = nullptr;
 }
 
 
 void MPPInterpreter::initialize(void)
 {
     LOG_INFO("Interpreter: initializing...");
+
+    // Disable fpu exceptions
+    _MM_SET_EXCEPTION_MASK(_MM_MASK_MASK);
+
+    if (_non_ieee_mode)
+    {
+        _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+    }
+
     _cp0_reg = Bus::cp0_reg;
-    _fgr = Bus::fgr;
     hard_reset();
     soft_reset();
 }
@@ -134,8 +130,8 @@ void MPPInterpreter::hard_reset(void)
     _llbit = 0;
     _hi.u = 0;
     _lo.u = 0;
-    *(Bus::FCR0) = 0x511;
-    *(Bus::FCR31) = 0;
+    _FCR0 = 0x511;
+    _FCR31 = 0;
 
     _cp0_reg[CP0_RANDOM_REG] = 0x1F;
     _cp0_reg[CP0_STATUS_REG] = 0x34000000;
@@ -149,21 +145,14 @@ void MPPInterpreter::hard_reset(void)
     _cp0_reg[CP0_BADVADDR_REG] = 0xFFFFFFFF;
     _cp0_reg[CP0_ERROREPC_REG] = 0xFFFFFFFF;
 
-    _cp1->rounding_mode = ROUND_MODE;
-
-    // Disable fpu exceptions
-    _MM_SET_EXCEPTION_MASK(_MM_MASK_MASK);
-
-    if (_non_ieee_mode)
-    {
-        _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
-    }
+    rounding_mode = ROUND_MODE;
 }
 
 static uint32_t get_system_type_reg(SystemType type)
 {
     switch (type)
     {
+    default:
     case SYSTEM_NTSC:
         return 1;
         break;
@@ -180,6 +169,7 @@ static uint32_t get_cic_seed(uint32_t chip)
 {
     switch (chip)
     {
+    default:
     case CIC_UNKNOWN:
     case CIC_NUS_6101:
     case CIC_NUS_6102:
@@ -254,9 +244,10 @@ void MPPInterpreter::execute(void)
     LOG_INFO("Interpreter: running...");
     _delay_slot = false;
     Bus::stop = false;
+    Bus::skip_jump = 0;
 
-    _PC = _last_instr_addr = 0xa4000040;
-    *(Bus::next_interrupt) = 624999;
+    _PC = Bus::last_jump_addr = 0xa4000040;
+    Bus::next_interrupt = 624999;
     Bus::interrupt->initialize();
 
     while (!Bus::stop)
@@ -707,7 +698,7 @@ void MPPInterpreter::LWC1(void)
 
     if (address)
     {
-        *((int32_t*)Bus::s_reg[_cur_instr.ft]) = (int32_t)dest;
+        *((int32_t*)_s_reg[_cur_instr.ft]) = (int32_t)dest;
     }
 }
 
@@ -725,7 +716,7 @@ void MPPInterpreter::LDC1(void)
 
     uint32_t address = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
 
-    Bus::mem->readmem(address, (uint64_t*)Bus::d_reg[_cur_instr.ft], SIZE_DWORD);
+    Bus::mem->readmem(address, (uint64_t*)_d_reg[_cur_instr.ft], SIZE_DWORD);
 }
 
 void MPPInterpreter::LD(void)
@@ -751,7 +742,7 @@ void MPPInterpreter::SWC1(void)
 
     ++_PC;
 
-    Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), *((int32_t*)Bus::s_reg[_cur_instr.ft]), SIZE_WORD);
+    Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), *((int32_t*)_s_reg[_cur_instr.ft]), SIZE_WORD);
 }
 
 void MPPInterpreter::SCD(void)
@@ -766,7 +757,7 @@ void MPPInterpreter::SDC1(void)
 
     ++_PC;
 
-    Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), *((int64_t*)Bus::d_reg[_cur_instr.ft]), SIZE_DWORD);
+    Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), *((int64_t*)_d_reg[_cur_instr.ft]), SIZE_DWORD);
 }
 
 void MPPInterpreter::SD(void)
@@ -784,8 +775,8 @@ void MPPInterpreter::generic_idle(uint32_t destination, bool take_jump, Register
 
     if (take_jump)
     {
-        _cp0->update_count();
-        skip = *(Bus::next_interrupt) - _cp0_reg[CP0_COUNT_REG];
+        _cp0->update_count(_PC);
+        skip = Bus::next_interrupt - _cp0_reg[CP0_COUNT_REG];
         if (skip > 3)
         {
             _cp0_reg[CP0_COUNT_REG] += (skip & 0xFFFFFFFC);
@@ -820,9 +811,9 @@ void MPPInterpreter::generic_jump(uint32_t destination, bool take_jump, Register
         prefetch();
         (this->*instruction_table[_cur_instr.op])();
 
-        _cp0->update_count();
+        _cp0->update_count(_PC);
         _delay_slot = false;
-        if (take_jump && !_skip_jump)
+        if (take_jump && !Bus::skip_jump)
         {
             _PC = destination;
         }
@@ -830,11 +821,11 @@ void MPPInterpreter::generic_jump(uint32_t destination, bool take_jump, Register
     else
     {
         _PC += 2;
-        _cp0->update_count();
+        _cp0->update_count(_PC);
     }
 
-    _last_instr_addr = (uint32_t)_PC;
-    if (*(Bus::next_interrupt) <= _cp0_reg[CP0_COUNT_REG])
+    Bus::last_jump_addr = (uint32_t)_PC;
+    if (Bus::next_interrupt <= _cp0_reg[CP0_COUNT_REG])
     {
         Bus::interrupt->gen_interrupt();
     }
@@ -847,7 +838,7 @@ void MPPInterpreter::global_jump_to(uint32_t addr)
 
 void MPPInterpreter::general_exception(void)
 {
-    _cp0->update_count();
+    _cp0->update_count(_PC);
     _cp0_reg[CP0_STATUS_REG] |= 2;
 
     _cp0_reg[CP0_EPC_REG] = (uint32_t)_PC;
@@ -863,12 +854,12 @@ void MPPInterpreter::general_exception(void)
     }
 
     global_jump_to(0x80000180);
-    _last_instr_addr = (uint32_t)_PC;
+    Bus::last_jump_addr = (uint32_t)_PC;
 
     if (_delay_slot)
     {
-        _skip_jump = (uint32_t)_PC;
-        *(Bus::next_interrupt) = 0;
+        Bus::skip_jump = (uint32_t)_PC;
+        Bus::next_interrupt = 0;
     }
 
 }
@@ -880,7 +871,7 @@ void MPPInterpreter::TLB_refill_exception(unsigned int address, int w)
 
     if (w != 2)
     {
-        _cp0->update_count();
+        _cp0->update_count(_PC);
     }
 
     if (w == 1)
@@ -960,11 +951,11 @@ void MPPInterpreter::TLB_refill_exception(unsigned int address, int w)
         _cp0_reg[CP0_EPC_REG] -= 4;
     }
 
-    _last_instr_addr = (uint32_t)_PC;
+    Bus::last_jump_addr = (uint32_t)_PC;
 
     if (_delay_slot)
     {
-        *(Bus::skip_jump) = (uint32_t)_PC;
-        *(Bus::next_interrupt) = 0;
+        Bus::skip_jump = (uint32_t)_PC;
+        Bus::next_interrupt = 0;
     }
 }

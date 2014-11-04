@@ -20,7 +20,7 @@
 #define MEM_NOT_IMPLEMENTED() \
     Bus::stop = true; \
     LOG_ERROR("Memory: Function %s in %s line %i not implemented. Stopping...", __func__, __FILE__, __LINE__); \
-    LOG_VERBOSE("OP: %X", Bus::cur_instr->code);
+    LOG_VERBOSE("Address: %X", address);
 
 
 static FrameBufferInfo fbInfo[6];
@@ -582,9 +582,9 @@ void MPMemory::read_vi(uint32_t& address, uint64_t* dest, DataSize size)
         switch (addr_low)
         {
         case 0x10:
-            Bus::cpu->getcp0()->update_count();
-            _vi_reg[VI_CURRENT_REG] = (_vi_reg[_VI_DELAY] - (*(Bus::next_vi) - Bus::cp0_reg[CP0_COUNT_REG])) / 1500;
-            _vi_reg[VI_CURRENT_REG] = (_vi_reg[VI_CURRENT_REG]&(~1)) | *(Bus::vi_field);
+            Bus::cpu->getcp0()->update_count(*Bus::PC);
+            _vi_reg[VI_CURRENT_REG] = (_vi_reg[_VI_DELAY] - (Bus::next_vi - Bus::cp0_reg[CP0_COUNT_REG])) / 1500;
+            _vi_reg[VI_CURRENT_REG] = (_vi_reg[VI_CURRENT_REG]&(~1)) | Bus::vi_field;
             break;
         }
         *dest = *(readvi_table[addr_low]);
@@ -595,9 +595,9 @@ void MPMemory::read_vi(uint32_t& address, uint64_t* dest, DataSize size)
         switch (addr_low)
         {
         case 0x10:
-            Bus::cpu->getcp0()->update_count();
-            _vi_reg[VI_CURRENT_REG] = (_vi_reg[_VI_DELAY] - (*(Bus::next_vi) - Bus::cp0_reg[CP0_COUNT_REG])) / 1500;
-            _vi_reg[VI_CURRENT_REG] = (_vi_reg[VI_CURRENT_REG]&(~1)) | *(Bus::vi_field);
+            Bus::cpu->getcp0()->update_count(*Bus::PC);
+            _vi_reg[VI_CURRENT_REG] = (_vi_reg[_VI_DELAY] - (Bus::next_vi - Bus::cp0_reg[CP0_COUNT_REG])) / 1500;
+            _vi_reg[VI_CURRENT_REG] = (_vi_reg[VI_CURRENT_REG]&(~1)) | Bus::vi_field;
             break;
         }
         *dest = ((uint64_t)(*readvi_table[addr_low]) << 32) |
@@ -610,9 +610,9 @@ void MPMemory::read_vi(uint32_t& address, uint64_t* dest, DataSize size)
         {
         case 0x10:
         case 0x12:
-            Bus::cpu->getcp0()->update_count();
-            _vi_reg[VI_CURRENT_REG] = (_vi_reg[_VI_DELAY] - (*(Bus::next_vi) - Bus::cp0_reg[CP0_COUNT_REG])) / 1500;
-            _vi_reg[VI_CURRENT_REG] = (_vi_reg[VI_CURRENT_REG]&(~1)) | *(Bus::vi_field);
+            Bus::cpu->getcp0()->update_count(*Bus::PC);
+            _vi_reg[VI_CURRENT_REG] = (_vi_reg[_VI_DELAY] - (Bus::next_vi - Bus::cp0_reg[CP0_COUNT_REG])) / 1500;
+            _vi_reg[VI_CURRENT_REG] = (_vi_reg[VI_CURRENT_REG]&(~1)) | Bus::vi_field;
             break;
         }
         *dest = *((uint16_t*)((uint8_t*)readvi_table[addr_low & 0xfffc]
@@ -627,9 +627,9 @@ void MPMemory::read_vi(uint32_t& address, uint64_t* dest, DataSize size)
         case 0x11:
         case 0x12:
         case 0x13:
-            Bus::cpu->getcp0()->update_count();
-            _vi_reg[VI_CURRENT_REG] = (_vi_reg[_VI_DELAY] - (*(Bus::next_vi) - Bus::cp0_reg[CP0_COUNT_REG])) / 1500;
-            _vi_reg[VI_CURRENT_REG] = (_vi_reg[VI_CURRENT_REG] & (~1)) | *(Bus::vi_field);
+            Bus::cpu->getcp0()->update_count(*Bus::PC);
+            _vi_reg[VI_CURRENT_REG] = (_vi_reg[_VI_DELAY] - (Bus::next_vi - Bus::cp0_reg[CP0_COUNT_REG])) / 1500;
+            _vi_reg[VI_CURRENT_REG] = (_vi_reg[VI_CURRENT_REG] & (~1)) | Bus::vi_field;
             break;
         }
         *dest = *((uint8_t*)readvi_table[addr_low & 0xfffc]
@@ -650,7 +650,7 @@ void MPMemory::read_ai(uint32_t& address, uint64_t* dest, DataSize size)
         switch (addr_low)
         {
         case 0x4:
-            Bus::cpu->getcp0()->update_count();
+            Bus::cpu->getcp0()->update_count(*Bus::PC);
             if (_ai_reg[_AI_CURRENT_DELAY] != 0 && Bus::interrupt->find_event(AI_INT) != 0 && (Bus::interrupt->find_event(AI_INT) - Bus::cp0_reg[CP0_COUNT_REG]) < 0x80000000)
                 *dest = ((Bus::interrupt->find_event(AI_INT) - Bus::cp0_reg[CP0_COUNT_REG])*(int64_t)_ai_reg[_AI_CURRENT_LEN]) / _ai_reg[_AI_CURRENT_DELAY];
             else
@@ -666,7 +666,7 @@ void MPMemory::read_ai(uint32_t& address, uint64_t* dest, DataSize size)
         switch (addr_low)
         {
         case 0x0:
-            Bus::cpu->getcp0()->update_count();
+            Bus::cpu->getcp0()->update_count(*Bus::PC);
             if (_ai_reg[_AI_CURRENT_DELAY] != 0 && Bus::interrupt->find_event(AI_INT) != 0)
                 *dest = ((Bus::interrupt->find_event(AI_INT) - Bus::cp0_reg[CP0_COUNT_REG])*(int64_t)_ai_reg[_AI_CURRENT_LEN]) / _ai_reg[_AI_CURRENT_DELAY];
             else
@@ -686,7 +686,7 @@ void MPMemory::read_ai(uint32_t& address, uint64_t* dest, DataSize size)
         {
         case 0x4:
         case 0x6:
-            Bus::cpu->getcp0()->update_count();
+            Bus::cpu->getcp0()->update_count(*Bus::PC);
             if (_ai_reg[_AI_CURRENT_DELAY] != 0 && Bus::interrupt->find_event(AI_INT) != 0)
                 len = (uint32_t)(((Bus::interrupt->find_event(AI_INT) - Bus::cp0_reg[CP0_COUNT_REG]) * (int64_t)_ai_reg[_AI_CURRENT_LEN]) / _ai_reg[_AI_CURRENT_DELAY]);
             else
@@ -709,7 +709,7 @@ void MPMemory::read_ai(uint32_t& address, uint64_t* dest, DataSize size)
         case 0x5:
         case 0x6:
         case 0x7:
-            Bus::cpu->getcp0()->update_count();
+            Bus::cpu->getcp0()->update_count(*Bus::PC);
             if (_ai_reg[_AI_CURRENT_DELAY] != 0 && Bus::interrupt->find_event(AI_INT) != 0)
                 len = (uint32_t)(((Bus::interrupt->find_event(AI_INT) - Bus::cp0_reg[CP0_COUNT_REG]) * (int64_t)_ai_reg[_AI_CURRENT_LEN]) / _ai_reg[_AI_CURRENT_DELAY]);
             else
@@ -1216,9 +1216,9 @@ void MPMemory::write_mi(uint32_t address, uint64_t src, DataSize size)
             update_MI_intr_mask_reg();
 
             Bus::interrupt->check_interrupt();
-            Bus::cpu->getcp0()->update_count();
+            Bus::cpu->getcp0()->update_count(*Bus::PC);
 
-            if (*(Bus::next_interrupt) <= Bus::cp0_reg[CP0_COUNT_REG])
+            if (Bus::next_interrupt <= Bus::cp0_reg[CP0_COUNT_REG])
                 Bus::interrupt->gen_interrupt();
 
             break;
@@ -1238,9 +1238,9 @@ void MPMemory::write_mi(uint32_t address, uint64_t src, DataSize size)
             update_MI_intr_mask_reg();
 
             Bus::interrupt->check_interrupt();
-            Bus::cpu->getcp0()->update_count();
+            Bus::cpu->getcp0()->update_count(*Bus::PC);
 
-            if (*(Bus::next_interrupt) <= Bus::cp0_reg[CP0_COUNT_REG])
+            if (Bus::next_interrupt <= Bus::cp0_reg[CP0_COUNT_REG])
                 Bus::interrupt->gen_interrupt();
             break;
         }
@@ -1263,9 +1263,9 @@ void MPMemory::write_mi(uint32_t address, uint64_t src, DataSize size)
             update_MI_intr_mask_reg();
 
             Bus::interrupt->check_interrupt();
-            Bus::cpu->getcp0()->update_count();
+            Bus::cpu->getcp0()->update_count(*Bus::PC);
 
-            if (*(Bus::next_interrupt) <= Bus::cp0_reg[CP0_COUNT_REG])
+            if (Bus::next_interrupt <= Bus::cp0_reg[CP0_COUNT_REG])
                 Bus::interrupt->gen_interrupt();
             break;
         }
@@ -1292,9 +1292,9 @@ void MPMemory::write_mi(uint32_t address, uint64_t src, DataSize size)
             update_MI_intr_mask_reg();
 
             Bus::interrupt->check_interrupt();
-            Bus::cpu->getcp0()->update_count();
+            Bus::cpu->getcp0()->update_count(*Bus::PC);
 
-            if (*(Bus::next_interrupt) <= Bus::cp0_reg[CP0_COUNT_REG])
+            if (Bus::next_interrupt <= Bus::cp0_reg[CP0_COUNT_REG])
                 Bus::interrupt->gen_interrupt();
             break;
         }
@@ -1489,7 +1489,7 @@ void MPMemory::write_ai(uint32_t address, uint64_t src, DataSize size)
             {
                 _ai_reg[_AI_CURRENT_DELAY] = delay;
                 _ai_reg[_AI_CURRENT_LEN] = _ai_reg[AI_LEN_REG];
-                Bus::cpu->getcp0()->update_count();
+                Bus::cpu->getcp0()->update_count(*Bus::PC);
                 Bus::interrupt->add_interrupt_event(AI_INT, delay);
                 _ai_reg[AI_STATUS_REG] |= 0x40000000;
             }
@@ -1535,7 +1535,7 @@ void MPMemory::write_ai(uint32_t address, uint64_t src, DataSize size)
             {
                 _ai_reg[_AI_CURRENT_DELAY] = delay;
                 _ai_reg[_AI_CURRENT_LEN] = _ai_reg[AI_LEN_REG];
-                Bus::cpu->getcp0()->update_count();
+                Bus::cpu->getcp0()->update_count(*Bus::PC);
                 Bus::interrupt->add_interrupt_event(AI_INT, delay / 2);
                 _ai_reg[AI_STATUS_REG] |= 0x40000000;
             }
@@ -1588,7 +1588,7 @@ void MPMemory::write_ai(uint32_t address, uint64_t src, DataSize size)
             {
                 _ai_reg[_AI_CURRENT_DELAY] = delay;
                 _ai_reg[_AI_CURRENT_LEN] = _ai_reg[AI_LEN_REG];
-                Bus::cpu->getcp0()->update_count();
+                Bus::cpu->getcp0()->update_count(*Bus::PC);
                 Bus::interrupt->add_interrupt_event(AI_INT, delay / 2);
                 _ai_reg[AI_STATUS_REG] |= 0x40000000;
             }
@@ -1647,7 +1647,7 @@ void MPMemory::write_ai(uint32_t address, uint64_t src, DataSize size)
             {
                 _ai_reg[_AI_CURRENT_DELAY] = delay;
                 _ai_reg[_AI_CURRENT_LEN] = _ai_reg[AI_LEN_REG];
-                Bus::cpu->getcp0()->update_count();
+                Bus::cpu->getcp0()->update_count(*Bus::PC);
                 Bus::interrupt->add_interrupt_event(AI_INT, delay / 2);
                 _ai_reg[AI_STATUS_REG] |= 0x40000000;
             }
@@ -2099,7 +2099,7 @@ void MPMemory::write_pif(uint32_t address, uint64_t src, DataSize size)
             if (Bus::pif_ram8[0x3F] == 0x08)
             {
                 Bus::pif_ram8[0x3F] = 0;
-                Bus::cpu->getcp0()->update_count();
+                Bus::cpu->getcp0()->update_count(*Bus::PC);
                 Bus::interrupt->add_interrupt_event(SI_INT, /*0x100*/0x900);
             }
             else
@@ -2126,7 +2126,7 @@ void MPMemory::write_pif(uint32_t address, uint64_t src, DataSize size)
             if (Bus::pif_ram8[0x3F] == 0x08)
             {
                 Bus::pif_ram8[0x3F] = 0;
-                Bus::cpu->getcp0()->update_count();
+                Bus::cpu->getcp0()->update_count(*Bus::PC);
                 Bus::interrupt->add_interrupt_event(SI_INT, /*0x100*/0x900);
             }
             else
@@ -2151,7 +2151,7 @@ void MPMemory::write_pif(uint32_t address, uint64_t src, DataSize size)
             if (Bus::pif_ram8[0x3F] == 0x08)
             {
                 Bus::pif_ram8[0x3F] = 0;
-                Bus::cpu->getcp0()->update_count();
+                Bus::cpu->getcp0()->update_count(*Bus::PC);
                 Bus::interrupt->add_interrupt_event(SI_INT, /*0x100*/0x900);
             }
             else
@@ -2173,7 +2173,7 @@ void MPMemory::write_pif(uint32_t address, uint64_t src, DataSize size)
             if (Bus::pif_ram8[0x3F] == 0x08)
             {
                 Bus::pif_ram8[0x3F] = 0;
-                Bus::cpu->getcp0()->update_count();
+                Bus::cpu->getcp0()->update_count(*Bus::PC);
                 Bus::interrupt->add_interrupt_event(SI_INT, /*0x100*/0x900);
             }
             else
@@ -2387,7 +2387,7 @@ void MPMemory::prepare_rsp(void)
         Bus::plugins->rsp()->DoRspCycles(0xffffffff);
         _sp_reg[SP_PC_REG] |= save_pc;
 
-        Bus::cpu->getcp0()->update_count();
+        Bus::cpu->getcp0()->update_count(*Bus::PC);
 
         if (_mi_reg[MI_INTR_REG] & 0x1)
         {
@@ -2453,7 +2453,7 @@ void MPMemory::prepare_rsp(void)
         Bus::plugins->rsp()->DoRspCycles(0xFFFFFFFF);
         _sp_reg[SP_PC_REG] |= save_pc;
 
-        Bus::cpu->getcp0()->update_count();
+        Bus::cpu->getcp0()->update_count(*Bus::PC);
 
         if (_mi_reg[MI_INTR_REG] & 0x1)
         {
@@ -2471,7 +2471,7 @@ void MPMemory::prepare_rsp(void)
         Bus::plugins->rsp()->DoRspCycles(0xFFFFFFFF);
         _sp_reg[SP_PC_REG] |= save_pc;
 
-        Bus::cpu->getcp0()->update_count();
+        Bus::cpu->getcp0()->update_count(*Bus::PC);
 
         if (_mi_reg[MI_INTR_REG] & 0x1)
         {

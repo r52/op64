@@ -113,16 +113,12 @@ l_table
 #endif
 _PC(0),
 _cur_instr({ 0 }),
+_delay_slot(false),
 _cp0(new CP0()),
-_cp1(new CP1())
+_cp1(new CP1(&_s_reg, &_d_reg, &_fgr))
 {
     using namespace Bus;
     PC = &_PC;
-    reg = _reg;
-    cur_instr = &_cur_instr;
-    hi = &_hi;
-    lo = &_lo;
-    llbit = &_llbit;
 
     // Needs to be initialized by concrete cpu
     interrupt = new InterruptHandler();
@@ -142,11 +138,6 @@ ICPU::~ICPU(void)
 
     using namespace Bus;
     PC = nullptr;
-    reg = nullptr;
-    cur_instr = nullptr;
-    hi = nullptr;
-    lo = nullptr;
-    llbit = nullptr;
 
     if (nullptr != interrupt)
     {

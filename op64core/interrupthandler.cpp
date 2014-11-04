@@ -27,7 +27,7 @@ bool Interrupt::operator<(const Interrupt& i) const
         {
             if ((cp0_reg[CP0_COUNT_REG] - i.count) < 0x10000000)
             {
-                if (i.type == SPECIAL_INT && SPECIAL_done)
+                if (i.type == SPECIAL_INT && Bus::interrupt->isSpecialDone())
                     return true;
 
                 return false;
@@ -50,35 +50,24 @@ bool Interrupt::operator==(const Interrupt& i) const
 
 InterruptHandler::InterruptHandler(void)
 {
-    using namespace Bus;
-    next_vi = &_next_vi;
-    vi_field = &_vi_field;
-    next_interrupt = &_next_interrupt;
-    SPECIAL_done = &_SPECIAL_done;
-    interrupt_unsafe_state = &_interrupt_unsafe_state;
 }
 
 InterruptHandler::~InterruptHandler(void)
 {
-    using namespace Bus;
-    next_vi = nullptr;
-    vi_field = nullptr;
-    next_interrupt = nullptr;
-    SPECIAL_done = nullptr;
-    interrupt_unsafe_state = nullptr;
 }
 
 void InterruptHandler::initialize(void)
 {
+    Bus::interrupt_unsafe_state = false;
     _SPECIAL_done = true;
-    _next_vi = _next_interrupt = 5000;
-    Bus::vi_reg[_VI_DELAY] = _next_vi;
-    _vi_field = 0;
+    Bus::next_vi = Bus::next_interrupt = 5000;
+    Bus::vi_reg[_VI_DELAY] = Bus::next_vi;
+    Bus::vi_field = 0;
 
     // reset the queue
     q.clear();
 
-    add_interrupt_event_count(VI_INT, _next_vi);
+    add_interrupt_event_count(VI_INT, Bus::next_vi);
     add_interrupt_event_count(SPECIAL_INT, 0);
 }
 
@@ -111,7 +100,7 @@ void InterruptHandler::add_interrupt_event(int32_t type, uint32_t delay)
     }
     
     q.insert(iter, event);
-    _next_interrupt = q.front().count;
+    Bus::next_interrupt = q.front().count;
 }
 
 void InterruptHandler::add_interrupt_event_count(int32_t type, uint32_t count)
@@ -126,7 +115,7 @@ void InterruptHandler::gen_interrupt(void)
         _vi_counter = 0;
     }
 
-    if (!_interrupt_unsafe_state)
+    if (!Bus::interrupt_unsafe_state)
     {
         if (Bus::doHardReset)
         {
@@ -138,21 +127,21 @@ void InterruptHandler::gen_interrupt(void)
 
     Interrupt& top = q.front();
 
-    if (*(Bus::skip_jump))
+    if (Bus::skip_jump)
     {
-        uint32_t dest = *(Bus::skip_jump);
-        *(Bus::skip_jump) = 0;
+        uint32_t dest = Bus::skip_jump;
+        Bus::skip_jump = 0;
 
         if (top.count > Bus::cp0_reg[CP0_COUNT_REG] || (Bus::cp0_reg[CP0_COUNT_REG] - top.count) < 0x80000000)
         {
-            _next_interrupt = top.count;
+            Bus::next_interrupt = top.count;
         }
         else
         {
-            _next_interrupt = 0;
+            Bus::next_interrupt = 0;
         }
 
-        *(Bus::last_instr_addr) = dest;
+        Bus::last_jump_addr = dest;
         Bus::cpu->global_jump_to(dest);
         return;
     }
@@ -192,15 +181,15 @@ void InterruptHandler::gen_interrupt(void)
         else
             Bus::vi_reg[_VI_DELAY] = ((Bus::vi_reg[VI_V_SYNC_REG] + 1) * 1500);
 
-        _next_vi += Bus::vi_reg[_VI_DELAY];
+        Bus::next_vi += Bus::vi_reg[_VI_DELAY];
 
         if (Bus::vi_reg[VI_STATUS_REG] & 0x40)
-            _vi_field = 1 - _vi_field;
+            Bus::vi_field = 1 - Bus::vi_field;
         else 
-            _vi_field = 0;
+            Bus::vi_field = 0;
 
         pop_interrupt_event();
-        add_interrupt_event_count(VI_INT, _next_vi);
+        add_interrupt_event_count(VI_INT, Bus::next_vi);
 
         Bus::mi_reg[MI_INTR_REG] |= 0x08;
 
@@ -411,15 +400,15 @@ void InterruptHandler::gen_interrupt(void)
         Bus::cp0_reg[CP0_ERROREPC_REG] = (uint32_t)*(Bus::PC);
         
         // adjust ErrorEPC if we were in a delay slot, and clear the delay_slot and dyna_interp flags
-        if (*(Bus::delay_slot))
+        if (Bus::cpu->inDelaySlot())
         {
             Bus::cp0_reg[CP0_ERROREPC_REG] -= 4;
         }
 
-        *(Bus::delay_slot) = false;
+        Bus::cpu->setDelaySlot(false);
 
         // set next instruction address to reset vector
-        *(Bus::last_instr_addr) = 0xa4000040;
+        Bus::last_jump_addr = 0xa4000040;
         Bus::cpu->global_jump_to(0xa4000040);
         return;
     }
@@ -442,10 +431,10 @@ void InterruptHandler::do_hard_reset(void)
     Bus::mem->initialize();
     Bus::cpu->hard_reset();
     Bus::cpu->soft_reset();
-    *(Bus::last_instr_addr) = 0xa4000040;
-    _next_interrupt = 624999;
+    Bus::last_jump_addr = 0xa4000040;
+    Bus::next_interrupt = 624999;
     initialize();
-    Bus::cpu->global_jump_to(*(Bus::last_instr_addr));
+    Bus::cpu->global_jump_to(Bus::last_jump_addr);
 }
 
 void InterruptHandler::pop_interrupt_event(void)
@@ -457,11 +446,11 @@ void InterruptHandler::pop_interrupt_event(void)
 
     if (!q.empty() && (q.front().count > Bus::cp0_reg[CP0_COUNT_REG] || (Bus::cp0_reg[CP0_COUNT_REG] - q.front().count) < 0x80000000))
     {
-        _next_interrupt = q.front().count;
+        Bus::next_interrupt = q.front().count;
     }
     else
     {
-        _next_interrupt = 0;
+        Bus::next_interrupt = 0;
     }
 }
 
@@ -494,7 +483,7 @@ void InterruptHandler::check_interrupt(void)
     {
         // Overrides the sort and make this the next interrupt
         q.push_front(Interrupt(CHECK_INT, Bus::cp0_reg[CP0_COUNT_REG]));
-        _next_interrupt = Bus::cp0_reg[CP0_COUNT_REG];
+        Bus::next_interrupt = Bus::cp0_reg[CP0_COUNT_REG];
     }
 }
 

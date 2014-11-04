@@ -38,7 +38,7 @@ public:
     CP0(void);
     ~CP0(void);
 
-    void update_count(void);
+    void update_count(uint32_t PC);
     bool cop1_unusable(void);
 
 private:

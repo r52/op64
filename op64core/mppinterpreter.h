@@ -65,22 +65,11 @@ private:
     }
 
 private:
-
-    // last instruction addr for jumps
-    uint32_t _last_instr_addr;
-
     // registers
     uint32_t* _cp0_reg;     // pointer to cp0 regs
-    uint64_t* _fgr;         // pointer to fgr
-
-
-    // skip jump addr
-    uint32_t _skip_jump;
-
 
     // cpu states
     bool _check_nop;
-    bool _delay_slot;
     bool _non_ieee_mode = true; // for testing
 
 

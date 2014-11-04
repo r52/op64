@@ -13,10 +13,10 @@ CP0::~CP0()
     Bus::cp0_reg = nullptr;
 }
 
-void CP0::update_count(void)
+void CP0::update_count(uint32_t PC)
 {
-    _cp0_reg[CP0_COUNT_REG] += ((((uint32_t)*(Bus::PC)) - *(Bus::last_instr_addr)) >> 2) * Bus::rom->getCountPerOp();       // count_per_op???
-    *(Bus::last_instr_addr) = (uint32_t)*(Bus::PC);
+    _cp0_reg[CP0_COUNT_REG] += ((PC - Bus::last_jump_addr) >> 2) * Bus::rom->getCountPerOp();
+    Bus::last_jump_addr = PC;
 }
 
 bool CP0::cop1_unusable(void)

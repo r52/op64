@@ -20,7 +20,7 @@ enum CompareFlag
 
 inline void set_rounding(void)
 {
-    switch (Bus::cpu->getcp1()->rounding_mode) {
+    switch (Bus::cpu->rounding_mode) {
     case ROUND_MODE:
         fesetround(FE_TONEAREST);
         _MM_SET_ROUNDING_MODE(_MM_ROUND_NEAREST);
@@ -64,7 +64,7 @@ inline void set_rounding(uint32_t mode)
 
 inline uint32_t get_rounding(void)
 {
-    return Bus::cpu->getcp1()->rounding_mode;
+    return Bus::cpu->rounding_mode;
 }
 
 

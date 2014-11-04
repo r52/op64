@@ -210,6 +210,20 @@ public:
         return _cp1;
     };
 
+    // delay slot rw
+    inline bool inDelaySlot(void)
+    {
+        return _delay_slot;
+    }
+
+    void setDelaySlot(bool delay)
+    {
+        _delay_slot = delay;
+    }
+
+    // fpu rounding mode
+    int32_t rounding_mode;
+
 protected:
     ICPU(void);
 
@@ -699,10 +713,18 @@ protected:
     Register64 _hi;           // mult hi/lo registers
     Register64 _lo;
 
+    // cp1 regs
+    uint32_t _FCR0;
+    uint32_t _FCR31;
+    float* _s_reg[32];
+    double* _d_reg[32];
+    uint64_t _fgr[32];
+
     // COPs
     CP0* _cp0;
     CP1* _cp1;
 
     // LL bit
     bool _llbit;
+    bool _delay_slot;
 };

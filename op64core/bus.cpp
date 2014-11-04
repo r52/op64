@@ -8,6 +8,7 @@
 #include "plugins.h"
 #include "systiming.h"
 
+// Exposed states for device communication
 namespace Bus
 {
     // unmanaged devices
@@ -25,24 +26,13 @@ namespace Bus
     FlashRam* flashram = nullptr;
 
     // regs
-    Register64* reg = nullptr;
-    Register64* hi = nullptr;
-    Register64* lo = nullptr;
-    bool* llbit = nullptr;
     uint32_t* cp0_reg = nullptr;
-    uint32_t* FCR0 = nullptr;
-    uint32_t* FCR31 = nullptr;
-    float** s_reg = nullptr;
-    double** d_reg = nullptr;
-    uint64_t* fgr = nullptr;
 
     // cpu state
     ProgramCounter* PC = nullptr;
-    uint32_t* last_instr_addr = nullptr;
-    uint32_t* next_interrupt = nullptr;
-    Instruction* cur_instr = nullptr;
-    uint32_t* skip_jump = nullptr;
-    bool* delay_slot = nullptr;
+    uint32_t last_jump_addr = 0;
+    uint32_t next_interrupt = 0;
+    uint32_t skip_jump = 0;
     std::atomic<bool> stop = true;
 
     // mem
@@ -70,12 +60,11 @@ namespace Bus
     uint32_t* dps_reg = nullptr;
 
     // vi state
-    uint32_t* next_vi = nullptr;
-    int32_t* vi_field = nullptr;
+    uint32_t next_vi = 0;
+    int32_t vi_field = 0;
 
     // interrupt state
-    bool* SPECIAL_done = nullptr;
-    bool* interrupt_unsafe_state = nullptr;
+    bool interrupt_unsafe_state = false;
 
     // core control
     std::atomic<bool> doHardReset = false;
