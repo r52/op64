@@ -78,31 +78,6 @@ void MPPInterpreter::CTC1(void)
     ++_PC;
 }
 
-void MPPInterpreter::BC(void)
-{
-    (this->*bc_table[_cur_instr.ft])();
-}
-
-void MPPInterpreter::S(void)
-{
-    (this->*s_table[_cur_instr.func])();
-}
-
-void MPPInterpreter::D(void)
-{
-    (this->*d_table[_cur_instr.func])();
-}
-
-void MPPInterpreter::W(void)
-{
-    (this->*w_table[_cur_instr.func])();
-}
-
-void MPPInterpreter::L(void)
-{
-    (this->*l_table[_cur_instr.func])();
-}
-
 void MPPInterpreter::BC1F(void)
 {
     // DECLARE_JUMP(BC1F,  PCADDR + (iimmediate+1)*4, (FCR31 & 0x800000)==0, &reg[0], 0, 1)

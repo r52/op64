@@ -57,7 +57,7 @@ private:
         }
         else
         {
-            LOG_ERROR("Prefetch execution address %x not found. Stopping...", (uint32_t)_PC);
+            LOG_ERROR("Interpreter: Prefetch execution address %x not found. Stopping...", (uint32_t)_PC);
             Bus::stop = true;
         }
     }
@@ -87,8 +87,6 @@ protected:
     void generic_jump(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1);
     void generic_idle(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1);
 
-    virtual void SPECIAL(void);
-    virtual void REGIMM(void);
     virtual void J(void);
     virtual void JAL(void);
     virtual void BEQ(void);
@@ -103,8 +101,6 @@ protected:
     virtual void ORI(void);
     virtual void XORI(void);
     virtual void LUI(void);
-    virtual void COP0(void);
-    virtual void COP1(void);
     virtual void SV(void);
     virtual void BEQL(void);
     virtual void BNEL(void);
@@ -219,11 +215,6 @@ protected:
     virtual void MTC1(void);
     virtual void DMTC1(void);
     virtual void CTC1(void);
-    virtual void BC(void);
-    virtual void S(void);
-    virtual void D(void);
-    virtual void W(void);
-    virtual void L(void);
 
     virtual void TLBR(void);
     virtual void TLBWI(void);

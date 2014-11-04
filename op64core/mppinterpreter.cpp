@@ -309,16 +309,6 @@ void MPPInterpreter::execute(void)
     }
 }
 
-void MPPInterpreter::SPECIAL(void)
-{
-    (this->*special_table[_cur_instr.func])();
-}
-
-void MPPInterpreter::REGIMM(void)
-{
-    (this->*regimm_table[_cur_instr.rt])();
-}
-
 void MPPInterpreter::J(void)
 {
     // DECLARE_JUMP(J,   (PC->f.j.inst_index<<2) | ((PCADDR+4) & 0xF0000000), 1, &reg[0],  0, 0)
@@ -468,16 +458,6 @@ void MPPInterpreter::LUI(void)
     }
     
     ++_PC;
-}
-
-void MPPInterpreter::COP0(void)
-{
-    (this->*cop0_table[_cur_instr.rs])();
-}
-
-void MPPInterpreter::COP1(void)
-{
-    (this->*cop1_table[_cur_instr.fmt])();
 }
 
 void MPPInterpreter::SV(void)

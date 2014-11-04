@@ -217,8 +217,16 @@ protected:
     //===========================================================================
     // regular instructions
 
-    virtual void SPECIAL(void) = 0;
-    virtual void REGIMM(void) = 0;
+    inline void SPECIAL(void)
+    {
+        (this->*special_table[_cur_instr.func])();
+    }
+
+    inline void REGIMM(void)
+    {
+        (this->*regimm_table[_cur_instr.rt])();
+    }
+
     virtual void J(void) = 0;
     virtual void JAL(void) = 0;
     virtual void BEQ(void) = 0;
@@ -235,10 +243,17 @@ protected:
     virtual void XORI(void) = 0;
     virtual void LUI(void) = 0;
 
-    virtual void COP0(void) = 0;
-    virtual void COP1(void) = 0;
+    inline void COP0(void)
+    {
+        (this->*cop0_table[_cur_instr.rs])();
+    }
+
+    inline void COP1(void)
+    {
+        (this->*cop1_table[_cur_instr.fmt])();
+    }
+
     virtual void SV(void) = 0;
-    //virtual void SV(void) = 0;
     virtual void BEQL(void) = 0;
     virtual void BNEL(void) = 0;
     virtual void BLEZL(void) = 0;
@@ -248,10 +263,6 @@ protected:
     virtual void DADDIU(void) = 0;
     virtual void LDL(void) = 0;
     virtual void LDR(void) = 0;
-    //virtual void SV(void) = 0;
-    //virtual void SV(void) = 0;
-    //virtual void SV(void) = 0;
-    //virtual void SV(void) = 0;
 
     virtual void LB(void) = 0;
     virtual void LH(void) = 0;
@@ -273,20 +284,14 @@ protected:
 
     virtual void LL(void) = 0;
     virtual void LWC1(void) = 0;
-    //virtual void SV(void) = 0;
-    //virtual void SV(void) = 0;
     virtual void LLD(void) = 0;
     virtual void LDC1(void) = 0;
-    //virtual void SV(void) = 0;
     virtual void LD(void) = 0;
 
     virtual void SC(void) = 0;
     virtual void SWC1(void) = 0;
-    //virtual void SV(void) = 0;
-    //virtual void SV(void) = 0;
     virtual void SCD(void) = 0;
     virtual void SDC1(void) = 0;
-    //virtual void SV(void) = 0;
     virtual void SD(void) = 0;
 
 #ifdef HAS_CXX11_LIST_INST
@@ -311,21 +316,16 @@ protected:
 
 
     virtual void SLL(void) = 0;
-    //virtual void SV(void) = 0;
     virtual void SRL(void) = 0;
     virtual void SRA(void) = 0;
     virtual void SLLV(void) = 0;
-    //virtual void SV(void) = 0;
     virtual void SRLV(void) = 0;
     virtual void SRAV(void) = 0;
 
     virtual void JR(void) = 0;
     virtual void JALR(void) = 0;
-    //virtual void SV(void) = 0;
-    //virtual void SV(void) = 0;
     virtual void SYSCALL(void) = 0;
     virtual void BREAK(void) = 0;
-    //virtual void SV(void) = 0;
     virtual void SYNC(void) = 0;
 
     virtual void MFHI(void) = 0;
@@ -333,7 +333,6 @@ protected:
     virtual void MFLO(void) = 0;
     virtual void MTLO(void) = 0;
     virtual void DSLLV(void) = 0;
-    //virtual void SV(void) = 0;
     virtual void DSRLV(void) = 0;
     virtual void DSRAV(void) = 0;
 
@@ -355,8 +354,6 @@ protected:
     virtual void XOR(void) = 0;
     virtual void NOR(void) = 0;
 
-    //virtual void SV(void) = 0;
-    //virtual void SV(void) = 0;
     virtual void SLT(void) = 0;
     virtual void SLTU(void) = 0;
     virtual void DADD(void) = 0;
@@ -369,16 +366,12 @@ protected:
     virtual void TLT(void) = 0;
     virtual void TLTU(void) = 0;
     virtual void TEQ(void) = 0;
-    //virtual void SV(void) = 0;
     virtual void TNE(void) = 0;
-    //virtual void SV(void) = 0;
 
     virtual void DSLL(void) = 0;
-    //virtual void SV(void) = 0;
     virtual void DSRL(void) = 0;
     virtual void DSRA(void) = 0;
     virtual void DSLL32(void) = 0;
-    //virtual void SV(void) = 0;
     virtual void DSRL32(void) = 0;
     virtual void DSRA32(void) = 0;
 
@@ -459,11 +452,31 @@ protected:
     virtual void MTC1(void) = 0;
     virtual void DMTC1(void) = 0;
     virtual void CTC1(void) = 0;
-    virtual void BC(void) = 0;
-    virtual void S(void) = 0;
-    virtual void D(void) = 0;
-    virtual void W(void) = 0;
-    virtual void L(void) = 0;
+
+    inline void BC(void)
+    {
+        (this->*bc_table[_cur_instr.ft])();
+    }
+
+    inline void S(void)
+    {
+        (this->*s_table[_cur_instr.func])();
+    }
+
+    inline void D(void)
+    {
+        (this->*d_table[_cur_instr.func])();
+    }
+
+    inline void W(void)
+    {
+        (this->*w_table[_cur_instr.func])();
+    }
+
+    inline void L(void)
+    {
+        (this->*l_table[_cur_instr.func])();
+    }
 
 #ifdef HAS_CXX11_LIST_INST
     InstructionTable cop1_table =
