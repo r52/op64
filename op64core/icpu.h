@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <array>
 
+#define PC_SIZE 4
+
 // core types
 enum
 {
@@ -113,7 +115,7 @@ public:
 
     inline ProgramCounter operator+(const uint32_t& x)
     {
-        uint32_t result = _addr + (x * _size);
+        uint32_t result = _addr + (x * PC_SIZE);
         return ProgramCounter(result);
     }
 
@@ -133,7 +135,7 @@ public:
 
     inline ProgramCounter& operator++()
     {
-        _addr += _size;
+        _addr += PC_SIZE;
         return *this;
     }
 
@@ -146,7 +148,7 @@ public:
 
     inline ProgramCounter& operator--()
     {
-        _addr -= _size;
+        _addr -= PC_SIZE;
         return *this;
     }
 
@@ -159,7 +161,7 @@ public:
 
     inline ProgramCounter& operator+=(const uint32_t& x)
     {
-        _addr += (x * _size);
+        _addr += (x * PC_SIZE);
         return *this;
     }
 
@@ -170,7 +172,6 @@ public:
 
 private:
     uint_fast32_t _addr;
-    const uint_fast32_t _size = sizeof(uint_fast32_t);
 };
 
 

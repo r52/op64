@@ -50,16 +50,18 @@ private:
     inline void prefetch(void)
     {
         uint32_t* mem = Bus::mem->fast_fetch(_PC);
-        if (nullptr != mem)
-        {
-            _check_nop = (mem[1] == 0);
-            _cur_instr.code = mem[0];
-        }
-        else
+
+        if (nullptr == mem)
         {
             LOG_ERROR("Interpreter: Prefetch execution address %x not found. Stopping...", (uint32_t)_PC);
             Bus::stop = true;
+            _cur_instr.code = 0;
+
+            return;
         }
+
+        _check_nop = (mem[1] == 0);
+        _cur_instr.code = mem[0];
     }
 
 private:

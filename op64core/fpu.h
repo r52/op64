@@ -83,8 +83,7 @@ inline float i32_to_f32(int i)
     float result;
     __m128 pt;
 
-    pt = _mm_setzero_ps();
-    pt = _mm_cvtsi32_ss(pt, i);
+    pt = _mm_cvtsi32_ss(_mm_setzero_ps(), i);
     _mm_store_ss(&result, pt);
 
     return result;
@@ -95,8 +94,7 @@ inline double i32_to_f64(int i)
     double result;
     __m128d pt;
 
-    pt = _mm_setzero_pd();
-    pt = _mm_cvtsi32_sd(pt, i);
+    pt = _mm_cvtsi32_sd(_mm_setzero_pd(), i);
     _mm_store_sd(&result, pt);
 
     return result;
@@ -117,8 +115,7 @@ inline float i64_to_f32(int64_t i)
     float result;
     __m128 pt;
 
-    pt = _mm_setzero_ps();
-    pt = _mm_cvtsi64_ss(pt, i);
+    pt = _mm_cvtsi64_ss(_mm_setzero_ps(), i);
     _mm_store_ss(&result, pt);
 
     return result;
@@ -129,8 +126,7 @@ inline double i64_to_f64(int64_t i)
     double result;
     __m128d pt;
 
-    pt = _mm_setzero_pd();
-    pt = _mm_cvtsi64_sd(pt, i);
+    pt = _mm_cvtsi64_sd(_mm_setzero_pd(), i);
     _mm_store_sd(&result, pt);
 
     return result;
@@ -140,11 +136,8 @@ inline double f32_to_f64(float* f)
 {
     double result;
     __m128d pt;
-    __m128 fl;
 
-    pt = _mm_setzero_pd();
-    fl = _mm_load_ss(f);
-    pt = _mm_cvtss_sd(pt, fl);
+    pt = _mm_cvtss_sd(_mm_setzero_pd(), _mm_load_ss(f));
     _mm_store_sd(&result, pt);
 
     return result;
@@ -153,12 +146,9 @@ inline double f32_to_f64(float* f)
 inline float f64_to_f32(double* d)
 {
     float result;
-    __m128d pt;
     __m128 fl;
 
-    fl = _mm_setzero_ps();
-    pt = _mm_load_sd(d);
-    fl = _mm_cvtsd_ss(fl, pt);
+    fl = _mm_cvtsd_ss(_mm_setzero_ps(), _mm_load_sd(d));
     _mm_store_ss(&result, fl);
 
     return result;
@@ -207,105 +197,89 @@ inline double sqrt_f64(double* f)
     return result;
 }
 
-inline float mul_f32(float* ffs, float* fft)
+inline float mul_f32(float* fs, float* ft)
 {
     float result;
-    __m128 fd, ft, fs;
+    __m128 fd;
 
-    fs = _mm_load_ss(ffs);
-    ft = _mm_load_ss(fft);
-    fd = _mm_mul_ss(fs, ft);
+    fd = _mm_mul_ss(_mm_load_ss(fs), _mm_load_ss(ft));
     _mm_store_ss(&result, fd);
 
     return result;
 }
 
-inline double mul_f64(double* ffs, double* fft)
+inline double mul_f64(double* fs, double* ft)
 {
     double result;
-    __m128d fd, ft, fs;
+    __m128d fd;
 
-    fs = _mm_load_sd(ffs);
-    ft = _mm_load_sd(fft);
-    fd = _mm_mul_sd(fs, ft);
+    fd = _mm_mul_sd(_mm_load_sd(fs), _mm_load_sd(ft));
     _mm_store_sd(&result, fd);
 
     return result;
 }
 
-inline float add_f32(float* ffs, float* fft)
+inline float add_f32(float* fs, float* ft)
 {
     float result;
-    __m128 fd, ft, fs;
+    __m128 fd;
 
-    fs = _mm_load_ss(ffs);
-    ft = _mm_load_ss(fft);
-    fd = _mm_add_ss(fs, ft);
+    fd = _mm_add_ss(_mm_load_ss(fs), _mm_load_ss(ft));
     _mm_store_ss(&result, fd);
 
     return result;
 }
 
-inline double add_f64(double* ffs, double* fft)
+inline double add_f64(double* fs, double* ft)
 {
     double result;
-    __m128d fd, ft, fs;
+    __m128d fd;
 
-    fs = _mm_load_sd(ffs);
-    ft = _mm_load_sd(fft);
-    fd = _mm_add_sd(fs, ft);
+    fd = _mm_add_sd(_mm_load_sd(fs), _mm_load_sd(ft));
     _mm_store_sd(&result, fd);
 
     return result;
 }
 
-inline float sub_f32(float* ffs, float* fft)
+inline float sub_f32(float* fs, float* ft)
 {
     float result;
-    __m128 fd, ft, fs;
+    __m128 fd;
 
-    fs = _mm_load_ss(ffs);
-    ft = _mm_load_ss(fft);
-    fd = _mm_sub_ss(fs, ft);
+    fd = _mm_sub_ss(_mm_load_ss(fs), _mm_load_ss(ft));
     _mm_store_ss(&result, fd);
 
     return result;
 }
 
-inline double sub_f64(double* ffs, double* fft)
+inline double sub_f64(double* fs, double* ft)
 {
     double result;
-    __m128d fd, ft, fs;
+    __m128d fd;
 
-    fs = _mm_load_sd(ffs);
-    ft = _mm_load_sd(fft);
-    fd = _mm_sub_sd(fs, ft);
+    fd = _mm_sub_sd(_mm_load_sd(fs), _mm_load_sd(ft));
     _mm_store_sd(&result, fd);
 
     return result;
 }
 
-inline float div_f32(float* ffs, float* fft)
+inline float div_f32(float* fs, float* ft)
 {
     float result;
-    __m128 fd, ft, fs;
+    __m128 fd;
 
-    fs = _mm_load_ss(ffs);
-    ft = _mm_load_ss(fft);
-    fd = _mm_div_ss(fs, ft);
+    fd = _mm_div_ss(_mm_load_ss(fs), _mm_load_ss(ft));
     _mm_store_ss(&result, fd);
 
     return result;
 }
 
-inline double div_f64(double* ffs, double* fft)
+inline double div_f64(double* fs, double* ft)
 {
     double result;
-    __m128d fd, ft, fs;
+    __m128d fd;
 
-    fs = _mm_load_sd(ffs);
-    ft = _mm_load_sd(fft);
-    fd = _mm_div_sd(fs, ft);
+    fd = _mm_div_sd(_mm_load_sd(fs), _mm_load_sd(ft));
     _mm_store_sd(&result, fd);
 
     return result;
@@ -314,10 +288,9 @@ inline double div_f64(double* ffs, double* fft)
 inline float neg_f32(float* f)
 {
     float result;
-    __m128 fd, fs;
+    __m128 fd;
 
-    fs = _mm_load_ss(f);
-    fd = _mm_xor_ps(_mm_set_ss(-0.0f), fs);
+    fd = _mm_xor_ps(_mm_set_ss(-0.0f), _mm_load_ss(f));
     _mm_store_ss(&result, fd);
 
     return result;
@@ -326,10 +299,9 @@ inline float neg_f32(float* f)
 inline double neg_f64(double* f)
 {
     double result;
-    __m128d fd, fs;
+    __m128d fd;
 
-    fs = _mm_load_sd(f);
-    fd = _mm_xor_pd(_mm_set_sd(-0.0f), fs);
+    fd = _mm_xor_pd(_mm_set_sd(-0.0f), _mm_load_sd(f));
     _mm_store_sd(&result, fd);
 
     return result;
@@ -338,10 +310,9 @@ inline double neg_f64(double* f)
 inline float abs_f32(float* f)
 {
     float result;
-    __m128 fd, fs;
+    __m128 fd;
 
-    fs = _mm_load_ss(f);
-    fd = _mm_andnot_ps(_mm_set_ss(-0.0f), fs);
+    fd = _mm_andnot_ps(_mm_set_ss(-0.0f), _mm_load_ss(f));
     _mm_store_ss(&result, fd);
 
     return result;
@@ -350,10 +321,9 @@ inline float abs_f32(float* f)
 inline double abs_f64(double* f)
 {
     double result;
-    __m128d fd, fs;
+    __m128d fd;
 
-    fs = _mm_load_sd(f);
-    fd = _mm_andnot_pd(_mm_set_sd(-0.0f), fs);
+    fd = _mm_andnot_pd(_mm_set_sd(-0.0f), _mm_load_sd(f));
     _mm_store_sd(&result, fd);
 
     return result;
