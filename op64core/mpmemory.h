@@ -103,6 +103,7 @@ private:
     void update_MI_intr_mask_reg(void);
     void update_sp_reg(void);
     void prepare_rsp(void);
+    void updateDPC(void);
 
 private:
 

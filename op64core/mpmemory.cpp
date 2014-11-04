@@ -537,7 +537,26 @@ void MPMemory::read_rsp_stat(uint32_t& address, uint64_t* dest, DataSize size)
 
 void MPMemory::read_dp(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    MEM_NOT_IMPLEMENTED();
+    uint32_t addr_low = address & 0xffff;
+
+    switch (size)
+    {
+    case SIZE_WORD:
+        *dest = *(readdp_table[addr_low]);
+        break;
+    case SIZE_DWORD:
+        *dest = ((uint64_t)(*readdp_table[addr_low]) << 32) |
+            *readdp_table[addr_low + 4];
+        break;
+    case SIZE_HWORD:
+        *dest = *((uint16_t*)((uint8_t*)readdp_table[addr_low & 0xfffc]
+            + (HES(addr_low & 3))));
+        break;
+    case SIZE_BYTE:
+        *dest = *((uint8_t*)readdp_table[addr_low & 0xfffc]
+            + (BES(addr_low & 3)));
+        break;
+    }
 }
 
 void MPMemory::read_dps(uint32_t& address, uint64_t* dest, DataSize size)
@@ -1189,7 +1208,161 @@ void MPMemory::write_rsp_stat(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::write_dp(uint32_t address, uint64_t src, DataSize size)
 {
-    MEM_NOT_IMPLEMENTED();
+    uint32_t addr_low = address & 0xffff;
+
+    switch (size)
+    {
+    case SIZE_WORD:
+    {
+        switch (addr_low)
+        {
+        case 0xc:
+            _dp_reg[_DPC_WRITE_STATUS_REG] = (uint32_t)src;
+            updateDPC();
+        case 0x8:
+        case 0x10:
+        case 0x14:
+        case 0x18:
+        case 0x1c:
+            return;
+            break;
+        }
+        *readdp_table[addr_low] = (uint32_t)src;
+        switch (addr_low)
+        {
+        case 0x0:
+            _dp_reg[DPC_CURRENT_REG] = _dp_reg[DPC_START_REG];
+            break;
+        case 0x4:
+            Bus::plugins->gfx()->ProcessRDPList();
+            Bus::mi_reg[MI_INTR_REG] |= 0x20;
+            Bus::interrupt->check_interrupt();
+            break;
+        }
+    }
+        break;
+    case SIZE_DWORD:
+    {
+        switch (addr_low)
+        {
+        case 0x8:
+            _dp_reg[_DPC_WRITE_STATUS_REG] = (uint32_t)(src & 0xFFFFFFFF);
+            updateDPC();
+            return;
+            break;
+        case 0x10:
+        case 0x18:
+            return;
+            break;
+        }
+        *readdp_table[addr_low] = (uint32_t)(src >> 32);
+        *readdp_table[addr_low + 4] = (uint32_t)(src & 0xFFFFFFFF);
+        switch (addr_low)
+        {
+        case 0x0:
+            _dp_reg[DPC_CURRENT_REG] = _dp_reg[DPC_START_REG];
+            Bus::plugins->gfx()->ProcessRDPList();
+            Bus::mi_reg[MI_INTR_REG] |= 0x20;
+            Bus::interrupt->check_interrupt();
+            break;
+        }
+    }
+        break;
+    case SIZE_HWORD:
+    {
+        switch (addr_low)
+        {
+        case 0xc:
+        case 0xe:
+            *((uint16_t*)((uint8_t*)&_dp_reg[_DPC_WRITE_STATUS_REG]
+                + (HES(addr_low & 3)))) = (uint16_t)src;
+            updateDPC();
+        case 0x8:
+        case 0xa:
+        case 0x10:
+        case 0x12:
+        case 0x14:
+        case 0x16:
+        case 0x18:
+        case 0x1a:
+        case 0x1c:
+        case 0x1e:
+            return;
+            break;
+        }
+        *((uint16_t*)((uint8_t*)readdp_table[addr_low & 0xfffc]
+            + (HES(addr_low & 3)))) = (uint16_t)src;
+        switch (addr_low)
+        {
+        case 0x0:
+        case 0x2:
+            _dp_reg[DPC_CURRENT_REG] = _dp_reg[DPC_START_REG];
+            break;
+        case 0x4:
+        case 0x6:
+            Bus::plugins->gfx()->ProcessRDPList();
+            Bus::mi_reg[MI_INTR_REG] |= 0x20;
+            Bus::interrupt->check_interrupt();
+            break;
+        }
+    }
+        break;
+    case SIZE_BYTE:
+    {
+        switch (addr_low)
+        {
+        case 0xc:
+        case 0xd:
+        case 0xe:
+        case 0xf:
+            *((uint8_t*)&_dp_reg[_DPC_WRITE_STATUS_REG]
+                + (BES(addr_low & 3))) = (uint8_t)src;
+            updateDPC();
+        case 0x8:
+        case 0x9:
+        case 0xa:
+        case 0xb:
+        case 0x10:
+        case 0x11:
+        case 0x12:
+        case 0x13:
+        case 0x14:
+        case 0x15:
+        case 0x16:
+        case 0x17:
+        case 0x18:
+        case 0x19:
+        case 0x1a:
+        case 0x1b:
+        case 0x1c:
+        case 0x1d:
+        case 0x1e:
+        case 0x1f:
+            return;
+            break;
+        }
+        *((uint8_t*)readdp_table[addr_low & 0xfffc]
+            + (BES(addr_low & 3))) = (uint8_t)src;
+        switch (addr_low)
+        {
+        case 0x0:
+        case 0x1:
+        case 0x2:
+        case 0x3:
+            _dp_reg[DPC_CURRENT_REG] = _dp_reg[DPC_START_REG];
+            break;
+        case 0x4:
+        case 0x5:
+        case 0x6:
+        case 0x7:
+            Bus::plugins->gfx()->ProcessRDPList();
+            Bus::mi_reg[MI_INTR_REG] |= 0x20;
+            Bus::interrupt->check_interrupt();
+            break;
+        }
+    }
+        break;
+    }
 }
 
 void MPMemory::write_dps(uint32_t address, uint64_t src, DataSize size)
@@ -2481,5 +2654,32 @@ void MPMemory::prepare_rsp(void)
         _mi_reg[MI_INTR_REG] &= ~0x1;
         _sp_reg[SP_STATUS_REG] &= ~0x203;
     }
+}
+
+void MPMemory::updateDPC(void)
+{
+    if (_dp_reg[_DPC_WRITE_STATUS_REG] & 0x1) // clear xbus_dmem_dma
+        _dp_reg[DPC_STATUS_REG] &= ~0x1;
+    if (_dp_reg[_DPC_WRITE_STATUS_REG] & 0x2) // set xbus_dmem_dma
+        _dp_reg[DPC_STATUS_REG] |= 0x1;
+
+    if (_dp_reg[_DPC_WRITE_STATUS_REG] & 0x4) // clear freeze
+    {
+        _dp_reg[DPC_STATUS_REG] &= ~0x2;
+
+        // see do_SP_task for more info
+        if (!(_sp_reg[SP_STATUS_REG] & 0x3)) // !halt && !broke
+        {
+            prepare_rsp();
+        }
+    }
+
+    if (_dp_reg[_DPC_WRITE_STATUS_REG] & 0x8) // set freeze
+        _dp_reg[DPC_STATUS_REG] |= 0x2;
+
+    if (_dp_reg[_DPC_WRITE_STATUS_REG] & 0x10) // clear flush
+        _dp_reg[DPC_STATUS_REG] &= ~0x4;
+    if (_dp_reg[_DPC_WRITE_STATUS_REG] & 0x20) // set flush
+        _dp_reg[DPC_STATUS_REG] |= 0x4;
 }
 
