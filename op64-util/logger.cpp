@@ -43,7 +43,7 @@ void Logger::log(uint32_t level, const char* msg)
 
     if (_logToFile && _logFile.is_open())
     {
-        _logFile << msg;
+        _logFile << buf;
     }
 }
 
@@ -116,5 +116,13 @@ _useTimeStamp(true),
 _minlevel(3)
 {
     //setLogToFile(true);
+}
+
+void Logger::logToFile(const char* msg)
+{
+    if (_logToFile && _logFile.is_open())
+    {
+        _logFile << msg;
+    }
 }
 

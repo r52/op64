@@ -36,6 +36,7 @@ public:
     }
 
     void log(uint32_t level, const char* msg);
+    void logToFile(const char* msg);
 
     
     /* setLogToFile 
@@ -124,12 +125,9 @@ private:
 
 #ifdef _DEBUG
 #define LOG_PC \
-    if (LOG.isLoggingToFile()) \
-    { \
-        char buf[20]; \
-        _safe_sprintf(buf, 20, "0x%x", (uint32_t)_PC); \
-        LOG(LOG_LEVEL_INFO, buf); \
-    }
+    char buf[20]; \
+    _safe_sprintf(buf, 20, "0x%x\n", (uint32_t)_PC); \
+    LOG.logToFile(buf);
 #else
 #define LOG_PC
 #endif
