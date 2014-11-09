@@ -164,14 +164,14 @@ inline int32_t trunc_f64_to_i32(double* f)
     return _mm_cvttsd_si32(_mm_load_sd(f));
 }
 
-inline int64_t trunc_f32_to_i64(float f)
+inline int64_t trunc_f32_to_i64(float* f)
 {
-    return _mm_cvttss_si64(_mm_load_ss(&f));
+    return _mm_cvttss_si64(_mm_load_ss(f));
 }
 
-inline int64_t trunc_f64_to_i64(double f)
+inline int64_t trunc_f64_to_i64(double* f)
 {
-    return _mm_cvttsd_si64(_mm_load_sd(&f));
+    return _mm_cvttsd_si64(_mm_load_sd(f));
 }
 
 inline float sqrt_f32(float* f)

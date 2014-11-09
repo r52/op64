@@ -85,7 +85,8 @@ void MPPInterpreter::JALR(void)
 
 void MPPInterpreter::SYSCALL(void)
 {
-    NOT_IMPLEMENTED();
+    _cp0_reg[CP0_CAUSE_REG] = 8 << 2;
+    general_exception();
 }
 
 void MPPInterpreter::BREAK(void)
@@ -377,22 +378,30 @@ void MPPInterpreter::SLTU(void)
 
 void MPPInterpreter::DADD(void)
 {
-    NOT_IMPLEMENTED();
+    _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s + _reg[_cur_instr.rt].s;
+
+    ++_PC;
 }
 
 void MPPInterpreter::DADDU(void)
 {
-    NOT_IMPLEMENTED();
+    _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s + _reg[_cur_instr.rt].s;
+
+    ++_PC;
 }
 
 void MPPInterpreter::DSUB(void)
 {
-    NOT_IMPLEMENTED();
+    _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s - _reg[_cur_instr.rt].s;
+
+    ++_PC;
 }
 
 void MPPInterpreter::DSUBU(void)
 {
-    NOT_IMPLEMENTED();
+    _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s - _reg[_cur_instr.rt].s;
+
+    ++_PC;
 }
 
 void MPPInterpreter::TGE(void)

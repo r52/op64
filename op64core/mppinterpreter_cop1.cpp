@@ -16,7 +16,11 @@ void MPPInterpreter::MFC1(void)
 
 void MPPInterpreter::DMFC1(void)
 {
-    NOT_IMPLEMENTED();
+    if (_cp0->cop1_unusable())
+        return;
+
+    _reg[_cur_instr.rt].s = *(int64_t*)_d_reg[_cur_instr.fs];
+    ++_PC;
 }
 
 void MPPInterpreter::CFC1(void)
@@ -47,7 +51,11 @@ void MPPInterpreter::MTC1(void)
 
 void MPPInterpreter::DMTC1(void)
 {
-    NOT_IMPLEMENTED();
+    if (_cp0->cop1_unusable())
+        return;
+
+    *((int64_t*)_d_reg[_cur_instr.fs]) = _reg[_cur_instr.rt].s;
+    ++_PC;
 }
 
 void MPPInterpreter::CTC1(void)
@@ -163,7 +171,8 @@ void MPPInterpreter::DIV_S(void)
 
     if ((_FCR31 & 0x400) && *_s_reg[_cur_instr.ft] == 0)
     {
-        LOG_WARNING("DIV_S by 0");
+        // This warning goes nuts in DK64???
+        //LOG_WARNING("DIV_S: divide by 0");
     }
 
     set_rounding();
@@ -219,7 +228,16 @@ void MPPInterpreter::ROUND_L_S(void)
 
 void MPPInterpreter::TRUNC_L_S(void)
 {
-    NOT_IMPLEMENTED();
+    if (_cp0->cop1_unusable())
+        return;
+
+    uint32_t saved_mode = get_rounding();
+
+    set_rounding(TRUNC_MODE);
+    *(int64_t*)_d_reg[_cur_instr.fd] = trunc_f32_to_i64((float*)_s_reg[_cur_instr.fs]);
+    set_rounding(saved_mode);
+
+    ++_PC;
 }
 
 void MPPInterpreter::CEIL_L_S(void)
@@ -315,17 +333,6 @@ void MPPInterpreter::C_EQ_S(void)
     if (_cp0->cop1_unusable())
         return;
 
-    ++_PC;
-    /*
-    if (isnan(*_s_reg[_cur_instr.fs]) || isnan(*_s_reg[_cur_instr.ft]))
-    {
-        _FCR31 &= ~0x800000;
-        return;
-    }
-
-    _FCR31 = (*_s_reg[_cur_instr.fs] == *_s_reg[_cur_instr.ft]) ? _FCR31 | 0x800000 : _FCR31&~0x800000;
-    */
-
     uint8_t result = c_cmp_32(_s_reg[_cur_instr.fs], _s_reg[_cur_instr.ft]);
 
     if (result == CMP_UNORDERED)
@@ -335,26 +342,80 @@ void MPPInterpreter::C_EQ_S(void)
     }
 
     _FCR31 = (result == CMP_EQUAL) ? _FCR31 | 0x800000 : _FCR31&~0x800000;
+
+    ++_PC;
 }
 
 void MPPInterpreter::C_UEQ_S(void)
 {
-    NOT_IMPLEMENTED();
+    if (_cp0->cop1_unusable())
+        return;
+
+    uint8_t result = c_cmp_32(_s_reg[_cur_instr.fs], _s_reg[_cur_instr.ft]);
+
+    if (result == CMP_UNORDERED)
+    {
+        _FCR31 |= 0x800000;
+        return;
+    }
+
+    _FCR31 = (result == CMP_EQUAL) ? _FCR31 | 0x800000 : _FCR31&~0x800000;
+
+    ++_PC;
 }
 
 void MPPInterpreter::C_OLT_S(void)
 {
-    NOT_IMPLEMENTED();
+    if (_cp0->cop1_unusable())
+        return;
+
+    uint8_t result = c_cmp_32(_s_reg[_cur_instr.fs], _s_reg[_cur_instr.ft]);
+
+    if (result == CMP_UNORDERED)
+    {
+        _FCR31 &= ~0x800000;
+        return;
+    }
+
+    _FCR31 = (result == CMP_LESS_THAN) ? _FCR31 | 0x800000 : _FCR31&~0x800000;
+
+    ++_PC;
 }
 
 void MPPInterpreter::C_ULT_S(void)
 {
-    NOT_IMPLEMENTED();
+    if (_cp0->cop1_unusable())
+        return;
+
+    uint8_t result = c_cmp_32(_s_reg[_cur_instr.fs], _s_reg[_cur_instr.ft]);
+
+    if (result == CMP_UNORDERED)
+    {
+        _FCR31 |= 0x800000;
+        return;
+    }
+
+    _FCR31 = (result == CMP_LESS_THAN) ? _FCR31 | 0x800000 : _FCR31&~0x800000;
+
+    ++_PC;
 }
 
 void MPPInterpreter::C_OLE_S(void)
 {
-    NOT_IMPLEMENTED();
+    if (_cp0->cop1_unusable())
+        return;
+
+    uint8_t result = c_cmp_32(_s_reg[_cur_instr.fs], _s_reg[_cur_instr.ft]);
+
+    if (result == CMP_UNORDERED)
+    {
+        _FCR31 &= ~0x800000;
+        return;
+    }
+
+    _FCR31 = ((result == CMP_LESS_THAN) || (result == CMP_EQUAL)) ? _FCR31 | 0x800000 : _FCR31&~0x800000;
+
+    ++_PC;
 }
 
 void MPPInterpreter::C_ULE_S(void)
@@ -391,7 +452,7 @@ void MPPInterpreter::C_LT_S(void)
 
     if (result == CMP_UNORDERED)
     {
-        LOG_ERROR("NaN in %s", __FUNCTION__);
+        LOG_ERROR("FPU: NaN in %s", __FUNCTION__);
         Bus::stop = true;
     }
 
@@ -414,7 +475,7 @@ void MPPInterpreter::C_LE_S(void)
 
     if (result == CMP_UNORDERED)
     {
-        LOG_ERROR("NaN in %s", __FUNCTION__);
+        LOG_ERROR("FPU: NaN in %s", __FUNCTION__);
         Bus::stop = true;
     }
 
@@ -425,7 +486,20 @@ void MPPInterpreter::C_LE_S(void)
 
 void MPPInterpreter::C_NGT_S(void)
 {
-    NOT_IMPLEMENTED();
+    if (_cp0->cop1_unusable())
+        return;
+
+    uint8_t result = c_cmp_32(_s_reg[_cur_instr.fs], _s_reg[_cur_instr.ft]);
+
+    if (result == CMP_UNORDERED)
+    {
+        LOG_ERROR("FPU: NaN in %s", __FUNCTION__);
+        Bus::stop = true;
+    }
+
+    _FCR31 = ((result == CMP_LESS_THAN) || (result == CMP_EQUAL)) ? _FCR31 | 0x800000 : _FCR31&~0x800000;
+
+    ++_PC;
 }
 
 void MPPInterpreter::ADD_D(void)
@@ -465,7 +539,7 @@ void MPPInterpreter::DIV_D(void)
 
     if ((_FCR31 & 0x400) && *_d_reg[_cur_instr.ft] == 0)
     {
-        LOG_WARNING("DIV_D by 0");
+        //LOG_WARNING("DIV_D: divide by 0");
     }
 
     set_rounding();
@@ -593,7 +667,12 @@ void MPPInterpreter::CVT_W_D(void)
 
 void MPPInterpreter::CVT_L_D(void)
 {
-    NOT_IMPLEMENTED();
+    if (_cp0->cop1_unusable())
+        return;
+
+    set_rounding();
+    *((int64_t*)_d_reg[_cur_instr.fd]) = f64_to_i64((double*)_d_reg[_cur_instr.fs]);
+    ++_PC;
 }
 
 void MPPInterpreter::C_F_D(void)
@@ -678,7 +757,7 @@ void MPPInterpreter::C_LT_D(void)
 
     if (result == CMP_UNORDERED)
     {
-        LOG_ERROR("NaN in %s", __FUNCTION__);
+        LOG_ERROR("FPU: NaN in %s", __FUNCTION__);
         Bus::stop = true;
     }
 
@@ -701,7 +780,7 @@ void MPPInterpreter::C_LE_D(void)
 
     if (result == CMP_UNORDERED)
     {
-        LOG_ERROR("NaN in %s", __FUNCTION__);
+        LOG_ERROR("FPU: NaN in %s", __FUNCTION__);
         Bus::stop = true;
     }
 

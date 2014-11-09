@@ -95,7 +95,7 @@ void MPPInterpreter::initialize(void)
 
 void MPPInterpreter::hard_reset(void)
 {
-    vec_for (uint32_t i = 0; i < 32; i++)
+    for (uint32_t i = 0; i < 32; i++)
     {
         _reg[i].u = 0;
         _cp0_reg[i] = 0;
@@ -214,16 +214,15 @@ void MPPInterpreter::soft_reset(void)
     // copy boot code
     memcpy(Bus::sp_dmem8 + 0x40, Bus::rom->getImage() + 0x40, 0xFC0);
 
-    _reg[19].u = 0; /* 0:Cart, 1:DD */
-    _reg[20].u = get_system_type_reg(Bus::rom->getSystemType());    /* 0:PAL, 1:NTSC, 2:MPAL */
-    _reg[21].u = 0; /* 0:ColdReset, 1:NMI */
+    _reg[19].u = 0; // 0:Cart, 1:DD
+    _reg[20].u = get_system_type_reg(Bus::rom->getSystemType());    // 0:PAL, 1:NTSC, 2:MPAL
+    _reg[21].u = 0; // 0:ColdReset, 1:NMI
     _reg[22].u = get_cic_seed(Bus::rom->getCICChip());
-    _reg[23].u = 0; /*???*/
+    _reg[23].u = 0;
 
-    uint32_t* sp_dmem = Bus::sp_dmem32;
     uint32_t* sp_imem = Bus::sp_imem32;
 
-    /* required by CIC x105 */
+    // required by CIC x105
     sp_imem[0] = 0x3C0DBFC0;
     sp_imem[1] = 0x8DA807FC;
     sp_imem[2] = 0x25AD07C0;
@@ -233,7 +232,7 @@ void MPPInterpreter::soft_reset(void)
     sp_imem[6] = 0x8DA80024;
     sp_imem[7] = 0x3C0BB000;
 
-    /* required by CIC x105 */
+    // required by CIC x105
     _reg[11].u = 0xFFFFFFFFA4000040;
     _reg[29].u = 0xFFFFFFFFA4001FF0;
     _reg[31].u = 0xFFFFFFFFA4001550;
@@ -484,12 +483,36 @@ void MPPInterpreter::DADDIU(void)
 
 void MPPInterpreter::LDL(void)
 {
-    NOT_IMPLEMENTED();
+    uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
+    uint32_t masked_addr = addr & ~7;
+    uint64_t value = 0;
+    uint32_t offset = addr & 7;
+    ++_PC;
+
+    Bus::mem->readmem(masked_addr, &value, SIZE_DWORD);
+
+    if (masked_addr)
+    {
+        _reg[_cur_instr.rt].s = (_reg[_cur_instr.rt].s & LDL_MASK[offset]);
+        _reg[_cur_instr.rt].s += (value << LDL_SHIFT[offset]);
+    }
 }
 
 void MPPInterpreter::LDR(void)
 {
-    NOT_IMPLEMENTED();
+    uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
+    uint32_t masked_addr = addr & ~7;
+    uint64_t value = 0;
+    uint32_t offset = addr & 7;
+    ++_PC;
+
+    Bus::mem->readmem(masked_addr, &value, SIZE_DWORD);
+
+    if (masked_addr)
+    {
+        _reg[_cur_instr.rt].s = (_reg[_cur_instr.rt].s & LDR_MASK[offset]);
+        _reg[_cur_instr.rt].s += (value >> LDR_SHIFT[offset]);
+    }
 }
 
 void MPPInterpreter::LB(void)
@@ -526,7 +549,7 @@ void MPPInterpreter::LH(void)
 
 void MPPInterpreter::LWL(void)
 {
-    uint32_t addr = (uint32_t)((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
+    uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
     uint32_t masked_addr = addr & ~3;
     uint64_t value = 0;
     uint32_t offset = addr & 3;
@@ -536,8 +559,8 @@ void MPPInterpreter::LWL(void)
 
     if (masked_addr)
     {
-        _reg[_cur_instr.rt].s = ((int32_t)_reg[_cur_instr.rt].s & LWL_MASK[offset]);
-        _reg[_cur_instr.rt].s += (signextend<int32_t, int64_t>((int32_t)value) << LWL_SHIFT[offset]);
+        _reg[_cur_instr.rt].s = (int32_t)(_reg[_cur_instr.rt].s & LWL_MASK[offset]);
+        _reg[_cur_instr.rt].s += (int32_t)(value << LWL_SHIFT[offset]);
     }
 }
 
@@ -590,8 +613,8 @@ void MPPInterpreter::LWR(void)
     Bus::mem->readmem(masked_addr, &value, SIZE_WORD);
     if (masked_addr)
     {
-        _reg[_cur_instr.rt].s = ((int32_t)_reg[_cur_instr.rt].s & LWR_MASK[offset]);
-        _reg[_cur_instr.rt].s += ((int32_t)value >> LWR_SHIFT[offset]);
+        _reg[_cur_instr.rt].s = (int32_t)(_reg[_cur_instr.rt].s & LWR_MASK[offset]);
+        _reg[_cur_instr.rt].s += (int32_t)(value >> LWR_SHIFT[offset]);
     }
 
 }
@@ -633,9 +656,9 @@ void MPPInterpreter::SWL(void)
     if (masked_addr)
     {
         value &= SWL_MASK[offset];
-        value += ((uint32_t)_reg[_cur_instr.rt].u >> SWL_SHIFT[offset]);
+        value += (uint32_t)(_reg[_cur_instr.rt].u >> SWL_SHIFT[offset]);
 
-        Bus::mem->writemem(masked_addr, value, SIZE_WORD);
+        Bus::mem->writemem(addr & ~0x03, value, SIZE_WORD);
     }
 }
 
@@ -668,9 +691,9 @@ void MPPInterpreter::SWR(void)
     if (masked_addr)
     {
         value &= SWR_MASK[offset];
-        value += (_reg[_cur_instr.rt].u << SWR_SHIFT[offset]);
+        value += (uint32_t)(_reg[_cur_instr.rt].u << SWR_SHIFT[offset]);
 
-        Bus::mem->writemem(masked_addr, value, SIZE_WORD);
+        Bus::mem->writemem(addr & ~0x03, value, SIZE_WORD);
     }
 }
 
@@ -908,7 +931,7 @@ void MPPInterpreter::TLB_refill_exception(unsigned int address, int w)
 
         if (address >= 0x80000000 && address < 0xc0000000)
         {
-            usual_handler = 1;
+            usual_handler = true;
         }
 
         for (i = 0; i < 32; i++)
