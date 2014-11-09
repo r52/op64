@@ -72,7 +72,6 @@ private:
     bool _check_nop;
     bool _non_ieee_mode = true; // for testing
 
-
 protected:
 
     void generic_jump(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1);
@@ -198,7 +197,6 @@ protected:
 
     virtual void MFC0(void);
     virtual void MTC0(void);
-    virtual void TLB(void);
 
     virtual void MFC1(void);
     virtual void DMFC1(void);

@@ -137,15 +137,9 @@ void MPPInterpreter::MTC0(void)
     ++_PC;
 }
 
-void MPPInterpreter::TLB(void)
-{
-    (this->*tlb_table[_cur_instr.func])();
-}
-
 void MPPInterpreter::TLBR(void)
 {
-    int index;
-    index = _cp0_reg[CP0_INDEX_REG] & 0x1F;
+    int index = _cp0_reg[CP0_INDEX_REG] & 0x1F;
     _cp0_reg[CP0_PAGEMASK_REG] = TLB::tlb_entry_table[index].mask << 13;
     _cp0_reg[CP0_ENTRYHI_REG] = ((TLB::tlb_entry_table[index].vpn2 << 13) | TLB::tlb_entry_table[index].asid);
     _cp0_reg[CP0_ENTRYLO0_REG] = (TLB::tlb_entry_table[index].pfn_even << 6) | (TLB::tlb_entry_table[index].c_even << 3)

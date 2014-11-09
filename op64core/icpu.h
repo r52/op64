@@ -443,7 +443,11 @@ protected:
 
     virtual void MFC0(void) = 0;
     virtual void MTC0(void) = 0;
-    virtual void TLB(void) = 0;
+
+    inline void TLB(void)
+    {
+        (this->*tlb_table[_cur_instr.func])();
+    }
 
 #ifdef HAS_CXX11_LIST_INST
     InstructionTable cop0_table =
