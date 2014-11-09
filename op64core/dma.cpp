@@ -173,44 +173,10 @@ void DMA::writePI(void)
         return;
     }
 
-    if (cpu->getCPUType() != CPU_INTERPRETER)
+    vec_for(i = 0; i < (int32_t)longueur; i++)
     {
-        /* do some non interp shit here
-        for (i = 0; i < (int)longueur; i++)
-        {
-            unsigned long rdram_address1 = pi_register.pi_dram_addr_reg + i + 0x80000000;
-            unsigned long rdram_address2 = pi_register.pi_dram_addr_reg + i + 0xa0000000;
-            ((unsigned char*)rdram)[(pi_register.pi_dram_addr_reg + i) ^ S8] =
-                rom[(((pi_register.pi_cart_addr_reg - 0x10000000) & 0x3FFFFFF) + i) ^ S8];
-
-            if (!invalid_code[rdram_address1 >> 12])
-            {
-                if (!blocks[rdram_address1 >> 12] ||
-                    blocks[rdram_address1 >> 12]->block[(rdram_address1 & 0xFFF) / 4].ops !=
-                    current_instruction_table.NOTCOMPILED)
-                {
-                    invalid_code[rdram_address1 >> 12] = 1;
-                }
-            }
-            if (!invalid_code[rdram_address2 >> 12])
-            {
-                if (!blocks[rdram_address1 >> 12] ||
-                    blocks[rdram_address2 >> 12]->block[(rdram_address2 & 0xFFF) / 4].ops !=
-                    current_instruction_table.NOTCOMPILED)
-                {
-                    invalid_code[rdram_address2 >> 12] = 1;
-                }
-            }
-        }
-        */
-    }
-    else
-    {
-        vec_for (i = 0; i < (int32_t)longueur; i++)
-        {
-            rdram8[BES(pi_reg[PI_DRAM_ADDR_REG] + i)] =
-                rom_image[BES(((pi_reg[PI_CART_ADDR_REG] - 0x10000000) & 0x3FFFFFF) + i)];
-        }
+        rdram8[BES(pi_reg[PI_DRAM_ADDR_REG] + i)] =
+            rom_image[BES(((pi_reg[PI_CART_ADDR_REG] - 0x10000000) & 0x3FFFFFF) + i)];
     }
 
     // Set the RDRAM memory size when copying main ROM code

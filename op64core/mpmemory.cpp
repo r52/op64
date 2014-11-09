@@ -2513,7 +2513,7 @@ void MPMemory::update_sp_reg(void)
 
     //if (get_event(SP_INT)) return;
     if (!(_sp_reg[_SP_WRITE_STATUS_REG] & 0x1) &&
-        !(_sp_reg[_SP_WRITE_STATUS_REG] & 0x4)) 
+        !(_sp_reg[_SP_WRITE_STATUS_REG] & 0x4))
         return;
 
     if (!(_sp_reg[SP_STATUS_REG] & 0x3)) // !halt && !broke
@@ -2663,6 +2663,7 @@ void MPMemory::updateDPC(void)
 {
     if (_dp_reg[_DPC_WRITE_STATUS_REG] & 0x1) // clear xbus_dmem_dma
         _dp_reg[DPC_STATUS_REG] &= ~0x1;
+
     if (_dp_reg[_DPC_WRITE_STATUS_REG] & 0x2) // set xbus_dmem_dma
         _dp_reg[DPC_STATUS_REG] |= 0x1;
 
@@ -2682,6 +2683,7 @@ void MPMemory::updateDPC(void)
 
     if (_dp_reg[_DPC_WRITE_STATUS_REG] & 0x10) // clear flush
         _dp_reg[DPC_STATUS_REG] &= ~0x4;
+
     if (_dp_reg[_DPC_WRITE_STATUS_REG] & 0x20) // set flush
         _dp_reg[DPC_STATUS_REG] |= 0x4;
 }

@@ -29,11 +29,17 @@ void EEPROM::eepromCommand(uint8_t* command)
         {
             command[1] |= 0x40;
             if ((command[1] & 3) > 0)
+            {
                 command[3] = 0;
+            }
             if ((command[1] & 3) > 1)
+            {
                 command[4] = (Bus::rom->getSaveType() != SAVETYPE_EEPROM_16KB) ? 0x80 : 0xc0;
+            }
             if ((command[1] & 3) > 2)
+            {
                 command[5] = 0;
+            }
         }
         else
         {
@@ -60,7 +66,8 @@ void EEPROM::eepromCommand(uint8_t* command)
         break;
     case 7:
         // read RTC block
-        switch (command[3]) {	// block number
+        switch (command[3]) // block number
+        {
         case 0:
             command[4] = 0x00;
             command[5] = 0x02;

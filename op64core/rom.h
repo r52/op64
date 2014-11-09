@@ -19,7 +19,7 @@ enum CIC
     CIC_NUS_6101 = 1,
     CIC_NUS_6102,
     CIC_NUS_6103,
-    CIC_NUS_6104,
+    CIC_NUS_6104,   // doesnt exist
     CIC_NUS_6105,
     CIC_NUS_6106,
     CIC_NUM_TYPES

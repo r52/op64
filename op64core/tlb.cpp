@@ -40,12 +40,16 @@ uint32_t TLB::virtual_to_physical_address(uint32_t addresse, int32_t w)
     if (w == 1)
     {
         if (tlb_lookup_write[addresse >> 12])
+        {
             return (tlb_lookup_write[addresse >> 12] & 0xFFFFF000) | (addresse & 0xFFF);
+        }
     }
     else
     {
         if (tlb_lookup_read[addresse >> 12])
+        {
             return (tlb_lookup_read[addresse >> 12] & 0xFFFFF000) | (addresse & 0xFFF);
+        }
     }
     //printf("tlb exception !!! @ %x, %x, add:%x\n", addresse, w, PC->addr);
     //getchar();

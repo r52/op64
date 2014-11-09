@@ -41,7 +41,7 @@ void Logger::log(uint32_t level, const char* msg)
         _safe_sprintf(buf, 350, "%s\n", msg);
     }
 
-    if (_logToFile && _logFile.is_open())
+    if (_logToFile)
     {
         _logFile << buf;
     }
@@ -120,7 +120,7 @@ _minlevel(3)
 
 void Logger::logToFile(const char* msg)
 {
-    if (_logToFile && _logFile.is_open())
+    if (_logToFile)
     {
         _logFile << msg;
     }
