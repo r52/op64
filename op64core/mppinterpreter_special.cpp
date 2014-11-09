@@ -195,12 +195,10 @@ void MPPInterpreter::DMULT(void)
 #if defined(__GNUC__)
     __int128_t rs128 = (int64_t)_reg[_cur_instr.rs].s;
     __int128_t rs128 = (int64_t)_reg[_cur_instr.rt].s;
-    __int128_t result;
+    __int128_t result = rs128 * rs128;
 
-    result = rs128 * rs128;
-
-    _lo.u = result;
-    _hi.u = (result >> 64);
+    _lo.s = result;
+    _hi.s = (result >> 64);
 #elif defined(_MSC_VER)
     _lo.s = _mul128(_reg[_cur_instr.rs].s, _reg[_cur_instr.rt].s, &_hi.s);
 #else
