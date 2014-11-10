@@ -83,7 +83,7 @@ private:
     uint32_t _minlevel;
     LogCallback _callback;
     std::ofstream _logFile;
-    std::string _filename = "log.log";
+    std::string _filename = "op64.log";
 };
 
 #define LOG Logger::getInstance()

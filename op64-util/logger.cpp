@@ -43,7 +43,7 @@ void Logger::log(uint32_t level, const char* msg)
 
     if (_logToFile)
     {
-        _logFile << buf;
+        _logFile.write(buf, 350);
     }
 }
 
@@ -122,7 +122,7 @@ void Logger::logToFile(const char* msg)
 {
     if (_logToFile)
     {
-        _logFile << msg;
+        _logFile.write(msg, strlen(msg));
     }
 }
 
