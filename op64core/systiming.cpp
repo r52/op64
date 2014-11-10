@@ -29,12 +29,16 @@ typedef CPUClock<375> R4300Clock;
 
 static nanoseconds getGameClockFrame(TimingMode mode, uint64_t frames)
 {
-    if (mode == TIMING_PAL)
+    switch (mode)
     {
-        return duration_cast<nanoseconds>(PALClock::duration(frames));
+    case TIMING_NTSC:
+    default:
+        return duration_cast<nanoseconds>(NTSCClock::duration{ frames });
+        break;
+    case TIMING_PAL:
+        return duration_cast<nanoseconds>(PALClock::duration{ frames });
+        break;
     }
-
-    return duration_cast<nanoseconds>(NTSCClock::duration(frames));
 }
 
 SysTiming::SysTiming() :
@@ -73,7 +77,7 @@ uint64_t SysTiming::doVILimit()
         }
     }
 
-    if (curtime - _lastVITime >= milliseconds(1000))
+    if (curtime - _lastVITime >= milliseconds{ 1000 })
     {
         uint64_t frames = _framesElapsed;
         _framesElapsed = 0;
