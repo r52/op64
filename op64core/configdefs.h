@@ -22,7 +22,7 @@
 #define CFG_INPUT_NAME "InputPluginName"
 
 // setting defaults
-#define CFG_DELAY_SI_DEFAULT true
+#define CFG_DELAY_SI_DEFAULT false
 #define CFG_SAVE_PATH_DEFAULT "Save/"
 
 #define CFG_GFX_PATH_DEFAULT "Plugins/GFX/"
