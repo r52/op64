@@ -602,8 +602,15 @@ void MPMemory::read_vi(uint32_t& address, uint64_t* dest, DataSize size)
         {
         case 0x10:
             Bus::cpu->getcp0()->update_count(*Bus::PC);
-            _vi_reg[VI_CURRENT_REG] = (_vi_reg[_VI_DELAY] - (Bus::next_vi - Bus::cp0_reg[CP0_COUNT_REG])) / 1500;
-            _vi_reg[VI_CURRENT_REG] = (_vi_reg[VI_CURRENT_REG]&(~1)) | Bus::vi_field;
+            if (_vi_reg[VI_V_SYNC_REG])
+            {
+                _vi_reg[VI_CURRENT_REG] = (_vi_reg[_VI_DELAY] - (Bus::next_vi - Bus::cp0_reg[CP0_COUNT_REG])) / (_vi_reg[_VI_DELAY] / _vi_reg[VI_V_SYNC_REG]);
+                _vi_reg[VI_CURRENT_REG] = (_vi_reg[VI_CURRENT_REG] & (~1)) | Bus::vi_field;
+            }
+            else
+            {
+                _vi_reg[VI_CURRENT_REG] = 0;
+            }
             break;
         }
         *dest = *(readvi_table[addr_low]);
@@ -615,8 +622,15 @@ void MPMemory::read_vi(uint32_t& address, uint64_t* dest, DataSize size)
         {
         case 0x10:
             Bus::cpu->getcp0()->update_count(*Bus::PC);
-            _vi_reg[VI_CURRENT_REG] = (_vi_reg[_VI_DELAY] - (Bus::next_vi - Bus::cp0_reg[CP0_COUNT_REG])) / 1500;
-            _vi_reg[VI_CURRENT_REG] = (_vi_reg[VI_CURRENT_REG]&(~1)) | Bus::vi_field;
+            if (_vi_reg[VI_V_SYNC_REG])
+            {
+                _vi_reg[VI_CURRENT_REG] = (_vi_reg[_VI_DELAY] - (Bus::next_vi - Bus::cp0_reg[CP0_COUNT_REG])) / (_vi_reg[_VI_DELAY] / _vi_reg[VI_V_SYNC_REG]);
+                _vi_reg[VI_CURRENT_REG] = (_vi_reg[VI_CURRENT_REG] & (~1)) | Bus::vi_field;
+            }
+            else
+            {
+                _vi_reg[VI_CURRENT_REG] = 0;
+            }
             break;
         }
         *dest = ((uint64_t)(*readvi_table[addr_low]) << 32) |
@@ -630,8 +644,15 @@ void MPMemory::read_vi(uint32_t& address, uint64_t* dest, DataSize size)
         case 0x10:
         case 0x12:
             Bus::cpu->getcp0()->update_count(*Bus::PC);
-            _vi_reg[VI_CURRENT_REG] = (_vi_reg[_VI_DELAY] - (Bus::next_vi - Bus::cp0_reg[CP0_COUNT_REG])) / 1500;
-            _vi_reg[VI_CURRENT_REG] = (_vi_reg[VI_CURRENT_REG]&(~1)) | Bus::vi_field;
+            if (_vi_reg[VI_V_SYNC_REG])
+            {
+                _vi_reg[VI_CURRENT_REG] = (_vi_reg[_VI_DELAY] - (Bus::next_vi - Bus::cp0_reg[CP0_COUNT_REG])) / (_vi_reg[_VI_DELAY] / _vi_reg[VI_V_SYNC_REG]);
+                _vi_reg[VI_CURRENT_REG] = (_vi_reg[VI_CURRENT_REG] & (~1)) | Bus::vi_field;
+            }
+            else
+            {
+                _vi_reg[VI_CURRENT_REG] = 0;
+            }
             break;
         }
         *dest = *((uint16_t*)((uint8_t*)readvi_table[addr_low & 0xfffc]
@@ -647,8 +668,15 @@ void MPMemory::read_vi(uint32_t& address, uint64_t* dest, DataSize size)
         case 0x12:
         case 0x13:
             Bus::cpu->getcp0()->update_count(*Bus::PC);
-            _vi_reg[VI_CURRENT_REG] = (_vi_reg[_VI_DELAY] - (Bus::next_vi - Bus::cp0_reg[CP0_COUNT_REG])) / 1500;
-            _vi_reg[VI_CURRENT_REG] = (_vi_reg[VI_CURRENT_REG] & (~1)) | Bus::vi_field;
+            if (_vi_reg[VI_V_SYNC_REG])
+            {
+                _vi_reg[VI_CURRENT_REG] = (_vi_reg[_VI_DELAY] - (Bus::next_vi - Bus::cp0_reg[CP0_COUNT_REG])) / (_vi_reg[_VI_DELAY] / _vi_reg[VI_V_SYNC_REG]);
+                _vi_reg[VI_CURRENT_REG] = (_vi_reg[VI_CURRENT_REG] & (~1)) | Bus::vi_field;
+            }
+            else
+            {
+                _vi_reg[VI_CURRENT_REG] = 0;
+            }
             break;
         }
         *dest = *((uint8_t*)readvi_table[addr_low & 0xfffc]

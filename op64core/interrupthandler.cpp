@@ -176,10 +176,7 @@ void InterruptHandler::gen_interrupt(void)
             }
         }
 
-        if (Bus::vi_reg[VI_V_SYNC_REG] == 0)
-            Bus::vi_reg[_VI_DELAY] = 500000;
-        else
-            Bus::vi_reg[_VI_DELAY] = ((Bus::vi_reg[VI_V_SYNC_REG] + 1) * 1500);
+        Bus::vi_reg[_VI_DELAY] = (62500000 / Bus::rom->getViLimit()) + 1;
 
         Bus::next_vi += Bus::vi_reg[_VI_DELAY];
 
@@ -431,6 +428,14 @@ void InterruptHandler::do_hard_reset(void)
     Bus::mem->initialize();
     Bus::cpu->hard_reset();
     Bus::cpu->soft_reset();
+
+    if (!Bus::plugins->initialize())
+    {
+        LOG_ERROR("Reset: one or more plugins failed to initialize");
+        Bus::stop = true;
+        return;
+    }
+
     Bus::last_jump_addr = 0xa4000040;
     Bus::next_interrupt = 624999;
     initialize();
