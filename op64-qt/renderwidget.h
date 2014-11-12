@@ -23,4 +23,5 @@ private:
 
 private:
     Emulator* _emu;
+    QString romName;
 };

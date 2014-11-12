@@ -1,8 +1,9 @@
 #include "renderwidget.h"
 #include "emulator.h"
 #include <QCloseEvent>
-#include "corecontrol.h"
 
+#include "corecontrol.h"
+#include "rom.h"
 
 
 RenderWidget::RenderWidget(Emulator* emu, QWidget* parent /*= 0*/) :
@@ -15,6 +16,10 @@ QWidget(parent)
     setAttribute(Qt::WA_OpaquePaintEvent);
 
     CoreControl::displayVI = std::bind(&RenderWidget::displayVI, this, std::placeholders::_1);
+
+    romName = QString::fromLocal8Bit((char*)Bus::rom->getHeader()->Name, 20);
+    romName = romName.trimmed();
+    setWindowTitle(romName);
 }
 
 void RenderWidget::closeEvent(QCloseEvent * event)
@@ -29,7 +34,7 @@ void RenderWidget::closeEvent(QCloseEvent * event)
 
 void RenderWidget::displayVI(uint64_t framerate)
 {
-    QMetaObject::invokeMethod(this, "setWindowTitle", Q_ARG(QString, QString("%1 VI/s").arg(framerate)));
+    QMetaObject::invokeMethod(this, "setWindowTitle", Q_ARG(QString, QString("%1 | %2 VI/s").arg(romName).arg(framerate)));
 }
 
 RenderWidget::~RenderWidget()
