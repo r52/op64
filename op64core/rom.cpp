@@ -193,10 +193,16 @@ bool Rom::loadRom(const char* name)
         // TODO future count per op
 
         LOG_VERBOSE("Name: %s", _header.Name);
-        LOG_VERBOSE("CRC1: %X", _header.CRC1);
-        LOG_VERBOSE("CRC2: %X", _header.CRC2);
+        LOG_VERBOSE("CRC: %X %X", _header.CRC1, _header.CRC2);
         LOG_VERBOSE("System Type: %s", systemTypeString[_systemtype]);
         LOG_VERBOSE("Save Type: %s", saveTypeString[_savetype]);
+        LOG_VERBOSE("Rom Size: %d Megabits", _imagesize / 1024 / 1024 * 8);
+        LOG_VERBOSE("ClockRate: %X", byteswap_u32(_header.ClockRate));
+        LOG_VERBOSE("Release Code: %X", byteswap_u32(_header.Release));
+        LOG_VERBOSE("Manufacturer ID: %X", byteswap_u32(_header.Manufacturer_ID));
+        LOG_VERBOSE("Cartridge ID: %X", _header.Cartridge_ID);
+        LOG_VERBOSE("Country Code: %X", _header.Country_code);
+        LOG_VERBOSE("PC: 0x%X", byteswap_u32(_header.PC));
 
         // Swap it again because little endian cpu
         uint32_t* roml = (uint32_t*)_image;
