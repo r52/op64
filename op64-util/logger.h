@@ -91,35 +91,35 @@ private:
 #define LOG_DEBUG(...) \
     { \
         char buf[250]; \
-        _safe_sprintf(buf, 250, __VA_ARGS__); \
+        _s_snprintf(buf, 250, __VA_ARGS__); \
         LOG(LOG_LEVEL_DEBUG, buf); \
     }
 
 #define LOG_ERROR(...) \
     { \
         char buf[250]; \
-        _safe_sprintf(buf, 250, __VA_ARGS__); \
+        _s_snprintf(buf, 250, __VA_ARGS__); \
         LOG(LOG_LEVEL_ERROR, buf); \
     }
 
 #define LOG_INFO(...) \
     { \
         char buf[250]; \
-        _safe_sprintf(buf, 250, __VA_ARGS__); \
+        _s_snprintf(buf, 250, __VA_ARGS__); \
         LOG(LOG_LEVEL_INFO, buf); \
     }
 
 #define LOG_WARNING(...) \
     { \
         char buf[250]; \
-        _safe_sprintf(buf, 250, __VA_ARGS__); \
+        _s_snprintf(buf, 250, __VA_ARGS__); \
         LOG(LOG_LEVEL_WARNING, buf); \
     }
 
 #define LOG_VERBOSE(...) \
     { \
         char buf[250]; \
-        _safe_sprintf(buf, 250, __VA_ARGS__); \
+        _s_snprintf(buf, 250, __VA_ARGS__); \
         LOG(LOG_LEVEL_VERBOSE, buf); \
     }
 

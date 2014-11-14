@@ -34,11 +34,11 @@ void Logger::log(uint32_t level, const char* msg)
         char tmstr[100];
         tm t = op::localtime(now);
         strftime(tmstr, sizeof(tmstr), "%c", &t);
-        _safe_sprintf(buf, 350, "%s: %s - %s\n", tmstr, log_levels[level], msg);
+        _s_snprintf(buf, 350, "%s: %s - %s\n", tmstr, log_levels[level], msg);
     }
     else
     {
-        _safe_sprintf(buf, 350, "%s\n", msg);
+        _s_snprintf(buf, 350, "%s\n", msg);
     }
 
     if (_logToFile)
