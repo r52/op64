@@ -4,9 +4,9 @@
 #include "version.h"
 #include "plugins.h"
 #include "configstore.h"
+#include "romdb.h"
 
 #include <QFileDialog>
-#include <QTextEdit>
 #include <QMessageBox>
 #include <QCloseEvent>
 #include <QSettings>
@@ -15,6 +15,7 @@
 #include "guiconfig.h"
 #include "configdialog.h"
 #include "renderwidget.h"
+#include "logwindow.h"
 
 
 static const char* logLevelFormatting[LOG_LEVEL_NUM] = {
@@ -47,6 +48,9 @@ QOP64Window::QOP64Window(QWidget *parent)
 
     setupEmulationThread();
     connectGUIControls();
+
+    // Force rom db load
+    RomDB::getInstance();
 }
 
 QOP64Window::~QOP64Window()
@@ -76,7 +80,7 @@ void QOP64Window::openRom(void)
 
 void QOP64Window::logCallback(uint32_t level, const char* msg)
 {
-    QMetaObject::invokeMethod(_logWindow, "insertHtml", Q_ARG(QString, QString(logLevelFormatting[level]).arg(QString(msg))));
+    QMetaObject::invokeMethod(_logWindow, "appendHtml", Q_ARG(QString, QString(logLevelFormatting[level]).arg(QString(msg))));
 }
 
 void QOP64Window::setupDirectories(void)
@@ -175,8 +179,7 @@ void QOP64Window::setupGUI(void)
     restoreGeometry(settings.value("geometry").toByteArray());
     restoreState(settings.value("state").toByteArray(), CFG_GUI_VERSION);
 
-    _logWindow = new QTextEdit();
-    _logWindow->moveToThread(&_emuThread);
+    _logWindow = new LogWindow();
     _logWindow->setWindowTitle(tr("op64 Log"));
     _logWindow->setGeometry(QRect(this->geometry().topRight().x(), this->geometry().topRight().y(), 640, 480));
     _logWindow->setMinimumSize(QSize(640, 480));
@@ -299,11 +302,14 @@ void QOP64Window::shudownEverything(void)
         loop.exec();
     }
 
-    _emuThread.quit();
-
     if (nullptr != _plugins)
     {
         delete _plugins; _plugins = nullptr;
+    }
+
+    if (!_emuThread.isFinished())
+    {
+        _emuThread.quit();
     }
 
     if (nullptr != renderWidget)

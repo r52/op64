@@ -105,6 +105,7 @@
     <ClInclude Include="plugins.h" />
     <ClInclude Include="rcpcommon.h" />
     <ClInclude Include="rom.h" />
+    <ClInclude Include="romdb.h" />
     <ClInclude Include="rspplugin.h" />
     <ClInclude Include="sram.h" />
     <ClInclude Include="systiming.h" />
@@ -137,6 +138,7 @@
     <ClCompile Include="pif.cpp" />
     <ClCompile Include="plugins.cpp" />
     <ClCompile Include="rom.cpp" />
+    <ClCompile Include="romdb.cpp" />
     <ClCompile Include="rspplugin.cpp" />
     <ClCompile Include="sram.cpp" />
     <ClCompile Include="systiming.cpp" />

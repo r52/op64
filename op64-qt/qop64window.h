@@ -13,7 +13,7 @@ class Emulator;
 class RenderWidget;
 enum EmuState;
 
-class QTextEdit;
+class LogWindow;
 class QSettings;
 
 class QOP64Window : public QMainWindow
@@ -33,8 +33,6 @@ private:
     void setupGUI(void);
     void connectGUIControls(void);
 
-    void logCallback(uint32_t level, const char* msg);
-
     void shudownEverything(void);
 
 signals:
@@ -43,6 +41,7 @@ signals:
 public slots:
     void emulationFinished();
     void emulatorChangeState(EmuState newstate);
+    void logCallback(uint32_t level, const char* msg);
 
 private slots:
     void openRom(void);
@@ -62,7 +61,7 @@ private:
     Plugins* _plugins;
     ConfigDialog* cfgDialog;
     RenderWidget* renderWidget;
-    QTextEdit* _logWindow;
+    LogWindow* _logWindow;
 };
 
 #endif // QOP64WINDOW_H

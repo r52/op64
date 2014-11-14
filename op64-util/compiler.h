@@ -17,9 +17,21 @@
 #endif
 
 #ifdef _MSC_VER
-#define _safe_sprintf(buf, len, ...) _snprintf_s(buf, len, __VA_ARGS__);
+#define _safe_sprintf(buf, len, ...) _snprintf_s(buf, len, __VA_ARGS__)
 #else
-#define _safe_sprintf(buf, len, ...) snprintf(buf, len, __VA_ARGS__);
+#define _safe_sprintf(buf, len, ...) snprintf(buf, len, __VA_ARGS__)
+#endif
+
+#ifdef _MSC_VER
+#define _s_sprintf(buf, len, ...) sprintf_s(buf, len, __VA_ARGS__)
+#else
+#define _s_sprintf(buf, len, ...) sprintf(buf, __VA_ARGS__)
+#endif
+
+#ifdef _MSC_VER
+#define _s_sscanf(...) sscanf_s(__VA_ARGS__)
+#else
+#define _s_sscanf(...) sscanf(__VA_ARGS__)
 #endif
 
 #if defined(__cilk)

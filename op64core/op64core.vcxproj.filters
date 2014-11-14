@@ -70,6 +70,18 @@
     <Filter Include="Source Files\cpu\fpu">
       <UniqueIdentifier>{e7813743-ad95-4e34-8986-2db428b6c2cb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\config">
+      <UniqueIdentifier>{663ffd8b-8900-4056-ba76-7a2a786af16f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\config">
+      <UniqueIdentifier>{516bf050-def6-41aa-a854-e8733e13aeee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\romdb">
+      <UniqueIdentifier>{50dbaab2-7cb4-4723-8f7d-e829dee41a0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\romdb">
+      <UniqueIdentifier>{7d895bc2-e343-4c15-810f-a7666bf9c046}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rom.h">
@@ -147,12 +159,6 @@
     <ClInclude Include="inputplugin.h">
       <Filter>Header Files\plugins</Filter>
     </ClInclude>
-    <ClInclude Include="configstore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="configdefs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="systiming.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -161,6 +167,15 @@
     </ClInclude>
     <ClInclude Include="version.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="configdefs.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="configstore.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="romdb.h">
+      <Filter>Header Files\romdb</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -230,9 +245,6 @@
     <ClCompile Include="plugins.cpp">
       <Filter>Source Files\plugins</Filter>
     </ClCompile>
-    <ClCompile Include="configstore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="gfxplugin.cpp">
       <Filter>Source Files\plugins</Filter>
     </ClCompile>
@@ -250,6 +262,12 @@
     </ClCompile>
     <ClCompile Include="corecontrol.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="configstore.cpp">
+      <Filter>Source Files\config</Filter>
+    </ClCompile>
+    <ClCompile Include="romdb.cpp">
+      <Filter>Source Files\romdb</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

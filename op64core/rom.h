@@ -40,6 +40,7 @@ enum SaveType
     SAVETYPE_SRAM,
     SAVETYPE_FLASH_RAM,
     CONTROLLER_PACK,
+    SAVETYPE_NONE,
     SAVETYPE_NUM_TYPES
 };
 
@@ -158,6 +159,8 @@ private:
     uint32_t _aidacrate;
     uint8_t _count_per_op = 2;  // TODO future-future: read this from rom db
 
+    std::string _md5;
+    std::string _goodname;
     rom_header _header;
     boost::filesystem::path _filename;
 };

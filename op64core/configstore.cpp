@@ -6,7 +6,7 @@
 
 void ConfigStore::loadConfig(void)
 {
-    boost::filesystem::path _configpath(_configFile);
+    boost::filesystem::path _configpath(CFG_FILENAME);
 
     bool fileExists = exists(_configpath);
 
@@ -16,7 +16,7 @@ void ConfigStore::loadConfig(void)
         _configstream.close();
     }
 
-    boost::property_tree::ini_parser::read_ini(_configFile, pt);
+    boost::property_tree::ini_parser::read_ini(CFG_FILENAME, pt);
 
     if (!fileExists)
     {
@@ -27,7 +27,7 @@ void ConfigStore::loadConfig(void)
 
 void ConfigStore::saveConfig(void)
 {
-    boost::property_tree::ini_parser::write_ini(_configFile, pt);
+    boost::property_tree::ini_parser::write_ini(CFG_FILENAME, pt);
 }
 
 ConfigStore::ConfigStore(void)

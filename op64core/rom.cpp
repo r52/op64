@@ -1,10 +1,13 @@
 #include <cstdlib>
 
 #include <boost/filesystem/fstream.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "rom.h"
 #include "logger.h"
 #include "util.h"
+#include "md5.h"
+#include "romdb.h"
 
 using namespace boost::filesystem;
 
@@ -22,7 +25,8 @@ static const char* saveTypeString[SAVETYPE_NUM_TYPES] =
     "EEPROM 16KB",
     "SRAM",
     "Flash RAM",
-    "Controller Pak"
+    "Controller Pak",
+    "None"
 };
 
 static SystemType rom_country_code_to_system_type(uint16_t cc)
@@ -184,14 +188,27 @@ bool Rom::loadRom(const char* name)
 
         swapRom(_image, _imagesize);
 
-        // TODO future: complete rom info stuffs here
         memcpy(&_header, _image, sizeof(rom_header));
+
+        // Calculate md5 for rom db search
+        MD5 md = MD5();
+        md.update(_image, _imagesize);
+        md.finalize();
+        _md5 = boost::to_upper_copy(md.hexdigest());
 
         _systemtype = rom_country_code_to_system_type(_header.Country_code);
         _vilimit = (_systemtype == SYSTEM_NTSC) ? 60 : 50;
         _aidacrate = rom_system_type_to_ai_dac_rate(_systemtype);
-        // TODO future count per op
 
+        RomSettings settings;
+        if (RomDB::getInstance().get(_md5, settings))
+        {
+            _count_per_op = settings.countperop;
+            _savetype = settings.savetype;
+            _goodname = settings.goodname;
+        }
+
+        LOG_VERBOSE("GoodName: %s", _goodname.c_str());
         LOG_VERBOSE("Name: %s", _header.Name);
         LOG_VERBOSE("CRC: %X %X", _header.CRC1, _header.CRC2);
         LOG_VERBOSE("System Type: %s", systemTypeString[_systemtype]);

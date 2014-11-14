@@ -1,5 +1,7 @@
 #pragma once
 
+#define CFG_FILENAME "op64.cfg"
+
 #define CFG_SECTION_CORE "Core"
 
 // some core settings
