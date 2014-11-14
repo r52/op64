@@ -2,8 +2,10 @@
 
 #include <fstream>
 #include <string>
-#include "util.h"
 #include <functional>
+#include <cstdint>
+
+#include "compiler.h"
 
 enum LogLevel {
     LOG_LEVEL_DEBUG = 0,
