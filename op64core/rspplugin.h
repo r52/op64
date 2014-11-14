@@ -1,7 +1,10 @@
 #pragma once
-#include "util.h"
-#include "plugins.h"
+
 #include <string>
+
+#include "plugins.h"
+#include "library.h"
+
 
 class RSPPlugin
 {

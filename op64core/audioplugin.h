@@ -1,9 +1,11 @@
 #pragma once
-#include "rom.h"
-#include "util.h"
-#include "plugins.h"
+
 #include <thread>
 #include <atomic>
+
+#include "rom.h"
+#include "library.h"
+#include "plugins.h"
 
 class AudioPlugin
 {

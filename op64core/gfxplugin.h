@@ -1,7 +1,9 @@
 #pragma once
-#include "plugins.h"
+
 #include <string>
-#include "util.h"
+
+#include "plugins.h"
+#include "library.h"
 
 typedef struct
 {

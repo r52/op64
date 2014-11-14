@@ -1,8 +1,9 @@
 #pragma once
 #include <string>
-#include "inputtypes.h"
 #include <cstdint>
-#include "util.h"
+
+#include "inputtypes.h"
+#include "library.h"
 #include "plugins.h"
 
 class InputPlugin

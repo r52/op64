@@ -75,6 +75,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="compiler.h" />
+    <ClInclude Include="library.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="md5.h" />
     <ClInclude Include="optime.h" />
@@ -82,10 +83,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="compiler.cpp" />
+    <ClCompile Include="library.cpp" />
     <ClCompile Include="logger.cpp" />
     <ClCompile Include="md5.cpp" />
     <ClCompile Include="optime.cpp" />
-    <ClCompile Include="util.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
