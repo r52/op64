@@ -1,10 +1,11 @@
 #include <QtWidgets>
+#include <boost/filesystem.hpp>
 
 #include "configpages.h"
 #include "configdialog.h"
 #include "configstore.h"
-#include <boost/filesystem.hpp>
-#include "util.h"
+
+#include "library.h"
 #include "plugins.h"
 #include "logger.h"
 
