@@ -79,6 +79,7 @@
     <ClInclude Include="logger.h" />
     <ClInclude Include="md5.h" />
     <ClInclude Include="optime.h" />
+    <ClInclude Include="strutil.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>

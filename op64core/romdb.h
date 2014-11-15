@@ -1,7 +1,9 @@
 #pragma once
 
-#include "rom.h"
 #include <map>
+
+#include "rom.h"
+#include "cheat.h"
 
 struct RomSettings
 {
@@ -11,6 +13,7 @@ struct RomSettings
     SaveType savetype;
     uint32_t status;
     uint8_t countperop = 2;
+    CheatList romhacks;
 };
 
 class RomDB

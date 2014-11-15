@@ -1,9 +1,10 @@
 #pragma once
 
 #include <cstdint>
-#include "bus.h"
-
 #include <boost/filesystem.hpp>
+
+#include "bus.h"
+#include "cheat.h"
 
 enum SystemType
 {
@@ -142,6 +143,11 @@ public:
         return _filename.extension().string();
     }
 
+    inline CheatList& getRomHacks(void)
+    {
+        return _romhacks;
+    }
+
 private:
     bool isValidRom(const uint8_t* image);
     void swapRom(uint8_t* rom, uint_fast32_t size);
@@ -154,7 +160,6 @@ private:
     uint_fast8_t _savetype;
     SystemType _systemtype;
     uint32_t _cicchip;
-
     uint32_t _vilimit;
     uint32_t _aidacrate;
     uint8_t _count_per_op = 2;  // TODO future-future: read this from rom db
@@ -163,4 +168,10 @@ private:
     std::string _goodname;
     rom_header _header;
     boost::filesystem::path _filename;
+
+    // Rom hacks that cannot be changed by the user
+    CheatList _romhacks;
+
+    // TODO: Actual cheats
+    //CheatList _cheats;
 };

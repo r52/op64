@@ -9,6 +9,7 @@
 #include "gfxplugin.h"
 #include "systiming.h"
 #include "corecontrol.h"
+#include "cheatengine.h"
 
 bool Interrupt::operator<(const Interrupt& i) const
 {
@@ -161,9 +162,17 @@ void InterruptHandler::gen_interrupt(void)
     case VI_INT:
     {
         if (_vi_counter < 60)
+        {
+            if (_vi_counter == 0)
+            {
+                Bus::cheat->applyCheats(ENTRY_BOOT);
+            }
             _vi_counter++;
-
-        // TODO future: cheats here???
+        }
+        else
+        {
+            Bus::cheat->applyCheats(ENTRY_VI);
+        }
 
         Bus::plugins->gfx()->UpdateScreen();
 

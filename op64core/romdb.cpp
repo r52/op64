@@ -1,10 +1,11 @@
-#include "romdb.h"
-#include "logger.h"
-#include "compiler.h"
-
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
+
+#include "romdb.h"
+#include "logger.h"
+#include "compiler.h"
+#include "cheatengine.h"
 
 #define ROMDB_FILE "romdb.ini"
 
@@ -20,11 +21,13 @@ RomDB::RomDB(void)
         std::string save;
         std::string crc;
         std::string refmd5;
+        std::string cheats;
 
         for (auto& section : pt)
         {
             ++entries;
             RomSettings setting;
+            uint32_t numhacks = 0;
             for (auto& key : section.second)
             {
                 if (key.first == "GoodName")
@@ -81,6 +84,7 @@ RomDB::RomDB(void)
                     auto search = _db.find(refmd5);
                     if (search != _db.end())
                     {
+                        // copy it
                         setting = search->second;
                     }
                     else
@@ -99,7 +103,17 @@ RomDB::RomDB(void)
                 }
                 else if (key.first.find("Cheat") != std::string::npos)
                 {
-                    LOG_WARNING("RomDB: TODO patch cheats");
+                    Cheat newhack;
+
+                    char namebuf[100];
+                    _s_snprintf(namebuf, 100, "Hack%d", ++numhacks);
+                    newhack.name = std::move(std::string(namebuf));
+
+                    cheats = key.second.get_value<std::string>();
+                    newhack.codes = std::move(CheatEngine::toCheatCodeList(cheats));
+                    newhack.enabled = newhack.was_enabled = true;
+
+                    setting.romhacks.push_back(std::move(newhack));
                 }
                 else
                 {
@@ -107,7 +121,7 @@ RomDB::RomDB(void)
                 }
             }
 
-            _db[section.first] = setting;
+            _db[section.first] = std::move(setting);
         }
 
         LOG_INFO("RomDB: %d entries loaded", entries);

@@ -7,6 +7,7 @@
 #include "logger.h"
 #include "plugins.h"
 #include "systiming.h"
+#include "cheatengine.h"
 
 // Exposed states for device communication
 namespace Bus
@@ -17,6 +18,7 @@ namespace Bus
     IMemory* mem = nullptr;
     Plugins* plugins = nullptr;
     SysTiming* systimer = nullptr;
+    CheatEngine* cheat = nullptr;
 
     // managed devices
     InterruptHandler* interrupt = nullptr;
@@ -179,6 +181,9 @@ namespace Bus
         systimer = new SysTiming(rom->getViLimit());
         systimer->startTimers();
 
+        cheat = new CheatEngine;
+        cheat->addRomHacks(rom->getRomHacks());
+
         cpu->execute();
 
         LOG_INFO("Bus: stopping emulator...");
@@ -186,6 +191,7 @@ namespace Bus
         plugins->RomClosed();
 
         delete systimer; systimer = nullptr;
+        delete cheat; cheat = nullptr;
     }
 
     bool disconnectDevices(void)

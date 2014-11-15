@@ -82,6 +82,8 @@
   <ItemGroup>
     <ClInclude Include="audioplugin.h" />
     <ClInclude Include="bus.h" />
+    <ClInclude Include="cheat.h" />
+    <ClInclude Include="cheatengine.h" />
     <ClInclude Include="configdefs.h" />
     <ClInclude Include="configstore.h" />
     <ClInclude Include="corecontrol.h" />
@@ -115,6 +117,7 @@
   <ItemGroup>
     <ClCompile Include="audioplugin.cpp" />
     <ClCompile Include="bus.cpp" />
+    <ClCompile Include="cheatengine.cpp" />
     <ClCompile Include="configstore.cpp" />
     <ClCompile Include="corecontrol.cpp" />
     <ClCompile Include="cp1.cpp" />

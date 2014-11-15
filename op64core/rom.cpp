@@ -206,6 +206,7 @@ bool Rom::loadRom(const char* name)
             _count_per_op = settings.countperop;
             _savetype = settings.savetype;
             _goodname = settings.goodname;
+            _romhacks = settings.romhacks;
         }
 
         LOG_VERBOSE("GoodName: %s", _goodname.c_str());
@@ -220,6 +221,8 @@ bool Rom::loadRom(const char* name)
         LOG_VERBOSE("Cartridge ID: %X", _header.Cartridge_ID);
         LOG_VERBOSE("Country Code: %X", _header.Country_code);
         LOG_VERBOSE("PC: 0x%X", byteswap_u32(_header.PC));
+
+        LOG_DEBUG("ROM: %d ROM hacks enabled", _romhacks.size());
 
         // Swap it again because little endian cpu
         uint32_t* roml = (uint32_t*)_image;

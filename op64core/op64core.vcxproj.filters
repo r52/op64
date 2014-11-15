@@ -82,6 +82,12 @@
     <Filter Include="Source Files\romdb">
       <UniqueIdentifier>{7d895bc2-e343-4c15-810f-a7666bf9c046}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\cheat">
+      <UniqueIdentifier>{c3d73d9e-ef7a-4b71-98c4-5360ccde2f88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\cheat">
+      <UniqueIdentifier>{8249eaa4-38d3-4088-99aa-da71e69ab71c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rom.h">
@@ -177,6 +183,12 @@
     <ClInclude Include="romdb.h">
       <Filter>Header Files\romdb</Filter>
     </ClInclude>
+    <ClInclude Include="cheat.h">
+      <Filter>Header Files\cheat</Filter>
+    </ClInclude>
+    <ClInclude Include="cheatengine.h">
+      <Filter>Header Files\cheat</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="rom.cpp">
@@ -268,6 +280,9 @@
     </ClCompile>
     <ClCompile Include="romdb.cpp">
       <Filter>Source Files\romdb</Filter>
+    </ClCompile>
+    <ClCompile Include="cheatengine.cpp">
+      <Filter>Source Files\cheat</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

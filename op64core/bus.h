@@ -14,6 +14,7 @@ class InterruptHandler;
 class PIF;
 class Plugins;
 class SysTiming;
+class CheatEngine;
 
 struct _controller_data;
 typedef struct _controller_data CONTROL;
@@ -28,6 +29,7 @@ namespace Bus
     extern Rom* rom;
     extern Plugins* plugins;
     extern SysTiming* systimer;
+    extern CheatEngine* cheat;
 
     // managed devices
     extern InterruptHandler* interrupt;
