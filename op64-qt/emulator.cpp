@@ -4,6 +4,7 @@
 #include "plugins.h"
 #include "mppinterpreter.h"
 #include "mpmemory.h"
+#include <QThread>
 
 
 Emulator::Emulator(WId mainwindow) :
@@ -157,6 +158,9 @@ void Emulator::gameSoftReset(void)
 
 void Emulator::runEmulator(void)
 {
+    // Log some threading info
+    LOG_DEBUG("Emulating in thread ID %d", QThread::currentThreadId());
+
     _plugins->setRenderWindow((void*)_renderwindow);
 
     if (initializeHardware(_plugins, _cpu, _mem))

@@ -126,6 +126,9 @@ void QOP64Window::setupEmulationThread(void)
     connect(_emu, SIGNAL(stateChanged(EmuState)), this, SLOT(emulatorChangeState(EmuState)), Qt::DirectConnection);
 
     _emuThread.start();
+
+    // Log some threading info
+    LOG_DEBUG("GUI thread ID %d", QThread::currentThreadId());
 }
 
 void QOP64Window::connectGUIControls(void)
