@@ -48,44 +48,44 @@ PluginPage::PluginPage(ConfigWidgets* widgets, QWidget *parent)
     QGroupBox *configGroup = new QGroupBox(tr("Plugins"));
 
     QLabel *gfxLabel = new QLabel(tr("Graphics Plugin:"));
-    QPushButton* gfxAbout = new QPushButton(tr("About"));
-    gfxAbout->setFixedWidth(50);
+    //QPushButton* gfxAbout = new QPushButton(tr("About"));
+    //gfxAbout->setFixedWidth(50);
     populateGfxPlugins();
 
     QHBoxLayout *gfxLayout = new QHBoxLayout;
     gfxLayout->addWidget(gfxLabel);
     gfxLayout->addWidget(_widgets->gfxCombo);
-    gfxLayout->addWidget(gfxAbout);
+    //gfxLayout->addWidget(gfxAbout);
 
     QLabel *audioLabel = new QLabel(tr("Audio Plugin:"));
-    QPushButton* audioAbout = new QPushButton(tr("About"));
-    audioAbout->setFixedWidth(50);
+    //QPushButton* audioAbout = new QPushButton(tr("About"));
+    //audioAbout->setFixedWidth(50);
     populateAudioPlugins();
 
     QHBoxLayout *audioLayout = new QHBoxLayout;
     audioLayout->addWidget(audioLabel);
     audioLayout->addWidget(_widgets->audioCombo);
-    audioLayout->addWidget(audioAbout);
+    //audioLayout->addWidget(audioAbout);
 
     QLabel *inputLabel = new QLabel(tr("Input Plugin:"));
-    QPushButton* inputAbout = new QPushButton(tr("About"));
-    inputAbout->setFixedWidth(50);
+    //QPushButton* inputAbout = new QPushButton(tr("About"));
+    //inputAbout->setFixedWidth(50);
     populateInputPlugins();
 
     QHBoxLayout *inputLayout = new QHBoxLayout;
     inputLayout->addWidget(inputLabel);
     inputLayout->addWidget(_widgets->inputCombo);
-    inputLayout->addWidget(inputAbout);
+    //inputLayout->addWidget(inputAbout);
 
     QLabel *rspLabel = new QLabel(tr("RSP Plugin:"));
-    QPushButton* rspAbout = new QPushButton(tr("About"));
-    rspAbout->setFixedWidth(50);
+    //QPushButton* rspAbout = new QPushButton(tr("About"));
+    //rspAbout->setFixedWidth(50);
     populateRSPPlugins();
 
     QHBoxLayout *rspLayout = new QHBoxLayout;
     rspLayout->addWidget(rspLabel);
     rspLayout->addWidget(_widgets->rspCombo);
-    rspLayout->addWidget(rspAbout);
+    //rspLayout->addWidget(rspAbout);
 
     QVBoxLayout *configLayout = new QVBoxLayout;
     configLayout->addLayout(gfxLayout);
