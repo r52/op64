@@ -17,6 +17,7 @@ enum
 
 class CP0;
 class CP1;
+enum TLBProbeMode;
 
 /************************************************************************/
 /* Instruction holder                                                   */
@@ -199,7 +200,7 @@ public:
 
     // COP0
     virtual void general_exception(void) = 0;
-    virtual void TLB_refill_exception(unsigned int address, int w) = 0;
+    virtual void TLB_refill_exception(unsigned int address, TLBProbeMode mode) = 0;
 
     inline CP0* getcp0(void)
     {

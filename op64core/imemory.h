@@ -29,7 +29,7 @@ public:
     {
         if (address < 0x80000000 || address >= 0xc0000000)
         {
-            address = TLB::virtual_to_physical_address(address, 2);
+            address = TLB::virtual_to_physical_address(address, TLB_FAST_READ);
         }
 
         if ((address & 0x1FFFFFFF) >= 0x10000000)

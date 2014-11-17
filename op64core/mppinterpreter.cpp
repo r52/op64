@@ -887,17 +887,17 @@ void MPPInterpreter::general_exception(void)
 
 }
 
-void MPPInterpreter::TLB_refill_exception(unsigned int address, int w)
+void MPPInterpreter::TLB_refill_exception(unsigned int address, TLBProbeMode mode)
 {
     uint32_t i;
     bool usual_handler = false;
 
-    if (w != 2)
+    if (mode != TLB_FAST_READ)
     {
         _cp0->update_count(_PC);
     }
 
-    if (w == 1)
+    if (mode == TLB_WRITE)
     {
         _cp0_reg[CP0_CAUSE_REG] = (3 << 2);
     }
@@ -969,7 +969,7 @@ void MPPInterpreter::TLB_refill_exception(unsigned int address, int w)
         _cp0_reg[CP0_CAUSE_REG] &= 0x7FFFFFFF;
     }
 
-    if (w != 2)
+    if (mode != TLB_FAST_READ)
     {
         _cp0_reg[CP0_EPC_REG] -= 4;
     }

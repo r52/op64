@@ -349,7 +349,7 @@ void MPMemory::read_nothing(uint32_t& address, uint64_t* dest, DataSize size)
 
 void MPMemory::read_nomem(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    address = TLB::virtual_to_physical_address(address, 0);
+    address = TLB::virtual_to_physical_address(address, TLB_READ);
     if (address == 0x00000000)
         return;
 
@@ -958,7 +958,7 @@ void MPMemory::read_rdramFB(uint32_t& address, uint64_t* dest, DataSize size)
 
 void MPMemory::write_nomem(uint32_t address, uint64_t src, DataSize size)
 {
-    address = TLB::virtual_to_physical_address(address, 1);
+    address = TLB::virtual_to_physical_address(address, TLB_WRITE);
     if (address == 0x00000000) return;
 
     writemem(address, src, size);

@@ -27,12 +27,19 @@ struct tlb_entry
     uint32_t phys_odd;
 };
 
+enum TLBProbeMode
+{
+    TLB_READ = 0,
+    TLB_WRITE,
+    TLB_FAST_READ
+};
+
 class TLB
 {
 public:
     static void tlb_unmap(tlb_entry *entry);
     static void tlb_map(tlb_entry *entry);
-    static uint32_t virtual_to_physical_address(uint32_t addresse, int32_t w);
+    static uint32_t virtual_to_physical_address(uint32_t addresse, TLBProbeMode mode);
 
     static tlb_entry tlb_entry_table[32];
     static uint32_t tlb_lookup_read[0x100000];

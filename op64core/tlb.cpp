@@ -9,7 +9,7 @@ tlb_entry TLB::tlb_entry_table[32];
 uint32_t TLB::tlb_lookup_read[0x100000];
 uint32_t TLB::tlb_lookup_write[0x100000];
 
-uint32_t TLB::virtual_to_physical_address(uint32_t addresse, int32_t w)
+uint32_t TLB::virtual_to_physical_address(uint32_t addresse, TLBProbeMode mode)
 {
     if (addresse >= 0x7f000000 && addresse < 0x80000000 && false /*isGoldeneyeRom*/)
     {
@@ -37,7 +37,7 @@ uint32_t TLB::virtual_to_physical_address(uint32_t addresse, int32_t w)
             break;
         }
     }
-    if (w == 1)
+    if (mode == TLB_WRITE)
     {
         if (tlb_lookup_write[addresse >> 12])
         {
@@ -51,10 +51,9 @@ uint32_t TLB::virtual_to_physical_address(uint32_t addresse, int32_t w)
             return (tlb_lookup_read[addresse >> 12] & 0xFFFFF000) | (addresse & 0xFFF);
         }
     }
-    //printf("tlb exception !!! @ %x, %x, add:%x\n", addresse, w, PC->addr);
-    //getchar();
-    Bus::cpu->TLB_refill_exception(addresse, w);
-    //return 0x80000000;
+
+    Bus::cpu->TLB_refill_exception(addresse, mode);
+
     return 0x00000000;
 }
 
