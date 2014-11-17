@@ -4,6 +4,7 @@
 
 #include "corecontrol.h"
 #include "rom.h"
+#include <QEventLoop>
 
 
 RenderWidget::RenderWidget(Emulator* emu, QWidget* parent /*= 0*/) :
@@ -27,6 +28,9 @@ void RenderWidget::closeEvent(QCloseEvent * event)
     if (_emu->getState() == EMU_RUNNING)
     {
         _emu->stopEmulator();
+        QEventLoop loop;
+        connect(_emu, &Emulator::emulatorFinished, &loop, &QEventLoop::quit);
+        loop.exec();
     }
 
     event->accept();

@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <windows.h>
 #include <QObject>
+#include "qwindowdefs.h"
 
 enum EmuState
 {
@@ -23,7 +24,7 @@ class Emulator : public QObject
     Q_OBJECT
 
 public:
-    Emulator(Plugins* plugins);
+    Emulator(WId mainwindow);
     ~Emulator();
 
     // execution
@@ -39,13 +40,29 @@ public:
         return _state;
     }
 
-    void setState(EmuState newstate);
+    inline void setState(EmuState newstate)
+    {
+        _state = newstate;
+
+        emit stateChanged(_state);
+    }
+
+    inline void setRenderWindow(WId renderwindow)
+    {
+        _renderwindow = renderwindow;
+    }
 
 public slots:
     void setLimitFPS(bool limit);
     void gameHardReset(void);
     void gameSoftReset(void);
     void runEmulator(void);
+
+    // plugin config
+    void showGraphicsConfig(void);
+    void showAudioConfig(void);
+    void showInputConfig(void);
+    void showRSPConfig(void);
 
 signals:
     void stateChanged(EmuState newstate);
@@ -60,6 +77,10 @@ private:
     void setupBus(Plugins* plugins, ICPU* cpu, IMemory* mem);
 
     EmuState _state;
+
+    // Windows
+    WId _mainwindow;
+    WId _renderwindow;
 
     // devices
     Plugins* _plugins;

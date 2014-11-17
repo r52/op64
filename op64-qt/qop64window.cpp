@@ -40,11 +40,8 @@ QOP64Window::QOP64Window(QWidget *parent)
     LOG_INFO("op64 %s compiled %s", OP64_VERSION, __DATE__);
     _logWindow->insertHtml("<br>");
 
-    // Setup plugins
-    _plugins = new Plugins();
-
     // Setup config dialog
-    cfgDialog = new ConfigDialog(_plugins, this);
+    cfgDialog = new ConfigDialog(this);
 
     setupEmulationThread();
     connectGUIControls();
@@ -70,7 +67,7 @@ void QOP64Window::openRom(void)
             renderWidget->setGeometry(QRect(100, 100, 640, 480));
             renderWidget->setMinimumSize(QSize(640, 480));
 
-            _plugins->setRenderWindow((void*)renderWidget->winId());
+            _emu->setRenderWindow(renderWidget->winId());
             renderWidget->show();
 
             emit runEmulator();
@@ -121,7 +118,7 @@ void QOP64Window::setupDirectories(void)
 void QOP64Window::setupEmulationThread(void)
 {
     // Setup emulation thread
-    _emu = new Emulator(_plugins);
+    _emu = new Emulator(this->winId());
     _emu->moveToThread(&_emuThread);
     connect(&_emuThread, &QThread::finished, _emu, &QObject::deleteLater);
     connect(_emu, &Emulator::emulatorFinished, this, &QOP64Window::emulationFinished);
@@ -144,10 +141,10 @@ void QOP64Window::connectGUIControls(void)
     connect(ui.actionSoft_Reset, SIGNAL(triggered()), _emu, SLOT(gameSoftReset()), Qt::DirectConnection);
 
     // options
-    connect(ui.actionGraphics_Settings, SIGNAL(triggered()), this, SLOT(showGraphicsConfig()));
-    connect(ui.actionAudio_Settings, SIGNAL(triggered()), this, SLOT(showAudioConfig()));
-    connect(ui.actionInput_Settings, SIGNAL(triggered()), this, SLOT(showInputConfig()));
-    connect(ui.actionRSP_Settings, SIGNAL(triggered()), this, SLOT(showRSPConfig()));
+    connect(ui.actionGraphics_Settings, SIGNAL(triggered()), _emu, SLOT(showGraphicsConfig()), Qt::DirectConnection);
+    connect(ui.actionAudio_Settings, SIGNAL(triggered()), _emu, SLOT(showAudioConfig()), Qt::DirectConnection);
+    connect(ui.actionInput_Settings, SIGNAL(triggered()), _emu, SLOT(showInputConfig()), Qt::DirectConnection);
+    connect(ui.actionRSP_Settings, SIGNAL(triggered()), _emu, SLOT(showRSPConfig()), Qt::DirectConnection);
     connect(ui.actionEmulator_Settings, SIGNAL(triggered()), this, SLOT(openConfigDialog()));
 
     // advanced
@@ -203,26 +200,6 @@ void QOP64Window::setupGUI(void)
 void QOP64Window::openConfigDialog(void)
 {
     cfgDialog->exec();
-}
-
-void QOP64Window::showAudioConfig(void)
-{
-    _plugins->ConfigPlugin((void*)this->winId(), PLUGIN_TYPE_AUDIO);
-}
-
-void QOP64Window::showInputConfig(void)
-{
-    _plugins->ConfigPlugin((void*)this->winId(), PLUGIN_TYPE_CONTROLLER);
-}
-
-void QOP64Window::showGraphicsConfig(void)
-{
-    _plugins->ConfigPlugin((void*)this->winId(), PLUGIN_TYPE_GFX);
-}
-
-void QOP64Window::showRSPConfig(void)
-{
-    _plugins->ConfigPlugin((void*)this->winId(), PLUGIN_TYPE_RSP);
 }
 
 void QOP64Window::emulatorChangeState(EmuState newstate)
@@ -300,11 +277,6 @@ void QOP64Window::shudownEverything(void)
         QEventLoop loop;
         connect(_emu, &Emulator::emulatorFinished, &loop, &QEventLoop::quit);
         loop.exec();
-    }
-
-    if (nullptr != _plugins)
-    {
-        delete _plugins; _plugins = nullptr;
     }
 
     if (!_emuThread.isFinished())

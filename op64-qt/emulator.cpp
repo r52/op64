@@ -6,11 +6,12 @@
 #include "mpmemory.h"
 
 
-Emulator::Emulator(Plugins* plugins) :
+Emulator::Emulator(WId mainwindow) :
 _state(DEAD),
-_plugins(plugins),
+_plugins(new Plugins),
 _cpu(new MPPInterpreter),
-_mem(new MPMemory)
+_mem(new MPMemory),
+_mainwindow(mainwindow)
 {
 }
 
@@ -28,8 +29,10 @@ Emulator::~Emulator()
         delete _mem; _mem = nullptr;
     }
 
-    // Doesn't own it
-    _plugins = nullptr;
+    if (nullptr != _plugins)
+    {
+        delete _plugins; _plugins = nullptr;
+    }
 }
 
 bool Emulator::isRomLoaded(void)
@@ -125,13 +128,6 @@ void Emulator::stopEmulator(void)
     Bus::stop = true;
 }
 
-void Emulator::setState(EmuState newstate)
-{
-    _state = newstate;
-
-    emit stateChanged(_state);
-}
-
 void Emulator::setupBus(Plugins* plugins, ICPU* cpu, IMemory* mem)
 {
     using namespace Bus;
@@ -161,6 +157,8 @@ void Emulator::gameSoftReset(void)
 
 void Emulator::runEmulator(void)
 {
+    _plugins->setRenderWindow((void*)_renderwindow);
+
     if (initializeHardware(_plugins, _cpu, _mem))
     {
         execute();
@@ -169,4 +167,24 @@ void Emulator::runEmulator(void)
     }
 
     emit emulatorFinished();
+}
+
+void Emulator::showAudioConfig(void)
+{
+    _plugins->ConfigPlugin((void*)_mainwindow, PLUGIN_TYPE_AUDIO);
+}
+
+void Emulator::showInputConfig(void)
+{
+    _plugins->ConfigPlugin((void*)_mainwindow, PLUGIN_TYPE_CONTROLLER);
+}
+
+void Emulator::showGraphicsConfig(void)
+{
+    _plugins->ConfigPlugin((void*)_mainwindow, PLUGIN_TYPE_GFX);
+}
+
+void Emulator::showRSPConfig(void)
+{
+    _plugins->ConfigPlugin((void*)_mainwindow, PLUGIN_TYPE_RSP);
 }

@@ -4,8 +4,8 @@
 #include "configpages.h"
 #include "configstore.h"
 
-ConfigDialog::ConfigDialog(Plugins* plugins, QWidget* parent)
-    : _plugins(plugins), QDialog(parent)
+ConfigDialog::ConfigDialog(QWidget* parent)
+    : QDialog(parent)
 {
     createConfigWidgets();
 

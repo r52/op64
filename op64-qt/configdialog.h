@@ -27,7 +27,7 @@ class ConfigDialog : public QDialog
     Q_OBJECT
 
 public:
-    ConfigDialog(Plugins* plugins, QWidget* parent = 0);
+    ConfigDialog(QWidget* parent = 0);
     ~ConfigDialog();
 
 public slots:
@@ -41,5 +41,4 @@ private:
     QListWidget* contentsWidget;
     QStackedWidget* pagesWidget;
     ConfigWidgets* _widgets;
-    Plugins* _plugins;
 };

@@ -45,10 +45,6 @@ public slots:
 
 private slots:
     void openRom(void);
-    void showGraphicsConfig(void);
-    void showAudioConfig(void);
-    void showInputConfig(void);
-    void showRSPConfig(void);
     void openConfigDialog(void);
     void toggleShowLog(bool show);
     void showAboutDialog(void);
@@ -58,7 +54,6 @@ private:
     QString _romFile;
     QThread _emuThread;
     Emulator* _emu;
-    Plugins* _plugins;
     ConfigDialog* cfgDialog;
     RenderWidget* renderWidget;
     LogWindow* _logWindow;
