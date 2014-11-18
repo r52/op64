@@ -185,7 +185,7 @@ void InterruptHandler::gen_interrupt(void)
             }
         }
 
-        Bus::vi_reg[_VI_DELAY] = (62500000 / Bus::rom->getViLimit()) + 1;
+        Bus::vi_reg[_VI_DELAY] = (93750000 / (Bus::rom->getViLimit() * 2));
 
         Bus::next_vi += Bus::vi_reg[_VI_DELAY];
 
