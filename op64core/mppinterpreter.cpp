@@ -100,32 +100,9 @@ void MPPInterpreter::hard_reset(void)
         _reg[i].u = 0;
         _cp0_reg[i] = 0;
         _fgr[i] = 0;
-
-        TLB::tlb_entry_table[i].mask = 0;
-        TLB::tlb_entry_table[i].vpn2 = 0;
-        TLB::tlb_entry_table[i].g = 0;
-        TLB::tlb_entry_table[i].asid = 0;
-        TLB::tlb_entry_table[i].pfn_even = 0;
-        TLB::tlb_entry_table[i].c_even = 0;
-        TLB::tlb_entry_table[i].d_even = 0;
-        TLB::tlb_entry_table[i].v_even = 0;
-        TLB::tlb_entry_table[i].pfn_odd = 0;
-        TLB::tlb_entry_table[i].c_odd = 0;
-        TLB::tlb_entry_table[i].d_odd = 0;
-        TLB::tlb_entry_table[i].v_odd = 0;
-        TLB::tlb_entry_table[i].r = 0;
-        //TLB::tlb_entry_table[i].check_par:ty_mask=0x1000;
-
-        TLB::tlb_entry_table[i].start_even = 0;
-        TLB::tlb_entry_table[i].end_even = 0;
-        TLB::tlb_entry_table[i].phys_even = 0;
-        TLB::tlb_entry_table[i].start_odd = 0;
-        TLB::tlb_entry_table[i].end_odd = 0;
-        TLB::tlb_entry_table[i].phys_odd = 0;
-
-        TLB::tlb_lookup_read[i] = 0;
-        TLB::tlb_lookup_write[i] = 0;
     }
+
+    TLB::tlb_init(_cp0->tlb);
 
     _llbit = 0;
     _hi.u = 0;
@@ -889,7 +866,6 @@ void MPPInterpreter::general_exception(void)
 
 void MPPInterpreter::TLB_refill_exception(unsigned int address, TLBProbeMode mode)
 {
-    uint32_t i;
     bool usual_handler = false;
 
     if (mode != TLB_FAST_READ)
@@ -932,21 +908,6 @@ void MPPInterpreter::TLB_refill_exception(unsigned int address, TLBProbeMode mod
         if (address >= 0x80000000 && address < 0xc0000000)
         {
             usual_handler = true;
-        }
-
-        for (i = 0; i < 32; i++)
-        {
-            if (/*tlb_e[i].v_even &&*/ address >= TLB::tlb_entry_table[i].start_even &&
-                address <= TLB::tlb_entry_table[i].end_even)
-            {
-                usual_handler = true;
-            }
-
-            if (/*tlb_e[i].v_odd &&*/ address >= TLB::tlb_entry_table[i].start_odd &&
-                address <= TLB::tlb_entry_table[i].end_odd)
-            {
-                usual_handler = true;
-            }
         }
 
         if (usual_handler)

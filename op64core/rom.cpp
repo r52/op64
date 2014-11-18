@@ -224,6 +224,8 @@ bool Rom::loadRom(const char* name)
 
         LOG_DEBUG("ROM: %d ROM hacks enabled", _romhacks.size());
 
+        setGameHacks(_header.Cartridge_ID);
+
         // Swap it again because little endian cpu
         uint32_t* roml = (uint32_t*)_image;
         vec_for (uint32_t i = 0; i < (_imagesize / 4); i++)
@@ -276,6 +278,18 @@ void Rom::calculateCIC(void)
         break;
     default:
         _cicchip = CIC_UNKNOWN;
+        break;
+    }
+}
+
+void Rom::setGameHacks(uint16_t cartid)
+{
+    switch (cartid)
+    {
+    case 0x4547:
+        _gamehacks |= GAME_HACK_GOLDENEYE;
+        break;
+    default:
         break;
     }
 }

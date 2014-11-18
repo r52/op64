@@ -45,6 +45,14 @@ enum SaveType
     SAVETYPE_NUM_TYPES
 };
 
+enum GameHacks
+{
+    GAME_HACK_NONE = 0,
+    GAME_HACK_GOLDENEYE = 1
+};
+
+#define COUNT_PER_OP_DEFAULT 2
+
 typedef struct
 {
     uint8_t init_PI_BSB_DOM1_LAT_REG;  /* 0x00 */
@@ -128,6 +136,11 @@ public:
         return _cicchip;
     }
 
+    inline uint32_t getGameHacks(void)
+    {
+        return _gamehacks;
+    }
+
     inline std::string getRomFilename(void)
     {
         return _filename.filename().string();
@@ -152,6 +165,7 @@ private:
     bool isValidRom(const uint8_t* image);
     void swapRom(uint8_t* rom, uint_fast32_t size);
     void calculateCIC(void);
+    void setGameHacks(uint16_t cartid);
 
 private:
     uint8_t* _image;
@@ -162,7 +176,8 @@ private:
     uint32_t _cicchip;
     uint32_t _vilimit;
     uint32_t _aidacrate;
-    uint8_t _count_per_op = 2;  // TODO future-future: read this from rom db
+    uint8_t _count_per_op = COUNT_PER_OP_DEFAULT;
+    uint32_t _gamehacks = GAME_HACK_NONE;
 
     std::string _md5;
     std::string _goodname;

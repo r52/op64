@@ -35,17 +35,17 @@ void MPPInterpreter::MTC0(void)
     case CP0_RANDOM_REG:
         break;
     case CP0_ENTRYLO0_REG:
-        _cp0_reg[CP0_ENTRYLO0_REG] = (uint32_t)_reg[_cur_instr.rt].u & 0x3FFFFFFF;
+        _cp0_reg[CP0_ENTRYLO0_REG] = (uint32_t)_reg[_cur_instr.rt].u;
         break;
     case CP0_ENTRYLO1_REG:
-        _cp0_reg[CP0_ENTRYLO1_REG] = (uint32_t)_reg[_cur_instr.rt].u & 0x3FFFFFFF;
+        _cp0_reg[CP0_ENTRYLO1_REG] = (uint32_t)_reg[_cur_instr.rt].u;
         break;
     case CP0_CONTEXT_REG:
         _cp0_reg[CP0_CONTEXT_REG] = ((uint32_t)_reg[_cur_instr.rt].u & 0xFF800000)
             | (_cp0_reg[CP0_CONTEXT_REG] & 0x007FFFF0);
         break;
     case CP0_PAGEMASK_REG:
-        _cp0_reg[CP0_PAGEMASK_REG] = (uint32_t)_reg[_cur_instr.rt].u & 0x01FFE000;
+        _cp0_reg[CP0_PAGEMASK_REG] = (uint32_t)_reg[_cur_instr.rt].u;
         break;
     case CP0_WIRED_REG:
         _cp0->update_count(_PC);
@@ -66,7 +66,7 @@ void MPPInterpreter::MTC0(void)
         _cp0_reg[CP0_COUNT_REG] = (uint32_t)_reg[_cur_instr.rt].u & 0xFFFFFFFF;
         break;
     case CP0_ENTRYHI_REG:
-        _cp0_reg[CP0_ENTRYHI_REG] = (uint32_t)_reg[_cur_instr.rt].u & 0xFFFFE0FF;
+        _cp0_reg[CP0_ENTRYHI_REG] = (uint32_t)_reg[_cur_instr.rt].u;
         break;
     case CP0_COMPARE_REG:
         _cp0->update_count(_PC);
@@ -135,73 +135,74 @@ void MPPInterpreter::MTC0(void)
 
 void MPPInterpreter::TLBR(void)
 {
-    int index = _cp0_reg[CP0_INDEX_REG] & 0x1F;
-    _cp0_reg[CP0_PAGEMASK_REG] = TLB::tlb_entry_table[index].mask << 13;
-    _cp0_reg[CP0_ENTRYHI_REG] = ((TLB::tlb_entry_table[index].vpn2 << 13) | TLB::tlb_entry_table[index].asid);
-    _cp0_reg[CP0_ENTRYLO0_REG] = (TLB::tlb_entry_table[index].pfn_even << 6) | (TLB::tlb_entry_table[index].c_even << 3)
-        | (TLB::tlb_entry_table[index].d_even << 2) | (TLB::tlb_entry_table[index].v_even << 1)
-        | TLB::tlb_entry_table[index].g;
-    _cp0_reg[CP0_ENTRYLO1_REG] = (TLB::tlb_entry_table[index].pfn_odd << 6) | (TLB::tlb_entry_table[index].c_odd << 3)
-        | (TLB::tlb_entry_table[index].d_odd << 2) | (TLB::tlb_entry_table[index].v_odd << 1)
-        | TLB::tlb_entry_table[index].g;
+    unsigned index = _cp0_reg[CP0_INDEX_REG] & 0x3F;
+    uint64_t entry_hi;
+
+    uint32_t page_mask = (_cp0->page_mask[index] << 1) & 0x01FFE000U;
+    uint32_t pfn0 = _cp0->pfn[index][0];
+    uint32_t pfn1 = _cp0->pfn[index][1];
+    uint8_t state0 = _cp0->state[index][0];
+    uint8_t state1 = _cp0->state[index][1];
+
+    TLB::tlb_read(_cp0->tlb, index, &entry_hi);
+    _cp0_reg[CP0_ENTRYHI_REG] = entry_hi;
+    _cp0_reg[CP0_ENTRYLO0_REG] = (pfn0 >> 6) | state0;
+    _cp0_reg[CP0_ENTRYLO1_REG] = (pfn1 >> 6) | state1;
+    _cp0_reg[CP0_PAGEMASK_REG] = page_mask;
+
     ++_PC;
 }
 
 void MPPInterpreter::TLBWI(void)
 {
-    uint32_t idx = _cp0_reg[CP0_INDEX_REG] & 0x3F;
+    uint64_t entry_hi = _cp0_reg[CP0_ENTRYHI_REG] & 0xC00000FFFFFFE0FFULL;
+    uint64_t entry_lo_0 = _cp0_reg[CP0_ENTRYLO0_REG] & 0x000000007FFFFFFFULL;
+    uint64_t entry_lo_1 = _cp0_reg[CP0_ENTRYLO1_REG] & 0x000000007FFFFFFFULL;
+    uint32_t page_mask = _cp0_reg[CP0_PAGEMASK_REG] & 0x0000000001FFE000ULL;
+    unsigned index = _cp0_reg[CP0_INDEX_REG] & 0x3F;
 
-    TLB::tlb_unmap(&TLB::tlb_entry_table[idx]);
+    TLB::tlb_write(_cp0->tlb, index, entry_hi, entry_lo_0, entry_lo_1, page_mask);
 
-    TLB::tlb_entry_table[idx].g = (_cp0_reg[CP0_ENTRYLO0_REG] & _cp0_reg[CP0_ENTRYLO1_REG] & 1);
-    TLB::tlb_entry_table[idx].pfn_even = (_cp0_reg[CP0_ENTRYLO0_REG] & 0x3FFFFFC0) >> 6;
-    TLB::tlb_entry_table[idx].pfn_odd = (_cp0_reg[CP0_ENTRYLO1_REG] & 0x3FFFFFC0) >> 6;
-    TLB::tlb_entry_table[idx].c_even = (_cp0_reg[CP0_ENTRYLO0_REG] & 0x38) >> 3;
-    TLB::tlb_entry_table[idx].c_odd = (_cp0_reg[CP0_ENTRYLO1_REG] & 0x38) >> 3;
-    TLB::tlb_entry_table[idx].d_even = (_cp0_reg[CP0_ENTRYLO0_REG] & 0x4) >> 2;
-    TLB::tlb_entry_table[idx].d_odd = (_cp0_reg[CP0_ENTRYLO1_REG] & 0x4) >> 2;
-    TLB::tlb_entry_table[idx].v_even = (_cp0_reg[CP0_ENTRYLO0_REG] & 0x2) >> 1;
-    TLB::tlb_entry_table[idx].v_odd = (_cp0_reg[CP0_ENTRYLO1_REG] & 0x2) >> 1;
-    TLB::tlb_entry_table[idx].asid = (_cp0_reg[CP0_ENTRYHI_REG] & 0xFF);
-    TLB::tlb_entry_table[idx].vpn2 = (_cp0_reg[CP0_ENTRYHI_REG] & 0xFFFFE000) >> 13;
-    //TLB::tlb_entry_table[idx].r = (_cp0_reg[CP0_ENTRYHI_REG] & 0xC000000000000000LL) >> 62;
-    TLB::tlb_entry_table[idx].mask = (_cp0_reg[CP0_PAGEMASK_REG] & 0x1FFE000) >> 13;
-
-    TLB::tlb_entry_table[idx].start_even = TLB::tlb_entry_table[idx].vpn2 << 13;
-    TLB::tlb_entry_table[idx].end_even = TLB::tlb_entry_table[idx].start_even +
-        (TLB::tlb_entry_table[idx].mask << 12) + 0xFFF;
-    TLB::tlb_entry_table[idx].phys_even = TLB::tlb_entry_table[idx].pfn_even << 12;
-
-
-    TLB::tlb_entry_table[idx].start_odd = TLB::tlb_entry_table[idx].end_even + 1;
-    TLB::tlb_entry_table[idx].end_odd = TLB::tlb_entry_table[idx].start_odd +
-        (TLB::tlb_entry_table[idx].mask << 12) + 0xFFF;
-    TLB::tlb_entry_table[idx].phys_odd = TLB::tlb_entry_table[idx].pfn_odd << 12;
-
-    TLB::tlb_map(&TLB::tlb_entry_table[idx]);
+    _cp0->page_mask[index] = (page_mask | 0x1FFF) >> 1;
+    _cp0->pfn[index][0] = (entry_lo_0 << 6) & ~0xFFFU;
+    _cp0->pfn[index][1] = (entry_lo_1 << 6) & ~0xFFFU;
+    _cp0->state[index][0] = entry_lo_0 & 0x3F;
+    _cp0->state[index][1] = entry_lo_1 & 0x3F;
 
     ++_PC;
 }
 
 void MPPInterpreter::TLBWR(void)
 {
-    NOT_IMPLEMENTED();
+    uint64_t entry_hi = _cp0_reg[CP0_ENTRYHI_REG] & 0xC00000FFFFFFE0FFULL;
+    uint64_t entry_lo_0 = _cp0_reg[CP0_ENTRYLO0_REG] & 0x000000007FFFFFFFULL;
+    uint64_t entry_lo_1 = _cp0_reg[CP0_ENTRYLO1_REG] & 0x000000007FFFFFFFULL;
+    uint32_t page_mask = _cp0_reg[CP0_PAGEMASK_REG] & 0x0000000001FFE000ULL;
+    unsigned index = _cp0_reg[CP0_RANDOM_REG];
+
+    TLB::tlb_write(_cp0->tlb, index, entry_hi, entry_lo_0, entry_lo_1, page_mask);
+
+    _cp0->page_mask[index] = (page_mask | 0x1FFF) >> 1;
+    _cp0->pfn[index][0] = (entry_lo_0 << 6) & ~0xFFFU;
+    _cp0->pfn[index][1] = (entry_lo_1 << 6) & ~0xFFFU;
+    _cp0->state[index][0] = entry_lo_0 & 0x3F;
+    _cp0->state[index][1] = entry_lo_1 & 0x3F;
+
+    ++_PC;
 }
 
 void MPPInterpreter::TLBP(void)
 {
+    uint64_t entry_hi = _cp0_reg[CP0_ENTRYHI_REG] & 0x0000000001FFE000ULL;
+    int index;
+
     _cp0_reg[CP0_INDEX_REG] |= 0x80000000;
-    for (uint32_t i = 0; i < 32; i++)
+
+    if ((index = TLB::tlb_probe(_cp0->tlb, entry_hi, entry_hi & 0xFF)) != -1)
     {
-        if (((TLB::tlb_entry_table[i].vpn2 & (~TLB::tlb_entry_table[i].mask)) ==
-            (((_cp0_reg[CP0_ENTRYHI_REG] & 0xFFFFE000) >> 13) & (~TLB::tlb_entry_table[i].mask))) &&
-            ((TLB::tlb_entry_table[i].g) ||
-            (TLB::tlb_entry_table[i].asid == (_cp0_reg[CP0_ENTRYHI_REG] & 0xFF))))
-        {
-            _cp0_reg[CP0_INDEX_REG] = i;
-            break;
-        }
+        _cp0_reg[CP0_INDEX_REG] = index;
     }
+
     ++_PC;
 }
 

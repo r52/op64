@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "tlb.h"
+
 enum {
     CP0_INDEX_REG = 0,
     CP0_RANDOM_REG,
@@ -40,6 +42,12 @@ public:
 
     void update_count(uint32_t PC);
     bool cop1_unusable(void);
+
+    tlb_o tlb;
+
+    uint32_t page_mask[32];
+    uint32_t pfn[32][2];
+    uint8_t state[32][2];
 
 private:
     uint32_t _cp0_reg[CP0_REGS_COUNT];

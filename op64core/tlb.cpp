@@ -3,15 +3,51 @@
 #include "rom.h"
 #include "icpu.h"
 #include "compiler.h"
+#include "cp0.h"
 
 
-tlb_entry TLB::tlb_entry_table[32];
-uint32_t TLB::tlb_lookup_read[0x100000];
-uint32_t TLB::tlb_lookup_write[0x100000];
+__align(static const int8_t one_hot_lut[256], CACHE_LINE_SIZE) = {
+    -1,
 
-uint32_t TLB::virtual_to_physical_address(uint32_t addresse, TLBProbeMode mode)
+    // 1
+    0,
+
+    // 2
+    1, -1,
+
+    // 4
+    2, -1, -1, -1,
+
+    // 8
+    3, -1, -1, -1, -1, -1, -1, -1,
+
+    // 16
+    4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+
+    // 32
+    5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+
+    // 64
+    6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+
+    // 128
+    7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+};
+
+uint32_t TLB::virtual_to_physical_address(uint32_t address, TLBProbeMode mode)
 {
-    if (addresse >= 0x7f000000 && addresse < 0x80000000 && false /*isGoldeneyeRom*/)
+    if (address >= 0x7f000000 && address < 0x80000000 && (Bus::rom->getGameHacks() & GAME_HACK_GOLDENEYE))
     {
         /**************************************************
         GoldenEye 007 hack allows for use of TLB.
@@ -21,122 +57,116 @@ uint32_t TLB::virtual_to_physical_address(uint32_t addresse, TLBProbeMode mode)
         {
         case 0x45:
             // U
-            return 0xb0034b30 + (addresse & 0xFFFFFF);
+            return 0xb0034b30 + (address & 0xFFFFFF);
             break;
         case 0x4A:
             // J
-            return 0xb0034b70 + (addresse & 0xFFFFFF);
+            return 0xb0034b70 + (address & 0xFFFFFF);
             break;
         case 0x50:
             // E
-            return 0xb00329f0 + (addresse & 0xFFFFFF);
+            return 0xb00329f0 + (address & 0xFFFFFF);
             break;
         default:
             // UNKNOWN COUNTRY CODE FOR GOLDENEYE USING AMERICAN VERSION HACK
-            return 0xb0034b30 + (addresse & 0xFFFFFF);
+            return 0xb0034b30 + (address & 0xFFFFFF);
             break;
         }
     }
-    if (mode == TLB_WRITE)
+
+    unsigned asid = Bus::cp0_reg[CP0_ENTRYHI_REG] & 0xFF;
+    CP0* cp0 = Bus::cpu->getcp0();
+    int index = tlb_probe(cp0->tlb, address, asid);
+
+    if (index >= 0)
     {
-        if (tlb_lookup_write[addresse >> 12])
-        {
-            return (tlb_lookup_write[addresse >> 12] & 0xFFFFF000) | (addresse & 0xFFF);
-        }
-    }
-    else
-    {
-        if (tlb_lookup_read[addresse >> 12])
-        {
-            return (tlb_lookup_read[addresse >> 12] & 0xFFFFF000) | (addresse & 0xFFF);
-        }
+        uint32_t page_mask = cp0->page_mask[index];
+        unsigned select = ((page_mask + 1) & address) == 0 ? 0 : 1;
+        return (0x80000000 | (cp0->pfn[index][select]) | (address & page_mask));
     }
 
-    Bus::cpu->TLB_refill_exception(addresse, mode);
+    Bus::cpu->TLB_refill_exception(address, mode);
 
     return 0x00000000;
 }
 
-void TLB::tlb_unmap(tlb_entry *entry)
+/* Ported cen64 tlb implementation */
+void TLB::tlb_init(tlb_o& tlb)
 {
-    unsigned int i;
-
-    if (entry->v_even)
+    for (uint32_t i = 0; i < 32; i++)
     {
-        vec_for (i = entry->start_even; i < entry->end_even; i += 0x1000)
-        {
-            tlb_lookup_read[i >> 12] = 0;
-        }
-
-        if (entry->d_even)
-        {
-            vec_for (i = entry->start_even; i < entry->end_even; i += 0x1000)
-            {
-                tlb_lookup_write[i >> 12] = 0;
-            }
-        }
-    }
-
-    if (entry->v_odd)
-    {
-        vec_for (i = entry->start_odd; i < entry->end_odd; i += 0x1000)
-        {
-            tlb_lookup_read[i >> 12] = 0;
-        }
-
-        if (entry->d_odd)
-        {
-            vec_for (i = entry->start_odd; i < entry->end_odd; i += 0x1000)
-            {
-                tlb_lookup_write[i >> 12] = 0;
-            }
-        }
+        tlb.vpn2[i] = ~0;
     }
 }
 
-void TLB::tlb_map(tlb_entry *entry)
+void TLB::tlb_write(tlb_o& tlb, unsigned index, uint64_t entry_hi, uint64_t entry_lo_0, uint64_t entry_lo_1, uint32_t page_mask)
 {
-    unsigned int i;
+    tlb.page_mask[index] = ~(page_mask >> 13);
 
-    if (entry->v_even)
+    tlb.vpn2[index] =
+        (entry_hi >> 35 & 0x18000000U) |
+        (entry_hi >> 13 & 0x7FFFFFF);
+
+    tlb.global[index] = (entry_lo_0 & 0x1) && (entry_lo_1 & 0x1) ? 0xFF : 0x00;
+    tlb.asid[index] = entry_hi & 0xFF;
+}
+
+void TLB::tlb_read(const tlb_o& tlb, unsigned index, uint64_t *entry_hi)
+{
+    *entry_hi =
+        ((tlb.vpn2[index] & 0x18000000LLU) << 35) |
+        ((tlb.vpn2[index] & 0x7FFFFFFLLU) << 13) |
+        ((tlb.global[index] & 1) << 12) |
+        (tlb.asid[index]);
+}
+
+int TLB::tlb_probe(const tlb_o& tlb, uint64_t vaddr, uint8_t vasid)
+{
+    int one_hot_idx;
+
+    uint32_t vpn2 =
+        (vaddr >> 35 & 0x18000000U) |
+        (vaddr >> 13 & 0x7FFFFFF);
+
+    __m128i vpn = _mm_set1_epi32(vpn2);
+    __m128i asid = _mm_set1_epi8(vasid);
+
+    // Scan 8 entries in parallel.
+    // op64: the original loop from cen64 has a bug where i += 8
+    // which terminates the loop after just 1 iteration (since 32/8 = 4)
+    for (unsigned i = 0; i < 32 / 8; i++)
     {
-        if (entry->start_even < entry->end_even &&
-            !(entry->start_even >= 0x80000000 && entry->end_even < 0xC0000000) &&
-            entry->phys_even < 0x20000000)
-        {
-            vec_for (i = entry->start_even; i < entry->end_even; i += 0x1000)
-            {
-                tlb_lookup_read[i >> 12] = 0x80000000 | (entry->phys_even + (i - entry->start_even) + 0xFFF);
-            }
+        unsigned j = i * 8;
+        __m128i check_l, check_h, vpn_check;
+        __m128i check_a, check_g, asid_check;
+        __m128i check;
 
-            if (entry->d_even)
-            {
-                vec_for (i = entry->start_even; i < entry->end_even; i += 0x1000)
-                {
-                    tlb_lookup_write[i >> 12] = 0x80000000 | (entry->phys_even + (i - entry->start_even) + 0xFFF);
-                }
-            }
+        __m128i page_mask_l = _mm_load_si128((__m128i*) (tlb.page_mask + j + 0));
+        __m128i page_mask_h = _mm_load_si128((__m128i*) (tlb.page_mask + j + 4));
+        __m128i vpn_l = _mm_load_si128((__m128i*) (tlb.vpn2 + j + 0));
+        __m128i vpn_h = _mm_load_si128((__m128i*) (tlb.vpn2 + j + 4));
+
+        // Check for matching VPNs.
+        check_l = _mm_and_si128(vpn, page_mask_l);
+        check_l = _mm_cmpeq_epi32(check_l, vpn_l);
+        check_h = _mm_and_si128(vpn, page_mask_h);
+        check_h = _mm_cmpeq_epi32(check_h, vpn_h);
+        vpn_check = _mm_packs_epi32(check_l, check_h);
+        vpn_check = _mm_packs_epi16(vpn_check, vpn_check);
+
+        // Check for matching ASID/global, too.
+        check_g = _mm_loadl_epi64((__m128i*) (tlb.global + j));
+        check_a = _mm_loadl_epi64((__m128i*) (tlb.asid + j));
+        asid_check = _mm_cmpeq_epi8(check_a, asid);
+        asid_check = _mm_or_si128(check_g, asid_check);
+
+        // Match only on VPN match && (asid match || global)
+        check = _mm_and_si128(vpn_check, asid_check);
+        if ((one_hot_idx = _mm_movemask_epi8(check)) != 0)
+        {
+            return j + one_hot_lut[one_hot_idx & 0xFF];
         }
     }
 
-    if (entry->v_odd)
-    {
-        if (entry->start_odd < entry->end_odd &&
-            !(entry->start_odd >= 0x80000000 && entry->end_odd < 0xC0000000) &&
-            entry->phys_odd < 0x20000000)
-        {
-            vec_for (i = entry->start_odd; i < entry->end_odd; i += 0x1000)
-            {
-                tlb_lookup_read[i >> 12] = 0x80000000 | (entry->phys_odd + (i - entry->start_odd) + 0xFFF);
-            }
-
-            if (entry->d_odd)
-            {
-                vec_for (i = entry->start_odd; i < entry->end_odd; i += 0x1000)
-                {
-                    tlb_lookup_write[i >> 12] = 0x80000000 | (entry->phys_odd + (i - entry->start_odd) + 0xFFF);
-                }
-            }
-        }
-    }
+    return -1;
 }
