@@ -11,10 +11,6 @@ void MPPInterpreter::MFC0(void)
 {
     switch (_cur_instr.rd)
     {
-    case CP0_RANDOM_REG:
-        LOG_ERROR("MFC0 instruction reading un-implemented Random register");
-        Bus::stop = true;
-        break;
     case CP0_COUNT_REG:
         _cp0->update_count(_PC);
     default:
@@ -52,8 +48,8 @@ void MPPInterpreter::MTC0(void)
         _cp0_reg[CP0_PAGEMASK_REG] = (uint32_t)_reg[_cur_instr.rt].u & 0x01FFE000;
         break;
     case CP0_WIRED_REG:
+        _cp0->update_count(_PC);
         _cp0_reg[CP0_WIRED_REG] = (uint32_t)_reg[_cur_instr.rt].u;
-        _cp0_reg[CP0_RANDOM_REG] = 31;
         break;
     case CP0_BADVADDR_REG:
         break;

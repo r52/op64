@@ -16,6 +16,8 @@ CP0::~CP0()
 void CP0::update_count(uint32_t PC)
 {
     _cp0_reg[CP0_COUNT_REG] += ((PC - Bus::last_jump_addr) >> 2) * Bus::rom->getCountPerOp();
+    _cp0_reg[CP0_RANDOM_REG] = (_cp0_reg[CP0_COUNT_REG] / 2 % (32 - _cp0_reg[CP0_WIRED_REG]))
+        + _cp0_reg[CP0_WIRED_REG];
     Bus::last_jump_addr = PC;
 }
 
