@@ -1,7 +1,7 @@
 #include "qop64window.h"
 #include <QtWidgets/QApplication>
 
-#ifdef _MSC_VER
+#if defined(QT_STATIC) && defined(_MSC_VER)
 #include <QtPlugin>
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin);
 #endif

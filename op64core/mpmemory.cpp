@@ -2635,7 +2635,7 @@ void MPMemory::prepare_rsp(void)
 
                     start <<= 4;
                     end <<= 4;
-                    vec_for (j = start; j <= end; j++)
+                    for (j = start; j <= end; j++)
                     {
                         if (j >= start1 && j <= end1)
                         {

@@ -44,7 +44,7 @@
 #endif
 
 #if defined(__INTEL_COMPILER) || defined(__GNUC__) || (defined(_MSC_VER) && _MSC_VER > 1800)
-// If the compiler supports list instantiation *cough* MSVC >:(
+// If the compiler supports list instantiation *cough* MSVC >:(. Gets around C2797 in VS2013
 #define HAS_CXX11_LIST_INST
 #endif
 

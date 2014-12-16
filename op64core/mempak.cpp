@@ -88,7 +88,7 @@ void MemPak::loadMempak(void)
     };
 
     for (int32_t i = 0; i < 4; i++) {
-        vec_for(int32_t j = 0; j < 0x8000; j += 2) {
+        for(int32_t j = 0; j < 0x8000; j += 2) {
             _mempaks[i][j] = 0;
             _mempaks[i][j + 1] = 0x03;
         }

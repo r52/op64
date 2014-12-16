@@ -212,7 +212,7 @@ void DMA::readSI(void)
 
     Bus::pif->pifRead();
 
-    vec_for (uint32_t i = 0; i < (64 / 4); i++)
+    for (uint32_t i = 0; i < (64 / 4); i++)
     {
         Bus::rdram[Bus::si_reg[SI_DRAM_ADDR_REG] / 4 + i] = byteswap_u32(Bus::pif_ram32[i]);
     }
@@ -237,7 +237,7 @@ void DMA::writeSI(void)
         Bus::stop = true;
     }
 
-    vec_for (uint32_t i = 0; i < (64 / 4); i++)
+    for (uint32_t i = 0; i < (64 / 4); i++)
     {
         Bus::pif_ram32[i] = byteswap_u32(Bus::rdram[Bus::si_reg[SI_DRAM_ADDR_REG] / 4 + i]);
     }
