@@ -17,7 +17,7 @@ These dependencies are large in size and thus cannot be included with the reposi
     * op64 uses the Boost library for cross platform abstractions that are not available in the C++ Standard Library
     * Precompiled .lib's for Visual Studio 2013 and Intel C++ 15.0 for the components used in op64 are available within the repository
     * Set the environment variable `BOOST_ROOT` to the root of the Boost library installation
-* (Required) [Qt 5.3 or higher](http://qt-project.org/) for the Qt GUI project
+* (Required) [Qt 5.3 or higher](http://www.qt.io/) for the Qt GUI project
     * Install an opensource 64-bit build for your OS and compiler
     * Alternatively, Windows Qt compact builds without the icu and webkit modules are available at http://sourceforge.net/projects/qtx64/. These builds remove the dependency of the gigantic icu dlls
     * Alternatively, acquire the source code and build Qt with the modules that you want. This option also allows you to build statically linked versions of the Qt libraries which removes the dependency of the gigantic Qt redistributable dlls (official Qt builds are dynamically linked, meaning Qt dlls must be packaged with the application)
@@ -32,11 +32,10 @@ These dependencies are large in size and thus cannot be included with the reposi
 
 op64 uses C++11 features that are not available in compilers older than Visual Studio 2013. However, Visual Studio 2013 itself has several problems with standard C++11 features. Ugly workarounds are currently in place to work around these issues for Visual Studio 2013 and will be removed when the issues are fixed in a later update or version. Visual Studio 14 (currently in alpha) fixes these issues but is not recommended as it is still in alpha. Intel C++ 15.0 works perfectly as it fully supports C++11.
 
-### Compilers Supported
+### Compilers Tested
 
-* Visual Studio 2013 or later
-* Intel C++ 15.0 or later
-* (UNTESTED) MinGW 4.9 or later should also work
+* Visual Studio 2013
+* Intel C++ 15.0
 
 ### Building
 
