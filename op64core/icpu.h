@@ -193,22 +193,22 @@ public:
 
     virtual void initialize(void) = 0;
     virtual void execute(void) = 0;
-    virtual void hard_reset(void) = 0;
-    virtual void soft_reset(void) = 0;
+    virtual void hardReset(void) = 0;
+    virtual void softReset(void) = 0;
 
-    virtual void global_jump_to(uint32_t addr) = 0;
+    virtual void globalJump(uint32_t addr) = 0;
 
     // COP0
-    virtual void general_exception(void) = 0;
-    virtual void TLB_refill_exception(unsigned int address, TLBProbeMode mode) = 0;
+    virtual void generalException(void) = 0;
+    virtual void TLBRefillException(unsigned int address, TLBProbeMode mode) = 0;
 
-    inline CP0* getcp0(void)
+    inline CP0* getCp0(void)
     {
         return _cp0;
     };
 
     // COP1
-    inline CP1* getcp1(void)
+    inline CP1* getCp1(void)
     {
         return _cp1;
     };

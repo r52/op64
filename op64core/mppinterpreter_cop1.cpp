@@ -7,7 +7,7 @@
 
 void MPPInterpreter::MFC1(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     _reg[_cur_instr.rt].s = *(int32_t*)_s_reg[_cur_instr.fs];
@@ -16,7 +16,7 @@ void MPPInterpreter::MFC1(void)
 
 void MPPInterpreter::DMFC1(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     _reg[_cur_instr.rt].s = *(int64_t*)_d_reg[_cur_instr.fs];
@@ -25,7 +25,7 @@ void MPPInterpreter::DMFC1(void)
 
 void MPPInterpreter::CFC1(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     if (_cur_instr.fs == 31)
@@ -42,7 +42,7 @@ void MPPInterpreter::CFC1(void)
 
 void MPPInterpreter::MTC1(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     *((int32_t*)_s_reg[_cur_instr.fs]) = (int32_t)_reg[_cur_instr.rt].s;
@@ -51,7 +51,7 @@ void MPPInterpreter::MTC1(void)
 
 void MPPInterpreter::DMTC1(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     *((int64_t*)_d_reg[_cur_instr.fs]) = _reg[_cur_instr.rt].s;
@@ -60,7 +60,7 @@ void MPPInterpreter::DMTC1(void)
 
 void MPPInterpreter::CTC1(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     if (_cur_instr.fs == 31)
@@ -136,7 +136,7 @@ void MPPInterpreter::BC1TL(void)
 
 void MPPInterpreter::ADD_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -146,7 +146,7 @@ void MPPInterpreter::ADD_S(void)
 
 void MPPInterpreter::SUB_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -156,7 +156,7 @@ void MPPInterpreter::SUB_S(void)
 
 void MPPInterpreter::MUL_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -166,7 +166,7 @@ void MPPInterpreter::MUL_S(void)
 
 void MPPInterpreter::DIV_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     if ((_FCR31 & 0x400) && *_s_reg[_cur_instr.ft] == 0)
@@ -182,7 +182,7 @@ void MPPInterpreter::DIV_S(void)
 
 void MPPInterpreter::SQRT_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -192,7 +192,7 @@ void MPPInterpreter::SQRT_S(void)
 
 void MPPInterpreter::ABS_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -202,7 +202,7 @@ void MPPInterpreter::ABS_S(void)
 
 void MPPInterpreter::MOV_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -213,7 +213,7 @@ void MPPInterpreter::MOV_S(void)
 
 void MPPInterpreter::NEG_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -228,7 +228,7 @@ void MPPInterpreter::ROUND_L_S(void)
 
 void MPPInterpreter::TRUNC_L_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     uint32_t saved_mode = get_rounding();
@@ -252,7 +252,7 @@ void MPPInterpreter::FLOOR_L_S(void)
 
 void MPPInterpreter::ROUND_W_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     uint32_t saved_mode = get_rounding();
@@ -266,7 +266,7 @@ void MPPInterpreter::ROUND_W_S(void)
 
 void MPPInterpreter::TRUNC_W_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     uint32_t saved_mode = get_rounding();
@@ -290,7 +290,7 @@ void MPPInterpreter::FLOOR_W_S(void)
 
 void MPPInterpreter::CVT_D_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -300,7 +300,7 @@ void MPPInterpreter::CVT_D_S(void)
 
 void MPPInterpreter::CVT_W_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -310,7 +310,7 @@ void MPPInterpreter::CVT_W_S(void)
 
 void MPPInterpreter::CVT_L_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -330,7 +330,7 @@ void MPPInterpreter::C_UN_S(void)
 
 void MPPInterpreter::C_EQ_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     uint8_t result = c_cmp_32(_s_reg[_cur_instr.fs], _s_reg[_cur_instr.ft]);
@@ -348,7 +348,7 @@ void MPPInterpreter::C_EQ_S(void)
 
 void MPPInterpreter::C_UEQ_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     uint8_t result = c_cmp_32(_s_reg[_cur_instr.fs], _s_reg[_cur_instr.ft]);
@@ -366,7 +366,7 @@ void MPPInterpreter::C_UEQ_S(void)
 
 void MPPInterpreter::C_OLT_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     uint8_t result = c_cmp_32(_s_reg[_cur_instr.fs], _s_reg[_cur_instr.ft]);
@@ -384,7 +384,7 @@ void MPPInterpreter::C_OLT_S(void)
 
 void MPPInterpreter::C_ULT_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     uint8_t result = c_cmp_32(_s_reg[_cur_instr.fs], _s_reg[_cur_instr.ft]);
@@ -402,7 +402,7 @@ void MPPInterpreter::C_ULT_S(void)
 
 void MPPInterpreter::C_OLE_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     uint8_t result = c_cmp_32(_s_reg[_cur_instr.fs], _s_reg[_cur_instr.ft]);
@@ -445,7 +445,7 @@ void MPPInterpreter::C_NGL_S(void)
 
 void MPPInterpreter::C_LT_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     uint8_t result = c_cmp_32(_s_reg[_cur_instr.fs], _s_reg[_cur_instr.ft]);
@@ -468,7 +468,7 @@ void MPPInterpreter::C_NGE_S(void)
 
 void MPPInterpreter::C_LE_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     uint8_t result = c_cmp_32(_s_reg[_cur_instr.fs], _s_reg[_cur_instr.ft]);
@@ -486,7 +486,7 @@ void MPPInterpreter::C_LE_S(void)
 
 void MPPInterpreter::C_NGT_S(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     uint8_t result = c_cmp_32(_s_reg[_cur_instr.fs], _s_reg[_cur_instr.ft]);
@@ -504,7 +504,7 @@ void MPPInterpreter::C_NGT_S(void)
 
 void MPPInterpreter::ADD_D(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -514,7 +514,7 @@ void MPPInterpreter::ADD_D(void)
 
 void MPPInterpreter::SUB_D(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -524,7 +524,7 @@ void MPPInterpreter::SUB_D(void)
 
 void MPPInterpreter::MUL_D(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -534,7 +534,7 @@ void MPPInterpreter::MUL_D(void)
 
 void MPPInterpreter::DIV_D(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     if ((_FCR31 & 0x400) && *_d_reg[_cur_instr.ft] == 0)
@@ -549,7 +549,7 @@ void MPPInterpreter::DIV_D(void)
 
 void MPPInterpreter::SQRT_D(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -559,7 +559,7 @@ void MPPInterpreter::SQRT_D(void)
 
 void MPPInterpreter::ABS_D(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -569,7 +569,7 @@ void MPPInterpreter::ABS_D(void)
 
 void MPPInterpreter::MOV_D(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -580,7 +580,7 @@ void MPPInterpreter::MOV_D(void)
 
 void MPPInterpreter::NEG_D(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     *((double*)_d_reg[_cur_instr.fd]) = neg_f64((double*)_d_reg[_cur_instr.fs]);
@@ -609,7 +609,7 @@ void MPPInterpreter::FLOOR_L_D(void)
 
 void MPPInterpreter::ROUND_W_D(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     uint32_t saved_mode = get_rounding();
@@ -623,7 +623,7 @@ void MPPInterpreter::ROUND_W_D(void)
 
 void MPPInterpreter::TRUNC_W_D(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     uint32_t saved_mode = get_rounding();
@@ -647,7 +647,7 @@ void MPPInterpreter::FLOOR_W_D(void)
 
 void MPPInterpreter::CVT_S_D(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -657,7 +657,7 @@ void MPPInterpreter::CVT_S_D(void)
 
 void MPPInterpreter::CVT_W_D(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -667,7 +667,7 @@ void MPPInterpreter::CVT_W_D(void)
 
 void MPPInterpreter::CVT_L_D(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -687,7 +687,7 @@ void MPPInterpreter::C_UN_D(void)
 
 void MPPInterpreter::C_EQ_D(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     ++_PC;
@@ -750,7 +750,7 @@ void MPPInterpreter::C_NGL_D(void)
 
 void MPPInterpreter::C_LT_D(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     uint8_t result = c_cmp_64(_d_reg[_cur_instr.fs], _d_reg[_cur_instr.ft]);
@@ -773,7 +773,7 @@ void MPPInterpreter::C_NGE_D(void)
 
 void MPPInterpreter::C_LE_D(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     uint8_t result = c_cmp_64(_d_reg[_cur_instr.fs], _d_reg[_cur_instr.ft]);
@@ -796,7 +796,7 @@ void MPPInterpreter::C_NGT_D(void)
 
 void MPPInterpreter::CVT_S_W(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -806,7 +806,7 @@ void MPPInterpreter::CVT_S_W(void)
 
 void MPPInterpreter::CVT_D_W(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -816,7 +816,7 @@ void MPPInterpreter::CVT_D_W(void)
 
 void MPPInterpreter::CVT_D_L(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();
@@ -826,7 +826,7 @@ void MPPInterpreter::CVT_D_L(void)
 
 void MPPInterpreter::CVT_S_L(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     set_rounding();

@@ -25,7 +25,7 @@ public:
     virtual void writemem(uint32_t address, uint64_t src, DataSize size) = 0;
 
     // shouldn't be using this except with mupen interpreter
-    inline uint32_t* fast_fetch(uint32_t address)
+    inline uint32_t* fastFetch(uint32_t address)
     {
         if (address < 0x80000000 || address >= 0xc0000000)
         {

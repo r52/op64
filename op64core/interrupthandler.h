@@ -53,15 +53,15 @@ public:
     ~InterruptHandler(void);
 
     void initialize(void);
-    void add_interrupt_event(int32_t type, uint32_t delay);
-    void add_interrupt_event_count(int32_t type, uint32_t count);
-    void gen_interrupt(void);
-    void check_interrupt(void);
-    uint32_t find_event(int32_t type);
-    void delete_event(int32_t type);
-    void translate_event_queue_by(uint32_t base);
+    void addInterruptEvent(int32_t type, uint32_t delay);
+    void addInterruptEventCount(int32_t type, uint32_t count);
+    void generateInterrupt(void);
+    void checkInterrupt(void);
+    uint32_t findEvent(int32_t type);
+    void deleteEvent(int32_t type);
+    void translateEventQueueBy(uint32_t base);
 
-    void soft_reset(void);
+    void softReset(void);
 
     inline bool isSpecialDone(void)
     {
@@ -69,8 +69,8 @@ public:
     }
 
 private:
-    void do_hard_reset(void);
-    void pop_interrupt_event(void);
+    void doHardReset(void);
+    void popInterruptEvent(void);
 
 private:
     InterruptQueue q;

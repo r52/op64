@@ -18,10 +18,10 @@
 #define DO_JUMP(target, condition, link, likely, cop1) \
     if (target == ((uint32_t)_PC) && _check_nop) \
     { \
-        generic_idle(target, condition, link, likely, cop1); \
+        genericIdle(target, condition, link, likely, cop1); \
         return; \
     } \
-    generic_jump(target, condition, link, likely, cop1);
+    genericJump(target, condition, link, likely, cop1);
 
 
 class MPPInterpreter : public ICPU
@@ -38,18 +38,18 @@ public:
     virtual void initialize(void);
     virtual void execute(void);
 
-    virtual void hard_reset(void);
-    virtual void soft_reset(void);
+    virtual void hardReset(void);
+    virtual void softReset(void);
 
-    virtual void global_jump_to(uint32_t addr);
+    virtual void globalJump(uint32_t addr);
 
-    virtual void general_exception(void);
-    virtual void TLB_refill_exception(unsigned int address, TLBProbeMode mode);
+    virtual void generalException(void);
+    virtual void TLBRefillException(unsigned int address, TLBProbeMode mode);
 
 private:
     inline void prefetch(void)
     {
-        uint32_t* mem = Bus::mem->fast_fetch(_PC);
+        uint32_t* mem = Bus::mem->fastFetch(_PC);
 
         if (nullptr == mem)
         {
@@ -74,8 +74,8 @@ private:
 
 protected:
 
-    void generic_jump(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1);
-    void generic_idle(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1);
+    void genericJump(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1);
+    void genericIdle(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1);
 
     virtual void J(void);
     virtual void JAL(void);

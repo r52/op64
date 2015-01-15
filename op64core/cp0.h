@@ -40,8 +40,8 @@ public:
     CP0(void);
     ~CP0(void);
 
-    void update_count(uint32_t PC);
-    bool cop1_unusable(void);
+    void updateCount(uint32_t PC);
+    bool COP1Unusable(void);
 
     tlb_o tlb;
 

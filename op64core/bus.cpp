@@ -244,7 +244,7 @@ namespace Bus
 
         LOG_INFO("Soft resetting emulator...");
 
-        interrupt->soft_reset();
+        interrupt->softReset();
     }
 
 }

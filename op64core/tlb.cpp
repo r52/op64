@@ -102,7 +102,7 @@ uint32_t TLB::virtual_to_physical_address(uint32_t address, TLBProbeMode mode)
     }
 
     unsigned asid = Bus::cp0_reg[CP0_ENTRYHI_REG] & 0xFF;
-    CP0* cp0 = Bus::cpu->getcp0();
+    CP0* cp0 = Bus::cpu->getCp0();
     int index = tlb_probe(cp0->tlb, address, asid);
 
     if (index >= 0)
@@ -112,7 +112,7 @@ uint32_t TLB::virtual_to_physical_address(uint32_t address, TLBProbeMode mode)
         return (0x80000000 | (cp0->pfn[index][select]) | (address & page_mask));
     }
 
-    Bus::cpu->TLB_refill_exception(address, mode);
+    Bus::cpu->TLBRefillException(address, mode);
 
     return 0x00000000;
 }

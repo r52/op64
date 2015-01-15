@@ -15,8 +15,8 @@ public:
     CP1(float* (*s_reg)[32], double* (*d_reg)[32], uint64_t (*fgr)[32]);
     ~CP1(void);
 
-    void shuffle_fpr_data(int oldStatus, int newStatus);
-    void set_fpr_pointers(int newStatus);
+    void shuffleFPRData(int oldStatus, int newStatus);
+    void setFPRPointers(int newStatus);
 
 private:
     float* (*_s_reg)[32];

@@ -68,13 +68,13 @@ void InterruptHandler::initialize(void)
     // reset the queue
     q.clear();
 
-    add_interrupt_event_count(VI_INT, Bus::next_vi);
-    add_interrupt_event_count(SPECIAL_INT, 0);
+    addInterruptEventCount(VI_INT, Bus::next_vi);
+    addInterruptEventCount(SPECIAL_INT, 0);
 }
 
-void InterruptHandler::add_interrupt_event(int32_t type, uint32_t delay)
+void InterruptHandler::addInterruptEvent(int32_t type, uint32_t delay)
 {
-    if (find_event(type)) {
+    if (findEvent(type)) {
         LOG_WARNING("Two events of type 0x%x in interrupt queue", type);
     }
 
@@ -104,12 +104,12 @@ void InterruptHandler::add_interrupt_event(int32_t type, uint32_t delay)
     Bus::next_interrupt = q.front().count;
 }
 
-void InterruptHandler::add_interrupt_event_count(int32_t type, uint32_t count)
+void InterruptHandler::addInterruptEventCount(int32_t type, uint32_t count)
 {
-    add_interrupt_event(type, (count - Bus::cp0_reg[CP0_COUNT_REG]));
+    addInterruptEvent(type, (count - Bus::cp0_reg[CP0_COUNT_REG]));
 }
 
-void InterruptHandler::gen_interrupt(void)
+void InterruptHandler::generateInterrupt(void)
 {
     if (Bus::stop == true)
     {
@@ -120,7 +120,7 @@ void InterruptHandler::gen_interrupt(void)
     {
         if (Bus::doHardReset)
         {
-            do_hard_reset();
+            doHardReset();
             Bus::doHardReset = false;
             return;
         }
@@ -143,7 +143,7 @@ void InterruptHandler::gen_interrupt(void)
         }
 
         Bus::last_jump_addr = dest;
-        Bus::cpu->global_jump_to(dest);
+        Bus::cpu->globalJump(dest);
         return;
     }
 
@@ -154,8 +154,8 @@ void InterruptHandler::gen_interrupt(void)
         if (Bus::cp0_reg[CP0_COUNT_REG] > 0x10000000)
             return;
 
-        pop_interrupt_event();
-        add_interrupt_event_count(SPECIAL_INT, 0);
+        popInterruptEvent();
+        addInterruptEventCount(SPECIAL_INT, 0);
         return;
     }
         break;
@@ -194,8 +194,8 @@ void InterruptHandler::gen_interrupt(void)
         else 
             Bus::vi_field = 0;
 
-        pop_interrupt_event();
-        add_interrupt_event_count(VI_INT, Bus::next_vi);
+        popInterruptEvent();
+        addInterruptEventCount(VI_INT, Bus::next_vi);
 
         Bus::mi_reg[MI_INTR_REG] |= 0x08;
 
@@ -217,9 +217,9 @@ void InterruptHandler::gen_interrupt(void)
         break;
     case COMPARE_INT:
     {
-        pop_interrupt_event();
+        popInterruptEvent();
         Bus::cp0_reg[CP0_COUNT_REG] += Bus::rom->getCountPerOp();
-        add_interrupt_event_count(COMPARE_INT, Bus::cp0_reg[CP0_COMPARE_REG]);
+        addInterruptEventCount(COMPARE_INT, Bus::cp0_reg[CP0_COMPARE_REG]);
         Bus::cp0_reg[CP0_COUNT_REG] -= Bus::rom->getCountPerOp();
 
         Bus::cp0_reg[CP0_CAUSE_REG] = (Bus::cp0_reg[CP0_CAUSE_REG] | 0x8000) & 0xFFFFFF83;
@@ -231,12 +231,12 @@ void InterruptHandler::gen_interrupt(void)
     }
         break;
     case CHECK_INT:
-        pop_interrupt_event();
+        popInterruptEvent();
         break;
     case SI_INT:
     {
         Bus::pif_ram8[0x3F] = 0x0;
-        pop_interrupt_event();
+        popInterruptEvent();
         Bus::mi_reg[MI_INTR_REG] |= 0x02;
         Bus::si_reg[SI_STATUS_REG] |= 0x1000;
 
@@ -258,7 +258,7 @@ void InterruptHandler::gen_interrupt(void)
         break;
     case PI_INT:
     {
-        pop_interrupt_event();
+        popInterruptEvent();
         Bus::mi_reg[MI_INTR_REG] |= 0x10;
         Bus::pi_reg[PI_STATUS_REG] &= ~3;
 
@@ -282,12 +282,12 @@ void InterruptHandler::gen_interrupt(void)
     {
         if (Bus::ai_reg[AI_STATUS_REG] & 0x80000000) // full
         {
-            uint32_t ai_event = find_event(AI_INT);
-            pop_interrupt_event();
+            uint32_t ai_event = findEvent(AI_INT);
+            popInterruptEvent();
             Bus::ai_reg[AI_STATUS_REG] &= ~0x80000000;
             Bus::ai_reg[_AI_CURRENT_DELAY] = Bus::ai_reg[_AI_NEXT_DELAY];
             Bus::ai_reg[_AI_CURRENT_LEN] = Bus::ai_reg[_AI_NEXT_LEN];
-            add_interrupt_event_count(AI_INT, ai_event + Bus::ai_reg[_AI_NEXT_DELAY]);
+            addInterruptEventCount(AI_INT, ai_event + Bus::ai_reg[_AI_NEXT_DELAY]);
 
             Bus::mi_reg[MI_INTR_REG] |= 0x04;
 
@@ -308,7 +308,7 @@ void InterruptHandler::gen_interrupt(void)
         }
         else
         {
-            pop_interrupt_event();
+            popInterruptEvent();
             Bus::ai_reg[AI_STATUS_REG] &= ~0x40000000;
 
             Bus::mi_reg[MI_INTR_REG] |= 0x04;
@@ -332,7 +332,7 @@ void InterruptHandler::gen_interrupt(void)
         break;
     case SP_INT:
     {
-        pop_interrupt_event();
+        popInterruptEvent();
         Bus::sp_reg[SP_STATUS_REG] |= 0x203;
         // sp_register.sp_status_reg |= 0x303;
 
@@ -359,7 +359,7 @@ void InterruptHandler::gen_interrupt(void)
         break;
     case DP_INT:
     {
-        pop_interrupt_event();
+        popInterruptEvent();
         Bus::dp_reg[DPC_STATUS_REG] &= ~2;
         Bus::dp_reg[DPC_STATUS_REG] |= 0x81;
         Bus::mi_reg[MI_INTR_REG] |= 0x20;
@@ -382,7 +382,7 @@ void InterruptHandler::gen_interrupt(void)
         break;
     case HW2_INT:
     {
-        pop_interrupt_event();
+        popInterruptEvent();
 
         Bus::cp0_reg[CP0_STATUS_REG] = (Bus::cp0_reg[CP0_STATUS_REG] & ~0x00380000) | 0x1000;
         Bus::cp0_reg[CP0_CAUSE_REG] = (Bus::cp0_reg[CP0_CAUSE_REG] | 0x1000) & 0xFFFFFF83;
@@ -390,12 +390,12 @@ void InterruptHandler::gen_interrupt(void)
         break;
     case NMI_INT:
     {
-        pop_interrupt_event();
+        popInterruptEvent();
         // setup r4300 Status flags: reset TS and SR, set BEV, ERL, and SR
         Bus::cp0_reg[CP0_STATUS_REG] = (Bus::cp0_reg[CP0_STATUS_REG] & ~0x00380000) | 0x00500004;
         Bus::cp0_reg[CP0_CAUSE_REG] = 0x00000000;
         // simulate the soft reset code which would run from the PIF ROM
-        Bus::cpu->soft_reset();
+        Bus::cpu->softReset();
         // clear all interrupts, reset interrupt counters back to 0
         Bus::cp0_reg[CP0_COUNT_REG] = 0;
         _vi_counter = 0;
@@ -415,28 +415,28 @@ void InterruptHandler::gen_interrupt(void)
 
         // set next instruction address to reset vector
         Bus::last_jump_addr = 0xa4000040;
-        Bus::cpu->global_jump_to(0xa4000040);
+        Bus::cpu->globalJump(0xa4000040);
         return;
     }
         break;
     default:
     {
         LOG_WARNING("Unknown interrupt queue event type %.8X.", top.type);
-        pop_interrupt_event();
+        popInterruptEvent();
     }
         break;
     }
 
-    Bus::cpu->general_exception();
+    Bus::cpu->generalException();
 
     // TODO future savestate
 }
 
-void InterruptHandler::do_hard_reset(void)
+void InterruptHandler::doHardReset(void)
 {
     Bus::mem->initialize();
-    Bus::cpu->hard_reset();
-    Bus::cpu->soft_reset();
+    Bus::cpu->hardReset();
+    Bus::cpu->softReset();
 
     if (!Bus::plugins->initialize())
     {
@@ -448,10 +448,10 @@ void InterruptHandler::do_hard_reset(void)
     Bus::last_jump_addr = 0xa4000040;
     Bus::next_interrupt = 624999;
     initialize();
-    Bus::cpu->global_jump_to(Bus::last_jump_addr);
+    Bus::cpu->globalJump(Bus::last_jump_addr);
 }
 
-void InterruptHandler::pop_interrupt_event(void)
+void InterruptHandler::popInterruptEvent(void)
 {
     if (q.front().type == SPECIAL_INT)
         _SPECIAL_done = true;
@@ -468,7 +468,7 @@ void InterruptHandler::pop_interrupt_event(void)
     }
 }
 
-uint32_t InterruptHandler::find_event(int32_t type)
+uint32_t InterruptHandler::findEvent(int32_t type)
 {
     auto event = std::find(q.begin(), q.end(), Interrupt(type));
     if (event != q.end())
@@ -479,7 +479,7 @@ uint32_t InterruptHandler::find_event(int32_t type)
     return 0;
 }
 
-void InterruptHandler::check_interrupt(void)
+void InterruptHandler::checkInterrupt(void)
 {
     if (Bus::mi_reg[MI_INTR_REG] & Bus::mi_reg[MI_INTR_MASK_REG])
     {
@@ -501,7 +501,7 @@ void InterruptHandler::check_interrupt(void)
     }
 }
 
-void InterruptHandler::delete_event(int32_t type)
+void InterruptHandler::deleteEvent(int32_t type)
 {
     if (q.empty())
         return;
@@ -513,21 +513,21 @@ void InterruptHandler::delete_event(int32_t type)
     }
 }
 
-void InterruptHandler::translate_event_queue_by(uint32_t base)
+void InterruptHandler::translateEventQueueBy(uint32_t base)
 {
-    delete_event(COMPARE_INT);
-    delete_event(SPECIAL_INT);
+    deleteEvent(COMPARE_INT);
+    deleteEvent(SPECIAL_INT);
 
     std::for_each(q.begin(), q.end(), [&](Interrupt& i){
         i.count = (i.count - Bus::cp0_reg[CP0_COUNT_REG]) + base;
     });
 
-    add_interrupt_event_count(COMPARE_INT, Bus::cp0_reg[CP0_COMPARE_REG]);
-    add_interrupt_event_count(SPECIAL_INT, 0);
+    addInterruptEventCount(COMPARE_INT, Bus::cp0_reg[CP0_COMPARE_REG]);
+    addInterruptEventCount(SPECIAL_INT, 0);
 }
 
-void InterruptHandler::soft_reset(void)
+void InterruptHandler::softReset(void)
 {
-    add_interrupt_event(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
-    add_interrupt_event(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
+    addInterruptEvent(HW2_INT, 0);  /* Hardware 2 Interrupt immediately */
+    addInterruptEvent(NMI_INT, 50000000);  /* Non maskable Interrupt after 1/2 second */
 }

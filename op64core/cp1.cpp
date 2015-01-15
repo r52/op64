@@ -19,7 +19,7 @@ CP1::~CP1(void)
     _fgr = nullptr;
 }
 
-void CP1::shuffle_fpr_data(int oldStatus, int newStatus)
+void CP1::shuffleFPRData(int oldStatus, int newStatus)
 {
     if ((newStatus & 0x04000000) != (oldStatus & 0x04000000))
     {
@@ -64,7 +64,7 @@ void CP1::shuffle_fpr_data(int oldStatus, int newStatus)
     }
 }
 
-void CP1::set_fpr_pointers(int newStatus)
+void CP1::setFPRPointers(int newStatus)
 {
     // update the FPR register pointers
     if (newStatus & 0x04000000)

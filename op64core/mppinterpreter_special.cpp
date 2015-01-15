@@ -73,20 +73,20 @@ void MPPInterpreter::JR(void)
 {
     //DECLARE_JUMP(JR,   irs32, 1, &reg[0],    0, 0)
 
-    generic_jump((uint32_t)_reg[_cur_instr.rs].u, true, &_reg[0], false, false);
+    genericJump((uint32_t)_reg[_cur_instr.rs].u, true, &_reg[0], false, false);
 }
 
 void MPPInterpreter::JALR(void)
 {
     // DECLARE_JUMP(JALR, irs32, 1, PC->f.r.rd, 0, 0)
 
-    generic_jump((uint32_t)_reg[_cur_instr.rs].u, true, &_reg[_cur_instr.rd], false, false);
+    genericJump((uint32_t)_reg[_cur_instr.rs].u, true, &_reg[_cur_instr.rd], false, false);
 }
 
 void MPPInterpreter::SYSCALL(void)
 {
     _cp0_reg[CP0_CAUSE_REG] = 8 << 2;
-    general_exception();
+    generalException();
 }
 
 void MPPInterpreter::BREAK(void)

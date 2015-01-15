@@ -12,7 +12,7 @@ void MPPInterpreter::MFC0(void)
     switch (_cur_instr.rd)
     {
     case CP0_COUNT_REG:
-        _cp0->update_count(_PC);
+        _cp0->updateCount(_PC);
     default:
         _reg[_cur_instr.rt].s = signextend<int32_t, int64_t>(_cp0_reg[_cur_instr.rd]);
         break;
@@ -54,41 +54,41 @@ void MPPInterpreter::MTC0(void)
     case CP0_BADVADDR_REG:
         break;
     case CP0_COUNT_REG:
-        _cp0->update_count(_PC);
+        _cp0->updateCount(_PC);
 
         Bus::interrupt_unsafe_state = true;
         if (Bus::next_interrupt <= _cp0_reg[CP0_COUNT_REG])
-            Bus::interrupt->gen_interrupt();
+            Bus::interrupt->generateInterrupt();
 
         Bus::interrupt_unsafe_state = false;
 
-        Bus::interrupt->translate_event_queue_by((uint32_t)_reg[_cur_instr.rt].u & 0xFFFFFFFF);
+        Bus::interrupt->translateEventQueueBy((uint32_t)_reg[_cur_instr.rt].u & 0xFFFFFFFF);
         _cp0_reg[CP0_COUNT_REG] = (uint32_t)_reg[_cur_instr.rt].u & 0xFFFFFFFF;
         break;
     case CP0_ENTRYHI_REG:
         _cp0_reg[CP0_ENTRYHI_REG] = (uint32_t)_reg[_cur_instr.rt].u;
         break;
     case CP0_COMPARE_REG:
-        _cp0->update_count(_PC);
-        Bus::interrupt->delete_event(COMPARE_INT);
-        Bus::interrupt->add_interrupt_event_count(COMPARE_INT, (uint32_t)_reg[_cur_instr.rt].u);
+        _cp0->updateCount(_PC);
+        Bus::interrupt->deleteEvent(COMPARE_INT);
+        Bus::interrupt->addInterruptEventCount(COMPARE_INT, (uint32_t)_reg[_cur_instr.rt].u);
         _cp0_reg[CP0_COMPARE_REG] = (uint32_t)_reg[_cur_instr.rt].u;
         _cp0_reg[CP0_CAUSE_REG] &= 0xFFFF7FFF; //Timer interupt is clear
         break;
     case CP0_STATUS_REG:
         if (((uint32_t)_reg[_cur_instr.rt].u & 0x04000000) != (_cp0_reg[CP0_STATUS_REG] & 0x04000000))
         {
-            _cp1->shuffle_fpr_data(_cp0_reg[CP0_STATUS_REG], (uint32_t)_reg[_cur_instr.rt].u);
-            _cp1->set_fpr_pointers((uint32_t)_reg[_cur_instr.rt].u);
+            _cp1->shuffleFPRData(_cp0_reg[CP0_STATUS_REG], (uint32_t)_reg[_cur_instr.rt].u);
+            _cp1->setFPRPointers((uint32_t)_reg[_cur_instr.rt].u);
         }
         _cp0_reg[CP0_STATUS_REG] = (uint32_t)_reg[_cur_instr.rt].u;
-        _cp0->update_count(_PC);
+        _cp0->updateCount(_PC);
         ++_PC;
-        Bus::interrupt->check_interrupt();
+        Bus::interrupt->checkInterrupt();
 
         Bus::interrupt_unsafe_state = true;
         if (Bus::next_interrupt <= _cp0_reg[CP0_COUNT_REG])
-            Bus::interrupt->gen_interrupt();
+            Bus::interrupt->generateInterrupt();
 
         Bus::interrupt_unsafe_state = false;
         --_PC;
@@ -208,7 +208,7 @@ void MPPInterpreter::TLBP(void)
 
 void MPPInterpreter::ERET(void)
 {
-    _cp0->update_count(_PC);
+    _cp0->updateCount(_PC);
     if (_cp0_reg[CP0_STATUS_REG] & 0x4)
     {
         LOG_ERROR("Error in ERET");
@@ -217,11 +217,11 @@ void MPPInterpreter::ERET(void)
     else
     {
         _cp0_reg[CP0_STATUS_REG] &= ~0x2;
-        global_jump_to(_cp0_reg[CP0_EPC_REG]);
+        globalJump(_cp0_reg[CP0_EPC_REG]);
     }
     _llbit = 0;
-    Bus::interrupt->check_interrupt();
+    Bus::interrupt->checkInterrupt();
     Bus::last_jump_addr = _PC;
     if (Bus::next_interrupt <= _cp0_reg[CP0_COUNT_REG])
-        Bus::interrupt->gen_interrupt();
+        Bus::interrupt->generateInterrupt();
 }

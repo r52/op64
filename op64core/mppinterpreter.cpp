@@ -89,11 +89,11 @@ void MPPInterpreter::initialize(void)
     }
 
     _cp0_reg = Bus::cp0_reg;
-    hard_reset();
-    soft_reset();
+    hardReset();
+    softReset();
 }
 
-void MPPInterpreter::hard_reset(void)
+void MPPInterpreter::hardReset(void)
 {
     for (uint32_t i = 0; i < 32; i++)
     {
@@ -112,7 +112,7 @@ void MPPInterpreter::hard_reset(void)
 
     _cp0_reg[CP0_RANDOM_REG] = 0x1F;
     _cp0_reg[CP0_STATUS_REG] = 0x34000000;
-    _cp1->set_fpr_pointers(_cp0_reg[CP0_STATUS_REG]);
+    _cp1->setFPRPointers(_cp0_reg[CP0_STATUS_REG]);
     _cp0_reg[CP0_CONFIG_REG] = 0x0006E463;
     _cp0_reg[CP0_PREVID_REG] = 0xb00;
     _cp0_reg[CP0_COUNT_REG] = 0x5000;
@@ -164,7 +164,7 @@ static uint32_t get_cic_seed(uint32_t chip)
     }
 }
 
-void MPPInterpreter::soft_reset(void)
+void MPPInterpreter::softReset(void)
 {
     _cp0_reg[CP0_STATUS_REG] = 0x34000000;
     _cp0_reg[CP0_CONFIG_REG] = 0x0006E463;
@@ -686,7 +686,7 @@ void MPPInterpreter::LL(void)
 
 void MPPInterpreter::LWC1(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     ++_PC;
@@ -709,7 +709,7 @@ void MPPInterpreter::LLD(void)
 
 void MPPInterpreter::LDC1(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     ++_PC;
@@ -737,7 +737,7 @@ void MPPInterpreter::SC(void)
 
 void MPPInterpreter::SWC1(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     ++_PC;
@@ -752,7 +752,7 @@ void MPPInterpreter::SCD(void)
 
 void MPPInterpreter::SDC1(void)
 {
-    if (_cp0->cop1_unusable())
+    if (_cp0->COP1Unusable())
         return;
 
     ++_PC;
@@ -767,15 +767,15 @@ void MPPInterpreter::SD(void)
     Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), _reg[_cur_instr.rt].u, SIZE_DWORD);
 }
 
-void MPPInterpreter::generic_idle(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1)
+void MPPInterpreter::genericIdle(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1)
 {
     int32_t skip;
-    if (cop1 && _cp0->cop1_unusable())
+    if (cop1 && _cp0->COP1Unusable())
         return;
 
     if (take_jump)
     {
-        _cp0->update_count(_PC);
+        _cp0->updateCount(_PC);
         skip = Bus::next_interrupt - _cp0_reg[CP0_COUNT_REG];
         if (skip > 3)
         {
@@ -783,18 +783,18 @@ void MPPInterpreter::generic_idle(uint32_t destination, bool take_jump, Register
         }
         else
         {
-            generic_jump(destination, take_jump, link, likely, cop1);
+            genericJump(destination, take_jump, link, likely, cop1);
         }
     }
     else
     {
-        generic_jump(destination, take_jump, link, likely, cop1);
+        genericJump(destination, take_jump, link, likely, cop1);
     }
 }
 
-void MPPInterpreter::generic_jump(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1)
+void MPPInterpreter::genericJump(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1)
 {
-    if (cop1 && _cp0->cop1_unusable())
+    if (cop1 && _cp0->COP1Unusable())
         return;
 
     if (link != &_reg[0])
@@ -811,7 +811,7 @@ void MPPInterpreter::generic_jump(uint32_t destination, bool take_jump, Register
         prefetch();
         (this->*instruction_table[_cur_instr.op])();
 
-        _cp0->update_count(_PC);
+        _cp0->updateCount(_PC);
         _delay_slot = false;
         if (take_jump && !Bus::skip_jump)
         {
@@ -821,24 +821,24 @@ void MPPInterpreter::generic_jump(uint32_t destination, bool take_jump, Register
     else
     {
         _PC += 2;
-        _cp0->update_count(_PC);
+        _cp0->updateCount(_PC);
     }
 
     Bus::last_jump_addr = (uint32_t)_PC;
     if (Bus::next_interrupt <= _cp0_reg[CP0_COUNT_REG])
     {
-        Bus::interrupt->gen_interrupt();
+        Bus::interrupt->generateInterrupt();
     }
 }
 
-void MPPInterpreter::global_jump_to(uint32_t addr)
+void MPPInterpreter::globalJump(uint32_t addr)
 {
     _PC = addr;
 }
 
-void MPPInterpreter::general_exception(void)
+void MPPInterpreter::generalException(void)
 {
-    _cp0->update_count(_PC);
+    _cp0->updateCount(_PC);
     _cp0_reg[CP0_STATUS_REG] |= 2;
 
     _cp0_reg[CP0_EPC_REG] = (uint32_t)_PC;
@@ -853,7 +853,7 @@ void MPPInterpreter::general_exception(void)
         _cp0_reg[CP0_CAUSE_REG] &= 0x7FFFFFFF;
     }
 
-    global_jump_to(0x80000180);
+    globalJump(0x80000180);
     Bus::last_jump_addr = (uint32_t)_PC;
 
     if (_delay_slot)
@@ -864,13 +864,13 @@ void MPPInterpreter::general_exception(void)
 
 }
 
-void MPPInterpreter::TLB_refill_exception(unsigned int address, TLBProbeMode mode)
+void MPPInterpreter::TLBRefillException(unsigned int address, TLBProbeMode mode)
 {
     bool usual_handler = false;
 
     if (mode != TLB_FAST_READ)
     {
-        _cp0->update_count(_PC);
+        _cp0->updateCount(_PC);
     }
 
     if (mode == TLB_WRITE)
@@ -888,7 +888,7 @@ void MPPInterpreter::TLB_refill_exception(unsigned int address, TLBProbeMode mod
 
     if (_cp0_reg[CP0_STATUS_REG] & 0x2) // Test de EXL
     {
-        global_jump_to(0x80000180);
+        globalJump(0x80000180);
         if (_delay_slot)
         {
             _cp0_reg[CP0_CAUSE_REG] |= 0x80000000;
@@ -912,11 +912,11 @@ void MPPInterpreter::TLB_refill_exception(unsigned int address, TLBProbeMode mod
 
         if (usual_handler)
         {
-            global_jump_to(0x80000180);
+            globalJump(0x80000180);
         }
         else
         {
-            global_jump_to(0x80000000);
+            globalJump(0x80000000);
         }
     }
 
