@@ -2,7 +2,7 @@
 #include "rom.h"
 #include "bus.h"
 #include "plugins.h"
-#include "mppinterpreter.h"
+#include "interpreter.h"
 #include "mpmemory.h"
 #include <QThread>
 
@@ -10,7 +10,7 @@
 Emulator::Emulator(WId mainwindow) :
 _state(DEAD),
 _plugins(new Plugins),
-_cpu(new MPPInterpreter),
+_cpu(new Interpreter),
 _mem(new MPMemory),
 _mainwindow(mainwindow)
 {

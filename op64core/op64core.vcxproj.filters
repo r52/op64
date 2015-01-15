@@ -96,9 +96,6 @@
     <ClInclude Include="icpu.h">
       <Filter>Header Files\cpu</Filter>
     </ClInclude>
-    <ClInclude Include="mppinterpreter.h">
-      <Filter>Header Files\cpu\interpreter</Filter>
-    </ClInclude>
     <ClInclude Include="mpmemory.h">
       <Filter>Header Files\memory\mupen</Filter>
     </ClInclude>
@@ -189,6 +186,9 @@
     <ClInclude Include="cheatengine.h">
       <Filter>Header Files\cheat</Filter>
     </ClInclude>
+    <ClInclude Include="interpreter.h">
+      <Filter>Header Files\cpu\interpreter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="rom.cpp">
@@ -197,26 +197,11 @@
     <ClCompile Include="icpu.cpp">
       <Filter>Source Files\cpu</Filter>
     </ClCompile>
-    <ClCompile Include="mppinterpreter.cpp">
-      <Filter>Source Files\cpu\interpreter</Filter>
-    </ClCompile>
     <ClCompile Include="mpmemory.cpp">
       <Filter>Source Files\memory\mupen</Filter>
     </ClCompile>
-    <ClCompile Include="mppinterpreter_regimm.cpp">
-      <Filter>Source Files\cpu\interpreter</Filter>
-    </ClCompile>
-    <ClCompile Include="mppinterpreter_special.cpp">
-      <Filter>Source Files\cpu\interpreter</Filter>
-    </ClCompile>
     <ClCompile Include="interrupthandler.cpp">
       <Filter>Source Files\cpu</Filter>
-    </ClCompile>
-    <ClCompile Include="mppinterpreter_cop0.cpp">
-      <Filter>Source Files\cpu\interpreter</Filter>
-    </ClCompile>
-    <ClCompile Include="mppinterpreter_cop1.cpp">
-      <Filter>Source Files\cpu\interpreter</Filter>
     </ClCompile>
     <ClCompile Include="cp1.cpp">
       <Filter>Source Files\cpu</Filter>
@@ -283,6 +268,21 @@
     </ClCompile>
     <ClCompile Include="cheatengine.cpp">
       <Filter>Source Files\cheat</Filter>
+    </ClCompile>
+    <ClCompile Include="interpreter.cpp">
+      <Filter>Source Files\cpu\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="interpreter_cop0.cpp">
+      <Filter>Source Files\cpu\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="interpreter_cop1.cpp">
+      <Filter>Source Files\cpu\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="interpreter_regimm.cpp">
+      <Filter>Source Files\cpu\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="interpreter_special.cpp">
+      <Filter>Source Files\cpu\interpreter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

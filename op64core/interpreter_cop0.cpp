@@ -1,4 +1,4 @@
-#include "mppinterpreter.h"
+#include "interpreter.h"
 #include "bus.h"
 #include "logger.h"
 #include "cp0.h"
@@ -7,7 +7,7 @@
 #include "tlb.h"
 
 
-void MPPInterpreter::MFC0(void)
+void Interpreter::MFC0(void)
 {
     switch (_cur_instr.rd)
     {
@@ -20,7 +20,7 @@ void MPPInterpreter::MFC0(void)
     ++_PC;
 }
 
-void MPPInterpreter::MTC0(void)
+void Interpreter::MTC0(void)
 {
     switch (_cur_instr.rd)
     {
@@ -133,7 +133,7 @@ void MPPInterpreter::MTC0(void)
     ++_PC;
 }
 
-void MPPInterpreter::TLBR(void)
+void Interpreter::TLBR(void)
 {
     unsigned index = _cp0_reg[CP0_INDEX_REG] & 0x3F;
     uint64_t entry_hi;
@@ -153,7 +153,7 @@ void MPPInterpreter::TLBR(void)
     ++_PC;
 }
 
-void MPPInterpreter::TLBWI(void)
+void Interpreter::TLBWI(void)
 {
     uint64_t entry_hi = _cp0_reg[CP0_ENTRYHI_REG] & 0xC00000FFFFFFE0FFULL;
     uint64_t entry_lo_0 = _cp0_reg[CP0_ENTRYLO0_REG] & 0x000000007FFFFFFFULL;
@@ -172,7 +172,7 @@ void MPPInterpreter::TLBWI(void)
     ++_PC;
 }
 
-void MPPInterpreter::TLBWR(void)
+void Interpreter::TLBWR(void)
 {
     uint64_t entry_hi = _cp0_reg[CP0_ENTRYHI_REG] & 0xC00000FFFFFFE0FFULL;
     uint64_t entry_lo_0 = _cp0_reg[CP0_ENTRYLO0_REG] & 0x000000007FFFFFFFULL;
@@ -191,7 +191,7 @@ void MPPInterpreter::TLBWR(void)
     ++_PC;
 }
 
-void MPPInterpreter::TLBP(void)
+void Interpreter::TLBP(void)
 {
     uint64_t entry_hi = _cp0_reg[CP0_ENTRYHI_REG] & 0x0000000001FFE000ULL;
     int index;
@@ -206,7 +206,7 @@ void MPPInterpreter::TLBP(void)
     ++_PC;
 }
 
-void MPPInterpreter::ERET(void)
+void Interpreter::ERET(void)
 {
     _cp0->updateCount(_PC);
     if (_cp0_reg[CP0_STATUS_REG] & 0x4)

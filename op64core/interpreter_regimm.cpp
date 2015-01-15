@@ -1,9 +1,9 @@
-#include "mppinterpreter.h"
+#include "interpreter.h"
 #include "util.h"
 #include "logger.h"
 #include "bus.h"
 
-void MPPInterpreter::BLTZ(void)
+void Interpreter::BLTZ(void)
 {
     // DECLARE_JUMP(BLTZ, PCADDR + (iimmediate+1)*4, irs < 0, &reg[0], 0, 0)
     DO_JUMP(
@@ -15,7 +15,7 @@ void MPPInterpreter::BLTZ(void)
         );
 }
 
-void MPPInterpreter::BGEZ(void)
+void Interpreter::BGEZ(void)
 {
     // DECLARE_JUMP(BGEZ, PCADDR + (iimmediate + 1) * 4, irs >= 0, &reg[0], 0, 0)
     DO_JUMP(
@@ -27,7 +27,7 @@ void MPPInterpreter::BGEZ(void)
         );
 }
 
-void MPPInterpreter::BLTZL(void)
+void Interpreter::BLTZL(void)
 {
     // DECLARE_JUMP(BLTZL,   PCADDR + (iimmediate+1)*4, irs < 0,    &reg[0],  1, 0)
     DO_JUMP(
@@ -39,7 +39,7 @@ void MPPInterpreter::BLTZL(void)
         );
 }
 
-void MPPInterpreter::BGEZL(void)
+void Interpreter::BGEZL(void)
 {
     // DECLARE_JUMP(BGEZL,   PCADDR + (iimmediate+1)*4, irs >= 0,   &reg[0],  1, 0)
     DO_JUMP(
@@ -51,37 +51,37 @@ void MPPInterpreter::BGEZL(void)
         );
 }
 
-void MPPInterpreter::TGEI(void)
+void Interpreter::TGEI(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::TGEIU(void)
+void Interpreter::TGEIU(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::TLTI(void)
+void Interpreter::TLTI(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::TLTIU(void)
+void Interpreter::TLTIU(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::TEQI(void)
+void Interpreter::TEQI(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::TNEI(void)
+void Interpreter::TNEI(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::BLTZAL(void)
+void Interpreter::BLTZAL(void)
 {
     // DECLARE_JUMP(BLTZAL, PCADDR + (iimmediate + 1) * 4, irs < 0, &reg[31], 0, 0)
     DO_JUMP(
@@ -93,7 +93,7 @@ void MPPInterpreter::BLTZAL(void)
         );
 }
 
-void MPPInterpreter::BGEZAL(void)
+void Interpreter::BGEZAL(void)
 {
     // DECLARE_JUMP(BGEZAL, PCADDR + (iimmediate + 1) * 4, irs >= 0, &reg[31], 0, 0)
     DO_JUMP(
@@ -105,7 +105,7 @@ void MPPInterpreter::BGEZAL(void)
         );
 }
 
-void MPPInterpreter::BLTZALL(void)
+void Interpreter::BLTZALL(void)
 {
     // DECLARE_JUMP(BLTZALL, PCADDR + (iimmediate+1)*4, irs < 0,    &reg[31], 1, 0)
     DO_JUMP(
@@ -117,7 +117,7 @@ void MPPInterpreter::BLTZALL(void)
         );
 }
 
-void MPPInterpreter::BGEZALL(void)
+void Interpreter::BGEZALL(void)
 {
     // DECLARE_JUMP(BGEZALL, PCADDR + (iimmediate+1)*4, irs >= 0,   &reg[31], 1, 0)
 

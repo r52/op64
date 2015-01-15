@@ -1,11 +1,11 @@
-#include "mppinterpreter.h"
+#include "interpreter.h"
 #include "logger.h"
 #include "bus.h"
 #include "cp1.h"
 #include "fpu.h"
 
 
-void MPPInterpreter::MFC1(void)
+void Interpreter::MFC1(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -14,7 +14,7 @@ void MPPInterpreter::MFC1(void)
     ++_PC;
 }
 
-void MPPInterpreter::DMFC1(void)
+void Interpreter::DMFC1(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -23,7 +23,7 @@ void MPPInterpreter::DMFC1(void)
     ++_PC;
 }
 
-void MPPInterpreter::CFC1(void)
+void Interpreter::CFC1(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -40,7 +40,7 @@ void MPPInterpreter::CFC1(void)
     ++_PC;
 }
 
-void MPPInterpreter::MTC1(void)
+void Interpreter::MTC1(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -49,7 +49,7 @@ void MPPInterpreter::MTC1(void)
     ++_PC;
 }
 
-void MPPInterpreter::DMTC1(void)
+void Interpreter::DMTC1(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -58,7 +58,7 @@ void MPPInterpreter::DMTC1(void)
     ++_PC;
 }
 
-void MPPInterpreter::CTC1(void)
+void Interpreter::CTC1(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -86,7 +86,7 @@ void MPPInterpreter::CTC1(void)
     ++_PC;
 }
 
-void MPPInterpreter::BC1F(void)
+void Interpreter::BC1F(void)
 {
     // DECLARE_JUMP(BC1F,  PCADDR + (iimmediate+1)*4, (FCR31 & 0x800000)==0, &reg[0], 0, 1)
     DO_JUMP(
@@ -98,7 +98,7 @@ void MPPInterpreter::BC1F(void)
         );
 }
 
-void MPPInterpreter::BC1T(void)
+void Interpreter::BC1T(void)
 {
     // DECLARE_JUMP(BC1T,  PCADDR + (iimmediate+1)*4, (FCR31 & 0x800000)!=0, &reg[0], 0, 1)
     DO_JUMP(
@@ -110,7 +110,7 @@ void MPPInterpreter::BC1T(void)
         );
 }
 
-void MPPInterpreter::BC1FL(void)
+void Interpreter::BC1FL(void)
 {
     // DECLARE_JUMP(BC1FL, PCADDR + (iimmediate+1)*4, (FCR31 & 0x800000)==0, &reg[0], 1, 1)
     DO_JUMP(
@@ -122,7 +122,7 @@ void MPPInterpreter::BC1FL(void)
         );
 }
 
-void MPPInterpreter::BC1TL(void)
+void Interpreter::BC1TL(void)
 {
     // DECLARE_JUMP(BC1TL, PCADDR + (iimmediate+1)*4, (FCR31 & 0x800000)!=0, &reg[0], 1, 1)
     DO_JUMP(
@@ -134,7 +134,7 @@ void MPPInterpreter::BC1TL(void)
         );
 }
 
-void MPPInterpreter::ADD_S(void)
+void Interpreter::ADD_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -144,7 +144,7 @@ void MPPInterpreter::ADD_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::SUB_S(void)
+void Interpreter::SUB_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -154,7 +154,7 @@ void MPPInterpreter::SUB_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::MUL_S(void)
+void Interpreter::MUL_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -164,7 +164,7 @@ void MPPInterpreter::MUL_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::DIV_S(void)
+void Interpreter::DIV_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -180,7 +180,7 @@ void MPPInterpreter::DIV_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::SQRT_S(void)
+void Interpreter::SQRT_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -190,7 +190,7 @@ void MPPInterpreter::SQRT_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::ABS_S(void)
+void Interpreter::ABS_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -200,7 +200,7 @@ void MPPInterpreter::ABS_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::MOV_S(void)
+void Interpreter::MOV_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -211,7 +211,7 @@ void MPPInterpreter::MOV_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::NEG_S(void)
+void Interpreter::NEG_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -221,12 +221,12 @@ void MPPInterpreter::NEG_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::ROUND_L_S(void)
+void Interpreter::ROUND_L_S(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::TRUNC_L_S(void)
+void Interpreter::TRUNC_L_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -240,17 +240,17 @@ void MPPInterpreter::TRUNC_L_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::CEIL_L_S(void)
+void Interpreter::CEIL_L_S(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::FLOOR_L_S(void)
+void Interpreter::FLOOR_L_S(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::ROUND_W_S(void)
+void Interpreter::ROUND_W_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -264,7 +264,7 @@ void MPPInterpreter::ROUND_W_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::TRUNC_W_S(void)
+void Interpreter::TRUNC_W_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -278,17 +278,17 @@ void MPPInterpreter::TRUNC_W_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::CEIL_W_S(void)
+void Interpreter::CEIL_W_S(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::FLOOR_W_S(void)
+void Interpreter::FLOOR_W_S(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::CVT_D_S(void)
+void Interpreter::CVT_D_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -298,7 +298,7 @@ void MPPInterpreter::CVT_D_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::CVT_W_S(void)
+void Interpreter::CVT_W_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -308,7 +308,7 @@ void MPPInterpreter::CVT_W_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::CVT_L_S(void)
+void Interpreter::CVT_L_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -318,17 +318,17 @@ void MPPInterpreter::CVT_L_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::C_F_S(void)
+void Interpreter::C_F_S(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_UN_S(void)
+void Interpreter::C_UN_S(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_EQ_S(void)
+void Interpreter::C_EQ_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -346,7 +346,7 @@ void MPPInterpreter::C_EQ_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::C_UEQ_S(void)
+void Interpreter::C_UEQ_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -364,7 +364,7 @@ void MPPInterpreter::C_UEQ_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::C_OLT_S(void)
+void Interpreter::C_OLT_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -382,7 +382,7 @@ void MPPInterpreter::C_OLT_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::C_ULT_S(void)
+void Interpreter::C_ULT_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -400,7 +400,7 @@ void MPPInterpreter::C_ULT_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::C_OLE_S(void)
+void Interpreter::C_OLE_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -418,32 +418,32 @@ void MPPInterpreter::C_OLE_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::C_ULE_S(void)
+void Interpreter::C_ULE_S(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_SF_S(void)
+void Interpreter::C_SF_S(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_NGLE_S(void)
+void Interpreter::C_NGLE_S(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_SEQ_S(void)
+void Interpreter::C_SEQ_S(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_NGL_S(void)
+void Interpreter::C_NGL_S(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_LT_S(void)
+void Interpreter::C_LT_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -461,12 +461,12 @@ void MPPInterpreter::C_LT_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::C_NGE_S(void)
+void Interpreter::C_NGE_S(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_LE_S(void)
+void Interpreter::C_LE_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -484,7 +484,7 @@ void MPPInterpreter::C_LE_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::C_NGT_S(void)
+void Interpreter::C_NGT_S(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -502,7 +502,7 @@ void MPPInterpreter::C_NGT_S(void)
     ++_PC;
 }
 
-void MPPInterpreter::ADD_D(void)
+void Interpreter::ADD_D(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -512,7 +512,7 @@ void MPPInterpreter::ADD_D(void)
     ++_PC;
 }
 
-void MPPInterpreter::SUB_D(void)
+void Interpreter::SUB_D(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -522,7 +522,7 @@ void MPPInterpreter::SUB_D(void)
     ++_PC;
 }
 
-void MPPInterpreter::MUL_D(void)
+void Interpreter::MUL_D(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -532,7 +532,7 @@ void MPPInterpreter::MUL_D(void)
     ++_PC;
 }
 
-void MPPInterpreter::DIV_D(void)
+void Interpreter::DIV_D(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -547,7 +547,7 @@ void MPPInterpreter::DIV_D(void)
     ++_PC;
 }
 
-void MPPInterpreter::SQRT_D(void)
+void Interpreter::SQRT_D(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -557,7 +557,7 @@ void MPPInterpreter::SQRT_D(void)
     ++_PC;
 }
 
-void MPPInterpreter::ABS_D(void)
+void Interpreter::ABS_D(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -567,7 +567,7 @@ void MPPInterpreter::ABS_D(void)
     ++_PC;
 }
 
-void MPPInterpreter::MOV_D(void)
+void Interpreter::MOV_D(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -578,7 +578,7 @@ void MPPInterpreter::MOV_D(void)
     ++_PC;
 }
 
-void MPPInterpreter::NEG_D(void)
+void Interpreter::NEG_D(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -587,27 +587,27 @@ void MPPInterpreter::NEG_D(void)
     ++_PC;
 }
 
-void MPPInterpreter::ROUND_L_D(void)
+void Interpreter::ROUND_L_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::TRUNC_L_D(void)
+void Interpreter::TRUNC_L_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::CEIL_L_D(void)
+void Interpreter::CEIL_L_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::FLOOR_L_D(void)
+void Interpreter::FLOOR_L_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::ROUND_W_D(void)
+void Interpreter::ROUND_W_D(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -621,7 +621,7 @@ void MPPInterpreter::ROUND_W_D(void)
     ++_PC;
 }
 
-void MPPInterpreter::TRUNC_W_D(void)
+void Interpreter::TRUNC_W_D(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -635,17 +635,17 @@ void MPPInterpreter::TRUNC_W_D(void)
     ++_PC;
 }
 
-void MPPInterpreter::CEIL_W_D(void)
+void Interpreter::CEIL_W_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::FLOOR_W_D(void)
+void Interpreter::FLOOR_W_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::CVT_S_D(void)
+void Interpreter::CVT_S_D(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -655,7 +655,7 @@ void MPPInterpreter::CVT_S_D(void)
     ++_PC;
 }
 
-void MPPInterpreter::CVT_W_D(void)
+void Interpreter::CVT_W_D(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -665,7 +665,7 @@ void MPPInterpreter::CVT_W_D(void)
     ++_PC;
 }
 
-void MPPInterpreter::CVT_L_D(void)
+void Interpreter::CVT_L_D(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -675,17 +675,17 @@ void MPPInterpreter::CVT_L_D(void)
     ++_PC;
 }
 
-void MPPInterpreter::C_F_D(void)
+void Interpreter::C_F_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_UN_D(void)
+void Interpreter::C_UN_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_EQ_D(void)
+void Interpreter::C_EQ_D(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -703,52 +703,52 @@ void MPPInterpreter::C_EQ_D(void)
     _FCR31 = (result == CMP_EQUAL) ? _FCR31 | 0x800000 : _FCR31&~0x800000;
 }
 
-void MPPInterpreter::C_UEQ_D(void)
+void Interpreter::C_UEQ_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_OLT_D(void)
+void Interpreter::C_OLT_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_ULT_D(void)
+void Interpreter::C_ULT_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_OLE_D(void)
+void Interpreter::C_OLE_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_ULE_D(void)
+void Interpreter::C_ULE_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_SF_D(void)
+void Interpreter::C_SF_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_NGLE_D(void)
+void Interpreter::C_NGLE_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_SEQ_D(void)
+void Interpreter::C_SEQ_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_NGL_D(void)
+void Interpreter::C_NGL_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_LT_D(void)
+void Interpreter::C_LT_D(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -766,12 +766,12 @@ void MPPInterpreter::C_LT_D(void)
     ++_PC;
 }
 
-void MPPInterpreter::C_NGE_D(void)
+void Interpreter::C_NGE_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::C_LE_D(void)
+void Interpreter::C_LE_D(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -789,12 +789,12 @@ void MPPInterpreter::C_LE_D(void)
     ++_PC;
 }
 
-void MPPInterpreter::C_NGT_D(void)
+void Interpreter::C_NGT_D(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::CVT_S_W(void)
+void Interpreter::CVT_S_W(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -804,7 +804,7 @@ void MPPInterpreter::CVT_S_W(void)
     ++_PC;
 }
 
-void MPPInterpreter::CVT_D_W(void)
+void Interpreter::CVT_D_W(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -814,7 +814,7 @@ void MPPInterpreter::CVT_D_W(void)
     ++_PC;
 }
 
-void MPPInterpreter::CVT_D_L(void)
+void Interpreter::CVT_D_L(void)
 {
     if (_cp0->COP1Unusable())
         return;
@@ -824,7 +824,7 @@ void MPPInterpreter::CVT_D_L(void)
     ++_PC;
 }
 
-void MPPInterpreter::CVT_S_L(void)
+void Interpreter::CVT_S_L(void)
 {
     if (_cp0->COP1Unusable())
         return;

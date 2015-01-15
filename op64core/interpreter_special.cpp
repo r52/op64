@@ -1,4 +1,4 @@
-#include "mppinterpreter.h"
+#include "interpreter.h"
 #include "util.h"
 #include "logger.h"
 #include "bus.h"
@@ -9,7 +9,7 @@
 #pragma intrinsic(_mul128)
 #endif
 
-void MPPInterpreter::SLL(void)
+void Interpreter::SLL(void)
 {
     if (_cur_instr.rd)
     {
@@ -19,7 +19,7 @@ void MPPInterpreter::SLL(void)
     ++_PC;
 }
 
-void MPPInterpreter::SRL(void)
+void Interpreter::SRL(void)
 {
     if (_cur_instr.rd)
     {
@@ -29,7 +29,7 @@ void MPPInterpreter::SRL(void)
     ++_PC;
 }
 
-void MPPInterpreter::SRA(void)
+void Interpreter::SRA(void)
 {
     if (_cur_instr.rd)
     {
@@ -39,7 +39,7 @@ void MPPInterpreter::SRA(void)
     ++_PC;
 }
 
-void MPPInterpreter::SLLV(void)
+void Interpreter::SLLV(void)
 {
     if (_cur_instr.rd)
     {
@@ -49,7 +49,7 @@ void MPPInterpreter::SLLV(void)
     ++_PC;
 }
 
-void MPPInterpreter::SRLV(void)
+void Interpreter::SRLV(void)
 {
     if (_cur_instr.rd)
     {
@@ -59,7 +59,7 @@ void MPPInterpreter::SRLV(void)
     ++_PC;
 }
 
-void MPPInterpreter::SRAV(void)
+void Interpreter::SRAV(void)
 {
     if (_cur_instr.rd)
     {
@@ -69,84 +69,84 @@ void MPPInterpreter::SRAV(void)
     ++_PC;
 }
 
-void MPPInterpreter::JR(void)
+void Interpreter::JR(void)
 {
     //DECLARE_JUMP(JR,   irs32, 1, &reg[0],    0, 0)
 
     genericJump((uint32_t)_reg[_cur_instr.rs].u, true, &_reg[0], false, false);
 }
 
-void MPPInterpreter::JALR(void)
+void Interpreter::JALR(void)
 {
     // DECLARE_JUMP(JALR, irs32, 1, PC->f.r.rd, 0, 0)
 
     genericJump((uint32_t)_reg[_cur_instr.rs].u, true, &_reg[_cur_instr.rd], false, false);
 }
 
-void MPPInterpreter::SYSCALL(void)
+void Interpreter::SYSCALL(void)
 {
     _cp0_reg[CP0_CAUSE_REG] = 8 << 2;
     generalException();
 }
 
-void MPPInterpreter::BREAK(void)
+void Interpreter::BREAK(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::SYNC(void)
+void Interpreter::SYNC(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::MFHI(void)
+void Interpreter::MFHI(void)
 {
     _reg[_cur_instr.rd].s = _hi.s;
 
     ++_PC;
 }
 
-void MPPInterpreter::MTHI(void)
+void Interpreter::MTHI(void)
 {
     _hi.s = _reg[_cur_instr.rs].s;
     ++_PC;
 }
 
-void MPPInterpreter::MFLO(void)
+void Interpreter::MFLO(void)
 {
     _reg[_cur_instr.rd].s = _lo.s;
     
     ++_PC;
 }
 
-void MPPInterpreter::MTLO(void)
+void Interpreter::MTLO(void)
 {
     _lo.s = _reg[_cur_instr.rs].s;
     ++_PC;
 }
 
-void MPPInterpreter::DSLLV(void)
+void Interpreter::DSLLV(void)
 {
     _reg[_cur_instr.rd].s = _reg[_cur_instr.rt].s << ((uint32_t)_reg[_cur_instr.rs].u & 0x3F);
 
     ++_PC;
 }
 
-void MPPInterpreter::DSRLV(void)
+void Interpreter::DSRLV(void)
 {
     _reg[_cur_instr.rd].u = _reg[_cur_instr.rt].u >> ((uint32_t)_reg[_cur_instr.rs].u & 0x3F);
 
     ++_PC;
 }
 
-void MPPInterpreter::DSRAV(void)
+void Interpreter::DSRAV(void)
 {
     _reg[_cur_instr.rd].s = _reg[_cur_instr.rt].s >> ((uint32_t)_reg[_cur_instr.rs].u & 0x3F);
 
     ++_PC;
 }
 
-void MPPInterpreter::MULT(void)
+void Interpreter::MULT(void)
 {
     int64_t result = (int64_t)((int32_t)_reg[_cur_instr.rs].s * (int64_t)((int32_t)_reg[_cur_instr.rt].s));
     _hi.s = signextend<int32_t, int64_t>(result >> 32);
@@ -154,7 +154,7 @@ void MPPInterpreter::MULT(void)
     ++_PC;
 }
 
-void MPPInterpreter::MULTU(void)
+void Interpreter::MULTU(void)
 {
     uint64_t result = (uint64_t)((uint32_t)_reg[_cur_instr.rs].u * (uint64_t)((uint32_t)_reg[_cur_instr.rt].u));
     _hi.s = signextend<int32_t, int64_t>(result >> 32);
@@ -162,7 +162,7 @@ void MPPInterpreter::MULTU(void)
     ++_PC;
 }
 
-void MPPInterpreter::DIV(void)
+void Interpreter::DIV(void)
 {
     if (_reg[_cur_instr.rt].u != 0)
     {
@@ -176,7 +176,7 @@ void MPPInterpreter::DIV(void)
     ++_PC;
 }
 
-void MPPInterpreter::DIVU(void)
+void Interpreter::DIVU(void)
 {
     if (_reg[_cur_instr.rt].u != 0)
     {
@@ -190,7 +190,7 @@ void MPPInterpreter::DIVU(void)
     ++_PC;
 }
 
-void MPPInterpreter::DMULT(void)
+void Interpreter::DMULT(void)
 {
 #if defined(__GNUC__)
     __int128_t rs128 = (int64_t)_reg[_cur_instr.rs].s;
@@ -220,7 +220,7 @@ void MPPInterpreter::DMULT(void)
     ++_PC;
 }
 
-void MPPInterpreter::DMULTU(void)
+void Interpreter::DMULTU(void)
 {
 #if defined(__GNUC__)
     __uint128_t rs128 = _reg[_cur_instr.rs].u;
@@ -250,7 +250,7 @@ void MPPInterpreter::DMULTU(void)
     ++_PC;
 }
 
-void MPPInterpreter::DDIV(void)
+void Interpreter::DDIV(void)
 {
     if (_reg[_cur_instr.rt].u != 0)
     {
@@ -264,7 +264,7 @@ void MPPInterpreter::DDIV(void)
     ++_PC;
 }
 
-void MPPInterpreter::DDIVU(void)
+void Interpreter::DDIVU(void)
 {
     if (_reg[_cur_instr.rt].u != 0)
     {
@@ -278,35 +278,35 @@ void MPPInterpreter::DDIVU(void)
     ++_PC;
 }
 
-void MPPInterpreter::ADD(void)
+void Interpreter::ADD(void)
 {
     _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rs].s + (int32_t)_reg[_cur_instr.rt].s);
     
     ++_PC;
 }
 
-void MPPInterpreter::ADDU(void)
+void Interpreter::ADDU(void)
 {
     _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rs].s + (int32_t)_reg[_cur_instr.rt].s);
     
     ++_PC;
 }
 
-void MPPInterpreter::SUB(void)
+void Interpreter::SUB(void)
 {
     _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rs].s - (int32_t)_reg[_cur_instr.rt].s);
 
     ++_PC;
 }
 
-void MPPInterpreter::SUBU(void)
+void Interpreter::SUBU(void)
 {
     _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rs].s - (int32_t)_reg[_cur_instr.rt].s);
     
     ++_PC;
 }
 
-void MPPInterpreter::AND(void)
+void Interpreter::AND(void)
 {
     if (_cur_instr.rd)
     {
@@ -316,7 +316,7 @@ void MPPInterpreter::AND(void)
     ++_PC;
 }
 
-void MPPInterpreter::OR(void)
+void Interpreter::OR(void)
 {
     if (_cur_instr.rd)
     {
@@ -326,7 +326,7 @@ void MPPInterpreter::OR(void)
     ++_PC;
 }
 
-void MPPInterpreter::XOR(void)
+void Interpreter::XOR(void)
 {
     if (_cur_instr.rd)
     {
@@ -336,7 +336,7 @@ void MPPInterpreter::XOR(void)
     ++_PC;
 }
 
-void MPPInterpreter::NOR(void)
+void Interpreter::NOR(void)
 {
     if (_cur_instr.rd)
     {
@@ -346,7 +346,7 @@ void MPPInterpreter::NOR(void)
     ++_PC;
 }
 
-void MPPInterpreter::SLT(void)
+void Interpreter::SLT(void)
 {
     if (_reg[_cur_instr.rs].s < _reg[_cur_instr.rt].s)
     {
@@ -360,7 +360,7 @@ void MPPInterpreter::SLT(void)
     ++_PC;
 }
 
-void MPPInterpreter::SLTU(void)
+void Interpreter::SLTU(void)
 {
     if (_reg[_cur_instr.rs].u < _reg[_cur_instr.rt].u)
     {
@@ -374,100 +374,100 @@ void MPPInterpreter::SLTU(void)
     ++_PC;
 }
 
-void MPPInterpreter::DADD(void)
+void Interpreter::DADD(void)
 {
     _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s + _reg[_cur_instr.rt].s;
 
     ++_PC;
 }
 
-void MPPInterpreter::DADDU(void)
+void Interpreter::DADDU(void)
 {
     _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s + _reg[_cur_instr.rt].s;
 
     ++_PC;
 }
 
-void MPPInterpreter::DSUB(void)
+void Interpreter::DSUB(void)
 {
     _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s - _reg[_cur_instr.rt].s;
 
     ++_PC;
 }
 
-void MPPInterpreter::DSUBU(void)
+void Interpreter::DSUBU(void)
 {
     _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s - _reg[_cur_instr.rt].s;
 
     ++_PC;
 }
 
-void MPPInterpreter::TGE(void)
+void Interpreter::TGE(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::TGEU(void)
+void Interpreter::TGEU(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::TLT(void)
+void Interpreter::TLT(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::TLTU(void)
+void Interpreter::TLTU(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::TEQ(void)
+void Interpreter::TEQ(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::TNE(void)
+void Interpreter::TNE(void)
 {
     NOT_IMPLEMENTED();
 }
 
-void MPPInterpreter::DSLL(void)
+void Interpreter::DSLL(void)
 {
     _reg[_cur_instr.rd].s = (_reg[_cur_instr.rt].s << _cur_instr.sa);
 
     ++_PC;
 }
 
-void MPPInterpreter::DSRL(void)
+void Interpreter::DSRL(void)
 {
     _reg[_cur_instr.rd].u = (_reg[_cur_instr.rt].u >> _cur_instr.sa);
 
     ++_PC;
 }
 
-void MPPInterpreter::DSRA(void)
+void Interpreter::DSRA(void)
 {
     _reg[_cur_instr.rd].s = (_reg[_cur_instr.rt].s >> _cur_instr.sa);
 
     ++_PC;
 }
 
-void MPPInterpreter::DSLL32(void)
+void Interpreter::DSLL32(void)
 {
     _reg[_cur_instr.rd].s = (_reg[_cur_instr.rt].s << (32 + _cur_instr.sa));
 
     ++_PC;
 }
 
-void MPPInterpreter::DSRL32(void)
+void Interpreter::DSRL32(void)
 {
     _reg[_cur_instr.rd].u = (_reg[_cur_instr.rt].u >> (32 + _cur_instr.sa));
 
     ++_PC;
 }
 
-void MPPInterpreter::DSRA32(void)
+void Interpreter::DSRA32(void)
 {
     _reg[_cur_instr.rd].s = (_reg[_cur_instr.rt].s >> (32 + _cur_instr.sa));
 

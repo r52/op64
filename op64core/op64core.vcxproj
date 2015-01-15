@@ -101,7 +101,7 @@
     <ClInclude Include="cp0.h" />
     <ClInclude Include="mempak.h" />
     <ClInclude Include="mpmemory.h" />
-    <ClInclude Include="mppinterpreter.h" />
+    <ClInclude Include="interpreter.h" />
     <ClInclude Include="n64_cic_nus_6105.h" />
     <ClInclude Include="pif.h" />
     <ClInclude Include="plugins.h" />
@@ -132,11 +132,11 @@
     <ClCompile Include="imemory.cpp" />
     <ClCompile Include="mempak.cpp" />
     <ClCompile Include="mpmemory.cpp" />
-    <ClCompile Include="mppinterpreter.cpp" />
-    <ClCompile Include="mppinterpreter_cop0.cpp" />
-    <ClCompile Include="mppinterpreter_cop1.cpp" />
-    <ClCompile Include="mppinterpreter_regimm.cpp" />
-    <ClCompile Include="mppinterpreter_special.cpp" />
+    <ClCompile Include="interpreter.cpp" />
+    <ClCompile Include="interpreter_cop0.cpp" />
+    <ClCompile Include="interpreter_cop1.cpp" />
+    <ClCompile Include="interpreter_regimm.cpp" />
+    <ClCompile Include="interpreter_special.cpp" />
     <ClCompile Include="n64_cic_nus_6105.cpp" />
     <ClCompile Include="pif.cpp" />
     <ClCompile Include="plugins.cpp" />

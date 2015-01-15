@@ -1,4 +1,5 @@
-/* mupen64plus pure interpreter implementation */
+/* Interpreter implementation based on mupen64plus' pure interpreter */
+
 #pragma once
 
 #include <cstdint>
@@ -24,11 +25,11 @@
     genericJump(target, condition, link, likely, cop1);
 
 
-class MPPInterpreter : public ICPU
+class Interpreter : public ICPU
 {
 public:
-    MPPInterpreter(void);
-    ~MPPInterpreter(void);
+    Interpreter(void);
+    ~Interpreter(void);
 
     virtual uint32_t getCPUType(void)
     {
