@@ -4,6 +4,8 @@
 #include "plugins.h"
 #include "interpreter.h"
 #include "mpmemory.h"
+#include "gfxplugin.h"
+
 #include <QThread>
 
 
@@ -191,4 +193,9 @@ void Emulator::showGraphicsConfig(void)
 void Emulator::showRSPConfig(void)
 {
     _plugins->ConfigPlugin((void*)_mainwindow, PLUGIN_TYPE_RSP);
+}
+
+void Emulator::toggleFullScreen(void)
+{
+    _plugins->gfx()->ChangeWindow();
 }

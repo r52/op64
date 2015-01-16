@@ -34,6 +34,7 @@ public:
     bool uninitializeHardware(void);
     bool isRomLoaded(void);
     void stopEmulator(void);
+    void toggleFullScreen(void);
 
     inline EmuState getState(void)
     {

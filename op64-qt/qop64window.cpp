@@ -142,6 +142,7 @@ void QOP64Window::connectGUIControls(void)
     connect(ui.actionLimit_FPS, SIGNAL(toggled(bool)), _emu, SLOT(setLimitFPS(bool)), Qt::DirectConnection);
     connect(ui.actionHard_Reset, SIGNAL(triggered()), _emu, SLOT(gameHardReset()), Qt::DirectConnection);
     connect(ui.actionSoft_Reset, SIGNAL(triggered()), _emu, SLOT(gameSoftReset()), Qt::DirectConnection);
+    connect(ui.actionFullscreen, SIGNAL(triggered()), this, SLOT(toggleFullscreen()));
 
     // options
     connect(ui.actionGraphics_Settings, SIGNAL(triggered()), _emu, SLOT(showGraphicsConfig()), Qt::DirectConnection);
@@ -297,5 +298,13 @@ void QOP64Window::shudownEverything(void)
     {
         _logWindow->deleteLater(); _logWindow = nullptr;
     }
+}
+
+void QOP64Window::toggleFullscreen(void)
+{
+    if (nullptr == renderWidget)
+        return;
+
+    renderWidget->toggleFullscreen();
 }
 

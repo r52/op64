@@ -1,10 +1,12 @@
+#include <QEventLoop>
+#include <QCloseEvent>
+#include <QShortcut>
+
 #include "renderwidget.h"
 #include "emulator.h"
-#include <QCloseEvent>
 
 #include "corecontrol.h"
 #include "rom.h"
-#include <QEventLoop>
 
 
 RenderWidget::RenderWidget(Emulator* emu, QWidget* parent /*= 0*/) :
@@ -21,6 +23,9 @@ QWidget(parent)
     romName = QString::fromLocal8Bit((char*)Bus::rom->getHeader()->Name, 20);
     romName = romName.trimmed();
     setWindowTitle(romName);
+
+    QShortcut* flscrn = new QShortcut(QKeySequence("F11"), this);
+    connect(flscrn, SIGNAL(activated()), this, SLOT(toggleFullscreen()));
 }
 
 void RenderWidget::closeEvent(QCloseEvent * event)
@@ -45,4 +50,19 @@ RenderWidget::~RenderWidget()
 {
     // Doesn't own it
     _emu = nullptr;
+}
+
+void RenderWidget::toggleFullscreen(void)
+{
+    // FIXME: buggy (no border when fullscreen -> normal on glide64)
+    _emu->toggleFullScreen();
+
+    if (isFullScreen())
+    {
+        showNormal();
+    }
+    else
+    {
+        showFullScreen();
+    }
 }

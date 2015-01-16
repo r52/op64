@@ -48,6 +48,7 @@ private slots:
     void openConfigDialog(void);
     void toggleShowLog(bool show);
     void showAboutDialog(void);
+    void toggleFullscreen(void);
 
 private:
     Ui::QOP64WindowClass ui;

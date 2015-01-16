@@ -85,6 +85,7 @@
      <addaction name="actionHard_Reset"/>
     </widget>
     <addaction name="actionLimit_FPS"/>
+    <addaction name="actionFullscreen"/>
     <addaction name="menuReset"/>
    </widget>
    <addaction name="menuFile"/>
@@ -163,6 +164,14 @@
   <action name="actionSoft_Reset">
    <property name="text">
     <string>Soft Reset</string>
+   </property>
+  </action>
+  <action name="actionFullscreen">
+   <property name="text">
+    <string>Fullscreen</string>
+   </property>
+   <property name="shortcut">
+    <string>F11</string>
    </property>
   </action>
  </widget>

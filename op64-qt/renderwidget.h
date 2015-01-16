@@ -15,6 +15,9 @@ public:
 
     virtual QPaintEngine* paintEngine() const { return 0; }
 
+public slots:
+    void toggleFullscreen(void);
+
 protected:
     virtual void closeEvent(QCloseEvent * event);
 
