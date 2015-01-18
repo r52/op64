@@ -15,6 +15,8 @@ enum EmuState
     EMU_STOPPED
 };
 
+Q_DECLARE_METATYPE(EmuState);
+
 class Plugins;
 class ICPU;
 class IMemory;
@@ -41,12 +43,7 @@ public:
         return _state;
     }
 
-    inline void setState(EmuState newstate)
-    {
-        _state = newstate;
-
-        emit stateChanged(_state);
-    }
+    void setState(EmuState newstate);
 
     inline void setRenderWindow(WId renderwindow)
     {

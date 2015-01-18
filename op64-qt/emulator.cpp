@@ -16,6 +16,7 @@ _cpu(new Interpreter),
 _mem(new MPMemory),
 _mainwindow(mainwindow)
 {
+    qRegisterMetaType<EmuState>("EmuState");
 }
 
 Emulator::~Emulator()
@@ -198,4 +199,11 @@ void Emulator::showRSPConfig(void)
 void Emulator::toggleFullScreen(void)
 {
     _plugins->gfx()->ChangeWindow();
+}
+
+void Emulator::setState(EmuState newstate)
+{
+    _state = newstate;
+
+    emit stateChanged(_state);
 }

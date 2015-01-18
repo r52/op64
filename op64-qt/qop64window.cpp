@@ -77,6 +77,7 @@ void QOP64Window::openRom(void)
 
 void QOP64Window::logCallback(uint32_t level, const char* msg)
 {
+    // This function has to be thread safe since the std::functional callback mechanism isn't
     QMetaObject::invokeMethod(_logWindow, "appendHtml", Q_ARG(QString, QString(logLevelFormatting[level]).arg(QString(msg))));
 }
 
@@ -123,7 +124,7 @@ void QOP64Window::setupEmulationThread(void)
     connect(&_emuThread, &QThread::finished, _emu, &QObject::deleteLater);
     connect(_emu, &Emulator::emulatorFinished, this, &QOP64Window::emulationFinished);
     connect(this, &QOP64Window::runEmulator, _emu, &Emulator::runEmulator);
-    connect(_emu, SIGNAL(stateChanged(EmuState)), this, SLOT(emulatorChangeState(EmuState)), Qt::DirectConnection);
+    connect(_emu, SIGNAL(stateChanged(EmuState)), this, SLOT(emulatorChangeState(EmuState)));
 
     _emuThread.start();
 
@@ -219,12 +220,12 @@ void QOP64Window::emulatorChangeState(EmuState newstate)
     case HARDWARE_INITIALIZED:
         break;
     case EMU_RUNNING:
-        QMetaObject::invokeMethod(ui.menuEmulation, "setEnabled", Q_ARG(bool, true));
+        ui.menuEmulation->setEnabled(true);
         break;
     case EMU_PAUSED:
         break;
     case EMU_STOPPED:
-        QMetaObject::invokeMethod(ui.menuEmulation, "setEnabled", Q_ARG(bool, false));
+        ui.menuEmulation->setEnabled(false);
         break;
     }
 }
