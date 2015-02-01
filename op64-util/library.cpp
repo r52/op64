@@ -3,6 +3,24 @@
 
 #ifndef _MSC_VER
 #include <dlfcn.h>
+#else
+#include <strsafe.h>
+#endif
+
+#ifdef _MSC_VER
+// Wide to Multibyte string convert from https://stackoverflow.com/questions/5513718/how-do-i-convert-from-lpctstr-to-stdstring
+static std::string MBFromW(LPCWSTR pwsz, UINT cp) {
+    int cch = WideCharToMultiByte(cp, 0, pwsz, -1, 0, 0, NULL, NULL);
+
+    char* psz = new char[cch];
+
+    WideCharToMultiByte(cp, 0, pwsz, -1, psz, cch, NULL, NULL);
+
+    std::string st(psz);
+    delete[] psz;
+
+    return st;
+}
 #endif
 
 
@@ -25,12 +43,31 @@ bool opLoadLib(LibHandle* handle, const char* libpath)
 
     if (*handle == nullptr)
     {
-        char *pchErrMsg;
+        LPVOID lpMsgBuf;
+        LPVOID lpDisplayBuf;
         DWORD dwErr = GetLastError();
-        FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dwErr,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&pchErrMsg, 0, NULL);
-        LOG_ERROR("opLoadLib('%s') error: %s", libpath, pchErrMsg);
-        LocalFree(pchErrMsg);
+        FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER |
+            FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            dwErr,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR) &lpMsgBuf,
+            0, NULL);
+
+        lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT,
+            (lstrlen((LPCTSTR)lpMsgBuf) + 40) * sizeof(TCHAR));
+        StringCchPrintf((LPTSTR)lpDisplayBuf,
+            LocalSize(lpDisplayBuf) / sizeof(TCHAR),
+            TEXT("error %d: %s"),
+            dwErr, lpMsgBuf);
+
+        std::string errMsg = MBFromW((LPCTSTR)lpDisplayBuf, CP_ACP);
+
+        LOG_ERROR("opLoadLib('%s') %s", libpath, errMsg.c_str());
+        LocalFree(lpMsgBuf);
+        LocalFree(lpDisplayBuf);
         return false;
     }
 #else
