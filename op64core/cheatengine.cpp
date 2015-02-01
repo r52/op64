@@ -55,7 +55,7 @@ CheatEngine::~CheatEngine()
 
 CheatCodeList CheatEngine::toCheatCodeList(const std::string& strcodelist)
 {
-    std::vector<std::string> strcodes = std::move(split(strcodelist, ','));
+    std::vector<std::string> strcodes = split(strcodelist, ',');
 
     CheatCodeList templist;
 
@@ -65,7 +65,7 @@ CheatCodeList CheatEngine::toCheatCodeList(const std::string& strcodelist)
         if (_s_sscanf(code.c_str(), "%08X %04X", &newcode.address, &newcode.value) == 2)
         {
             newcode.old_value = CHEAT_CODE_MAGIC_VALUE;
-            templist.push_back(std::move(newcode));
+            templist.push_back(newcode);
         }
         else
         {
@@ -98,7 +98,7 @@ CheatCodeList CheatEngine::processCodeList(CheatCodeList& rawlist)
                 code.address = cur_addr;
                 code.value = cur_value;
                 code.old_value = CHEAT_CODE_MAGIC_VALUE;
-                processedlist.push_back(std::move(code));
+                processedlist.push_back(code);
 
                 cur_addr += incr_addr;
                 cur_value += incr_value;
@@ -107,7 +107,7 @@ CheatCodeList CheatEngine::processCodeList(CheatCodeList& rawlist)
         else
         {
             // just a normal code
-            processedlist.push_back(std::move(rawlist[i]));
+            processedlist.push_back(rawlist[i]);
         }
     }
 

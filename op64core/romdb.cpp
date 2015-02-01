@@ -107,13 +107,13 @@ RomDB::RomDB(void)
 
                     char namebuf[100];
                     _s_snprintf(namebuf, 100, "Hack%d", ++numhacks);
-                    newhack.name = std::move(std::string(namebuf));
+                    newhack.name = std::string(namebuf);
 
                     cheats = key.second.get_value<std::string>();
-                    newhack.codes = std::move(CheatEngine::toCheatCodeList(cheats));
+                    newhack.codes = CheatEngine::toCheatCodeList(cheats);
                     newhack.enabled = newhack.was_enabled = true;
 
-                    setting.romhacks.push_back(std::move(newhack));
+                    setting.romhacks.push_back(newhack);
                 }
                 else
                 {
@@ -121,7 +121,7 @@ RomDB::RomDB(void)
                 }
             }
 
-            _db[section.first] = std::move(setting);
+            _db[section.first] = setting;
         }
 
         LOG_INFO("RomDB: %d entries loaded", entries);

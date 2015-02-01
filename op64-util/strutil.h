@@ -9,7 +9,7 @@ std::vector<std::string>& split(const std::string& s, char delim, std::vector<st
     std::stringstream ss(s);
     std::string item;
     while (std::getline(ss, item, delim)) {
-        elems.push_back(std::move(item));
+        elems.push_back(item);
     }
     return elems;
 }
