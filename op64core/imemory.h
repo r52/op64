@@ -5,6 +5,10 @@
 #include "tlb.h"
 #include "bus.h"
 
+#define SP_MEM_SIZE 0x2000
+#define RDRAM_SIZE 0x800000
+#define PIF_RAM_SIZE 0x40
+
 enum DataSize
 {
     SIZE_WORD = 0,
@@ -55,12 +59,12 @@ public:
 protected:
     IMemory();
 
-    uint32_t _SP_MEM[0x1000 / 4 * 2];    // allocate exactly 2048 * (4 byte uint32) = 8192 bytes (8KB) of SP MEM
+    uint32_t _SP_MEM[SP_MEM_SIZE / 4];    // allocate exactly 2048 * (4 byte uint32) = 8192 bytes (8KB) of SP MEM
     uint32_t* const _SP_DMEM = _SP_MEM;
-    uint32_t* const _SP_IMEM = _SP_DMEM + (0x1000 / 4);     // IMEM is 4KB (0x400 = 1024 4 byte ints) into the memory
+    uint32_t* const _SP_IMEM = _SP_DMEM + ((SP_MEM_SIZE/2) / 4);     // IMEM is 4KB (0x400 = 1024 4 byte ints) into the memory
 
-    __align(uint32_t _rdram[0x800000 / 4], 16);
-    uint32_t _PIF_RAM[0x40 / 4];
+    __align(uint32_t _rdram[RDRAM_SIZE / 4], 16);
+    uint32_t _PIF_RAM[PIF_RAM_SIZE / 4];
 
     uint32_t _vi_reg[VI_NUM_REGS];
     uint32_t _mi_reg[MI_NUM_REGS];
