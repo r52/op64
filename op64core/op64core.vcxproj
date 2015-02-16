@@ -80,6 +80,7 @@
     <ProjectReference />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ai_controller.h" />
     <ClInclude Include="audioplugin.h" />
     <ClInclude Include="bus.h" />
     <ClInclude Include="cheat.h" />
@@ -102,6 +103,7 @@
     <ClInclude Include="mempak.h" />
     <ClInclude Include="mpmemory.h" />
     <ClInclude Include="interpreter.h" />
+    <ClInclude Include="mpmemory_regs.h" />
     <ClInclude Include="n64_cic_nus_6105.h" />
     <ClInclude Include="pif.h" />
     <ClInclude Include="plugins.h" />
@@ -115,6 +117,7 @@
     <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ai_controller.cpp" />
     <ClCompile Include="audioplugin.cpp" />
     <ClCompile Include="bus.cpp" />
     <ClCompile Include="cheatengine.cpp" />

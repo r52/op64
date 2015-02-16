@@ -105,7 +105,7 @@ bool RSPPlugin::initialize(Plugins* plugins, void* renderWindow, void* statusBar
     Info.SP__STATUS_REG = &Bus::sp_reg[SP_STATUS_REG];
     Info.SP__DMA_FULL_REG = &Bus::sp_reg[SP_DMA_FULL_REG];
     Info.SP__DMA_BUSY_REG = &Bus::sp_reg[SP_DMA_BUSY_REG];
-    Info.SP__PC_REG = &Bus::sp_reg[SP_PC_REG];
+    Info.SP__PC_REG = &Bus::sp2_reg[SP_PC_REG];
     Info.SP__SEMAPHORE_REG = &Bus::sp_reg[SP_SEMAPHORE_REG];
 
     Info.DPC__START_REG = &Bus::dp_reg[DPC_START_REG];

@@ -9,10 +9,6 @@ enum
     AI_STATUS_REG,
     AI_DACRATE_REG,
     AI_BITRATE_REG,
-    _AI_NEXT_DELAY,
-    _AI_NEXT_LEN,
-    _AI_CURRENT_DELAY,
-    _AI_CURRENT_LEN,
     AI_NUM_REGS
 };
 
@@ -22,7 +18,6 @@ enum
     DPC_END_REG,
     DPC_CURRENT_REG,
     DPC_STATUS_REG,
-    _DPC_WRITE_STATUS_REG,
     DPC_CLOCK_REG,
     DPC_BUFBUSY_REG,
     DPC_PIPEBUSY_REG,
@@ -45,8 +40,6 @@ enum
     MI_VERSION_REG,
     MI_INTR_REG,
     MI_INTR_MASK_REG,
-    _MI_WRITE_INIT_MODE_REG,
-    _MI_WRITE_INTR_MASK_REG,
     MI_NUM_REGS
 };
 
@@ -101,7 +94,10 @@ enum
 {
     SI_DRAM_ADDR_REG = 0,
     SI_PIF_ADDR_RD64B_REG,
+    _SI_RESERVED_1,
+    _SI_RESERVED_2,
     SI_PIF_ADDR_WR64B_REG,
+    _SI_RESERVED_3,
     SI_STATUS_REG,
     SI_NUM_REGS
 };
@@ -112,17 +108,19 @@ enum
     SP_DRAM_ADDR_REG,
     SP_RD_LEN_REG,
     SP_WR_LEN_REG,
-    _SP_WRITE_STATUS_REG,
     SP_STATUS_REG,
     SP_DMA_FULL_REG,
     SP_DMA_BUSY_REG,
     SP_SEMAPHORE_REG,
-    SP_PC_REG,
-    SP_IBIST_REG,
     SP_NUM_REGS
 };
 
-
+enum
+{
+    SP_PC_REG = 0,
+    SP_IBIST_REG,
+    SP2_NUM_REGS
+};
 
 enum
 {
@@ -140,6 +138,5 @@ enum
     VI_V_BURST_REG,
     VI_X_SCALE_REG,
     VI_Y_SCALE_REG,
-    _VI_DELAY,
     VI_NUM_REGS
 };

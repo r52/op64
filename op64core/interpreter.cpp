@@ -8,6 +8,7 @@
 #include "interrupthandler.h"
 #include "util.h"
 #include "tlb.h"
+#include "ai_controller.h"
 
 // borrowed from pj64
 static const uint32_t SWL_MASK[4] = { 0x00000000, 0xFF000000, 0xFFFF0000, 0xFFFFFF00 };
@@ -170,7 +171,7 @@ void Interpreter::softReset(void)
     _cp0_reg[CP0_CONFIG_REG] = 0x0006E463;
 
     Bus::sp_reg[SP_STATUS_REG] = 1;
-    Bus::sp_reg[SP_PC_REG] = 0;
+    Bus::sp2_reg[SP_PC_REG] = 0;
 
     uint32_t bsd_dom1_config = *(uint32_t*)Bus::rom->getImage();
     Bus::pi_reg[PI_BSD_DOM1_LAT_REG] = bsd_dom1_config & 0xff;
@@ -179,8 +180,8 @@ void Interpreter::softReset(void)
     Bus::pi_reg[PI_BSD_DOM1_RLS_REG] = (bsd_dom1_config >> 20) & 0x03;
     Bus::pi_reg[PI_STATUS_REG] = 0;
 
-    Bus::ai_reg[AI_DRAM_ADDR_REG] = 0;
-    Bus::ai_reg[AI_LEN_REG] = 0;
+    Bus::ai.reg[AI_DRAM_ADDR_REG] = 0;
+    Bus::ai.reg[AI_LEN_REG] = 0;
 
     Bus::vi_reg[VI_INTR_REG] = 1023;
     Bus::vi_reg[VI_CURRENT_REG] = 0;

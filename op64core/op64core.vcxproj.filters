@@ -88,6 +88,12 @@
     <Filter Include="Source Files\cheat">
       <UniqueIdentifier>{8249eaa4-38d3-4088-99aa-da71e69ab71c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ai">
+      <UniqueIdentifier>{9aa2a2b6-f458-4019-8ae5-e89df3900a00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ai">
+      <UniqueIdentifier>{2dc5c69e-2d4e-4595-82b8-292e3c6ccf8e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rom.h">
@@ -189,6 +195,12 @@
     <ClInclude Include="interpreter.h">
       <Filter>Header Files\cpu\interpreter</Filter>
     </ClInclude>
+    <ClInclude Include="mpmemory_regs.h">
+      <Filter>Header Files\memory\mupen</Filter>
+    </ClInclude>
+    <ClInclude Include="ai_controller.h">
+      <Filter>Header Files\ai</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="rom.cpp">
@@ -283,6 +295,9 @@
     </ClCompile>
     <ClCompile Include="interpreter_special.cpp">
       <Filter>Source Files\cpu\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="ai_controller.cpp">
+      <Filter>Source Files\ai</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

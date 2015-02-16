@@ -1,5 +1,6 @@
 #include "audioplugin.h"
 #include "rcpcommon.h"
+#include "ai_controller.h"
 
 
 AudioPlugin::AudioPlugin(const char* libPath) :
@@ -68,12 +69,12 @@ bool AudioPlugin::initialize(void* renderWindow, void* statusBar)
     Info.DMEM = Bus::sp_dmem8;
     Info.IMEM = Bus::sp_imem8;
     Info.MI__INTR_REG = &Bus::mi_reg[MI_INTR_REG];
-    Info.AI__DRAM_ADDR_REG = &Bus::ai_reg[AI_DRAM_ADDR_REG];
-    Info.AI__LEN_REG = &Bus::ai_reg[AI_LEN_REG];
-    Info.AI__CONTROL_REG = &Bus::ai_reg[AI_CONTROL_REG];
-    Info.AI__STATUS_REG = &Bus::ai_reg[AI_STATUS_REG];
-    Info.AI__DACRATE_REG = &Bus::ai_reg[AI_DACRATE_REG];
-    Info.AI__BITRATE_REG = &Bus::ai_reg[AI_BITRATE_REG];
+    Info.AI__DRAM_ADDR_REG = &Bus::ai.reg[AI_DRAM_ADDR_REG];
+    Info.AI__LEN_REG = &Bus::ai.reg[AI_LEN_REG];
+    Info.AI__CONTROL_REG = &Bus::ai.reg[AI_CONTROL_REG];
+    Info.AI__STATUS_REG = &Bus::ai.reg[AI_STATUS_REG];
+    Info.AI__DACRATE_REG = &Bus::ai.reg[AI_DACRATE_REG];
+    Info.AI__BITRATE_REG = &Bus::ai.reg[AI_BITRATE_REG];
     Info.CheckInterrupts = DummyFunction;
 
     _initialized = InitiateAudio(Info) != 0;
@@ -85,7 +86,7 @@ bool AudioPlugin::initialize(void* renderWindow, void* statusBar)
         _audioThread.detach();
     }
 
-    if (Bus::ai_reg[AI_DACRATE_REG] != 0) {
+    if (Bus::ai.reg[AI_DACRATE_REG] != 0) {
         DacrateChanged(SYSTEM_NTSC);
     }
 

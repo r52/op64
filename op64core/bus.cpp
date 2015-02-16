@@ -8,6 +8,7 @@
 #include "plugins.h"
 #include "systiming.h"
 #include "cheatengine.h"
+#include "ai_controller.h"
 
 // Exposed states for device communication
 namespace Bus
@@ -26,6 +27,9 @@ namespace Bus
     CONTROL* controllers = nullptr;
     SRAM* sram = nullptr;
     FlashRam* flashram = nullptr;
+
+    // controllers (can be persistent)
+    AiController ai;
 
     // regs
     uint32_t* cp0_reg = nullptr;
@@ -54,7 +58,8 @@ namespace Bus
     uint32_t* mi_reg = nullptr;
     uint32_t* rdram_reg = nullptr;
     uint32_t* sp_reg = nullptr;
-    uint32_t* ai_reg = nullptr;
+    uint32_t* sp2_reg = nullptr;
+
     uint32_t* pi_reg = nullptr;
     uint32_t* ri_reg = nullptr;
     uint32_t* si_reg = nullptr;
@@ -63,6 +68,7 @@ namespace Bus
 
     // vi state
     uint32_t next_vi = 0;
+    uint32_t vi_delay = 0;
     int32_t vi_field = 0;
 
     // interrupt state

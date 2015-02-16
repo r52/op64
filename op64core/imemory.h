@@ -69,7 +69,8 @@ protected:
     uint32_t _mi_reg[MI_NUM_REGS];
     uint32_t _rdram_reg[RDRAM_NUM_REGS];
     uint32_t _sp_reg[SP_NUM_REGS];
-    uint32_t _ai_reg[AI_NUM_REGS];
+    uint32_t _sp2_reg[SP2_NUM_REGS];
+
     uint32_t _pi_reg[PI_NUM_REGS];
     uint32_t _ri_reg[RI_NUM_REGS];
     uint32_t _si_reg[SI_NUM_REGS];

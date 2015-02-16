@@ -10,6 +10,7 @@
 #include "systiming.h"
 #include "corecontrol.h"
 #include "cheatengine.h"
+#include "ai_controller.h"
 
 bool Interrupt::operator<(const Interrupt& i) const
 {
@@ -62,7 +63,7 @@ void InterruptHandler::initialize(void)
     Bus::interrupt_unsafe_state = false;
     _SPECIAL_done = true;
     Bus::next_vi = Bus::next_interrupt = 5000;
-    Bus::vi_reg[_VI_DELAY] = Bus::next_vi;
+    Bus::vi_delay = Bus::next_vi;
     Bus::vi_field = 0;
 
     // reset the queue
@@ -185,9 +186,9 @@ void InterruptHandler::generateInterrupt(void)
             }
         }
 
-        Bus::vi_reg[_VI_DELAY] = (93750000 / (Bus::rom->getViLimit() * 2));
+        Bus::vi_delay = (93750000 / (Bus::rom->getViLimit() * 2));
 
-        Bus::next_vi += Bus::vi_reg[_VI_DELAY];
+        Bus::next_vi += Bus::vi_delay;
 
         if (Bus::vi_reg[VI_STATUS_REG] & 0x40)
             Bus::vi_field = 1 - Bus::vi_field;
@@ -280,14 +281,14 @@ void InterruptHandler::generateInterrupt(void)
         break;
     case AI_INT:
     {
-        if (Bus::ai_reg[AI_STATUS_REG] & 0x80000000) // full
+        if (Bus::ai.reg[AI_STATUS_REG] & 0x80000000) // full
         {
             uint32_t ai_event = findEvent(AI_INT);
             popInterruptEvent();
-            Bus::ai_reg[AI_STATUS_REG] &= ~0x80000000;
-            Bus::ai_reg[_AI_CURRENT_DELAY] = Bus::ai_reg[_AI_NEXT_DELAY];
-            Bus::ai_reg[_AI_CURRENT_LEN] = Bus::ai_reg[_AI_NEXT_LEN];
-            addInterruptEventCount(AI_INT, ai_event + Bus::ai_reg[_AI_NEXT_DELAY]);
+            Bus::ai.reg[AI_STATUS_REG] &= ~0x80000000;
+            Bus::ai.fifo[0].delay = Bus::ai.fifo[1].delay;
+            Bus::ai.fifo[0].length = Bus::ai.fifo[1].length;
+            addInterruptEventCount(AI_INT, ai_event + Bus::ai.fifo[1].delay);
 
             Bus::mi_reg[MI_INTR_REG] |= 0x04;
 
@@ -309,7 +310,7 @@ void InterruptHandler::generateInterrupt(void)
         else
         {
             popInterruptEvent();
-            Bus::ai_reg[AI_STATUS_REG] &= ~0x40000000;
+            Bus::ai.reg[AI_STATUS_REG] &= ~0x40000000;
 
             Bus::mi_reg[MI_INTR_REG] |= 0x04;
 
@@ -401,7 +402,7 @@ void InterruptHandler::generateInterrupt(void)
         _vi_counter = 0;
         initialize();
         // clear the audio status register so that subsequent write_ai() calls will work properly
-        Bus::ai_reg[AI_STATUS_REG] = 0;
+        Bus::ai.reg[AI_STATUS_REG] = 0;
         // set ErrorEPC with the last instruction address
         Bus::cp0_reg[CP0_ERROREPC_REG] = (uint32_t)*(Bus::PC);
         

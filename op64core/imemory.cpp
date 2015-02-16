@@ -19,7 +19,8 @@ IMemory::IMemory()
     mi_reg = _mi_reg;
     rdram_reg = _rdram_reg;
     sp_reg = _sp_reg;
-    ai_reg = _ai_reg;
+    sp2_reg = _sp2_reg;
+
     pi_reg = _pi_reg;
     ri_reg = _ri_reg;
     si_reg = _si_reg;
@@ -45,7 +46,8 @@ IMemory::~IMemory()
     mi_reg = nullptr;
     rdram_reg = nullptr;
     sp_reg = nullptr;
-    ai_reg = nullptr;
+    sp2_reg = nullptr;
+
     pi_reg = nullptr;
     ri_reg = nullptr;
     si_reg = nullptr;

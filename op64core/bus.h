@@ -16,6 +16,8 @@ class Plugins;
 class SysTiming;
 class CheatEngine;
 
+class AiController;
+
 struct _controller_data;
 typedef struct _controller_data CONTROL;
 class SRAM;
@@ -38,6 +40,8 @@ namespace Bus
     extern SRAM* sram;
     extern FlashRam* flashram;
 
+    // controllers
+    extern AiController ai;
 
     // regs
     extern uint32_t* cp0_reg;
@@ -66,7 +70,8 @@ namespace Bus
     extern uint32_t* mi_reg;
     extern uint32_t* rdram_reg;
     extern uint32_t* sp_reg;
-    extern uint32_t* ai_reg;
+    extern uint32_t* sp2_reg;
+
     extern uint32_t* pi_reg;
     extern uint32_t* ri_reg;
     extern uint32_t* si_reg;
@@ -75,6 +80,7 @@ namespace Bus
 
     // vi state
     extern uint32_t next_vi;
+    extern uint32_t vi_delay;
     extern int32_t vi_field;
 
     // interrupt state
