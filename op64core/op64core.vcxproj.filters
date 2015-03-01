@@ -88,11 +88,71 @@
     <Filter Include="Source Files\cheat">
       <UniqueIdentifier>{8249eaa4-38d3-4088-99aa-da71e69ab71c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\ai">
-      <UniqueIdentifier>{9aa2a2b6-f458-4019-8ae5-e89df3900a00}</UniqueIdentifier>
+    <Filter Include="Header Files\rcp">
+      <UniqueIdentifier>{83bde006-d02a-4cae-ac98-c963f37d0208}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\ai">
-      <UniqueIdentifier>{2dc5c69e-2d4e-4595-82b8-292e3c6ccf8e}</UniqueIdentifier>
+    <Filter Include="Header Files\rcp\ai">
+      <UniqueIdentifier>{265ab729-fe33-4aae-b7d8-3a1e68ad5c27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rcp\vi">
+      <UniqueIdentifier>{46e2e09a-dd29-4d35-82c2-bdd09774d270}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rcp\ri">
+      <UniqueIdentifier>{9bd593f9-4d79-417c-bbeb-3fea1c166213}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rcp\mi">
+      <UniqueIdentifier>{e39a3b07-123d-45fa-afa8-01034a637a76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rcp\si">
+      <UniqueIdentifier>{d70a05c2-5ecb-4514-85f7-bdabad1c7c5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rcp\dpc">
+      <UniqueIdentifier>{dc936bd0-3403-45ff-8d20-1cac366bfe75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rcp\dps">
+      <UniqueIdentifier>{98af4d6f-68c6-4c5f-a3bb-c66ad3a3f334}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rcp\pi">
+      <UniqueIdentifier>{86382ced-0ec3-4dcf-b83a-e39b2e61315c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rcp\sp">
+      <UniqueIdentifier>{64ea0089-dae2-4549-bbb1-be06babdb05a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rcp">
+      <UniqueIdentifier>{623e3d67-a829-42b5-bc55-5248586cb05e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rcp\ai">
+      <UniqueIdentifier>{94d8e3f5-8b1d-44b2-9596-69ba1a91543d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rcp\vi">
+      <UniqueIdentifier>{dcd45c45-6a0c-4a0a-aa17-c1408090adcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rcp\ri">
+      <UniqueIdentifier>{f4cd9ee2-b9e3-47ad-8387-6422946a6cb1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rcp\pi">
+      <UniqueIdentifier>{69d87471-4e13-493a-86f9-0bd212b0fd93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rcp\si">
+      <UniqueIdentifier>{bf1a92ba-ef19-499b-a3c4-c2526f68c347}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rcp\dpc">
+      <UniqueIdentifier>{4085805b-1f0e-4b0c-ac66-32587a854eb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rcp\dps">
+      <UniqueIdentifier>{23740af2-a950-4da8-8c71-2c7855332e33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rcp\mi">
+      <UniqueIdentifier>{6b6f77c2-036c-42b7-9453-d1a6de2999cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rcp\sp">
+      <UniqueIdentifier>{8da7e9fe-a715-441a-a6c6-fb599a646cd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rdram">
+      <UniqueIdentifier>{9473b81a-6ab4-49e0-8188-0b438090f7f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rdram">
+      <UniqueIdentifier>{5a41c2a3-dd25-4e33-a813-fd605f78964b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -195,11 +255,47 @@
     <ClInclude Include="interpreter.h">
       <Filter>Header Files\cpu\interpreter</Filter>
     </ClInclude>
-    <ClInclude Include="mpmemory_regs.h">
-      <Filter>Header Files\memory\mupen</Filter>
+    <ClInclude Include="rcpinterface.h">
+      <Filter>Header Files\rcp</Filter>
     </ClInclude>
-    <ClInclude Include="ai_controller.h">
-      <Filter>Header Files\ai</Filter>
+    <ClInclude Include="op64.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rcp.h">
+      <Filter>Header Files\rcp</Filter>
+    </ClInclude>
+    <ClInclude Include="audiointerface.h">
+      <Filter>Header Files\rcp\ai</Filter>
+    </ClInclude>
+    <ClInclude Include="mipsinterface.h">
+      <Filter>Header Files\rcp\mi</Filter>
+    </ClInclude>
+    <ClInclude Include="dpcinterface.h">
+      <Filter>Header Files\rcp\dpc</Filter>
+    </ClInclude>
+    <ClInclude Include="dpsinterface.h">
+      <Filter>Header Files\rcp\dps</Filter>
+    </ClInclude>
+    <ClInclude Include="rspinterface.h">
+      <Filter>Header Files\rcp\sp</Filter>
+    </ClInclude>
+    <ClInclude Include="peripheralinterface.h">
+      <Filter>Header Files\rcp\pi</Filter>
+    </ClInclude>
+    <ClInclude Include="serialinterface.h">
+      <Filter>Header Files\rcp\si</Filter>
+    </ClInclude>
+    <ClInclude Include="rdraminterface.h">
+      <Filter>Header Files\rcp\ri</Filter>
+    </ClInclude>
+    <ClInclude Include="rdramcontroller.h">
+      <Filter>Header Files\rdram</Filter>
+    </ClInclude>
+    <ClInclude Include="videointerface.h">
+      <Filter>Header Files\rcp\vi</Filter>
+    </ClInclude>
+    <ClInclude Include="registerinterface.h">
+      <Filter>Header Files\rcp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -296,8 +392,35 @@
     <ClCompile Include="interpreter_special.cpp">
       <Filter>Source Files\cpu\interpreter</Filter>
     </ClCompile>
-    <ClCompile Include="ai_controller.cpp">
-      <Filter>Source Files\ai</Filter>
+    <ClCompile Include="rdramcontroller.cpp">
+      <Filter>Source Files\rdram</Filter>
+    </ClCompile>
+    <ClCompile Include="audiointerface.cpp">
+      <Filter>Source Files\rcp\ai</Filter>
+    </ClCompile>
+    <ClCompile Include="dpcinterface.cpp">
+      <Filter>Source Files\rcp\dpc</Filter>
+    </ClCompile>
+    <ClCompile Include="dpsinterface.cpp">
+      <Filter>Source Files\rcp\dps</Filter>
+    </ClCompile>
+    <ClCompile Include="mipsinterface.cpp">
+      <Filter>Source Files\rcp\mi</Filter>
+    </ClCompile>
+    <ClCompile Include="rspinterface.cpp">
+      <Filter>Source Files\rcp\sp</Filter>
+    </ClCompile>
+    <ClCompile Include="serialinterface.cpp">
+      <Filter>Source Files\rcp\si</Filter>
+    </ClCompile>
+    <ClCompile Include="peripheralinterface.cpp">
+      <Filter>Source Files\rcp\pi</Filter>
+    </ClCompile>
+    <ClCompile Include="rdraminterface.cpp">
+      <Filter>Source Files\rcp\ri</Filter>
+    </ClCompile>
+    <ClCompile Include="videointerface.cpp">
+      <Filter>Source Files\rcp\vi</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,11 +1,18 @@
+#include <ctime>
+
 #include "pif.h"
 #include "bus.h"
 #include "logger.h"
 #include "n64_cic_nus_6105.h"
 #include "rom.h"
-#include <ctime>
+
 #include "plugins.h"
 #include "inputplugin.h"
+
+#include "util.h"
+#include "icpu.h"
+#include "cp0.h"
+#include "interrupthandler.h"
 
 
 PIF::PIF(void) :
@@ -56,7 +63,7 @@ void PIF::pifRead(void)
     int32_t i = 0, channel = 0;
     while (i < 0x40)
     {
-        switch (Bus::pif_ram8[i])
+        switch (ram[i])
         {
         case 0x00:
             channel++;
@@ -75,7 +82,7 @@ void PIF::pifRead(void)
         case 0xB8:
             break;
         default:
-            if (!(Bus::pif_ram8[i] & 0xC0))
+            if (!(ram[i] & 0xC0))
             {
                 if (channel < 4)
                 {
@@ -84,15 +91,15 @@ void PIF::pifRead(void)
                     {
                         if (Bus::plugins->input()->ReadController != nullptr)
                         {
-                            Bus::plugins->input()->ReadController(channel, &Bus::pif_ram8[i]);
+                            Bus::plugins->input()->ReadController(channel, &ram[i]);
                         }
                     }
                     else
                     {
-                        readController(channel, &Bus::pif_ram8[i]);
+                        readController(channel, &ram[i]);
                     }
                 }
-                i += Bus::pif_ram8[i] + (Bus::pif_ram8[(i + 1)] & 0x3F) + 1;
+                i += ram[i] + (ram[(i + 1)] & 0x3F) + 1;
                 channel++;
             }
             else
@@ -111,42 +118,42 @@ void PIF::pifRead(void)
 void PIF::pifWrite(void)
 {
     int i = 0, channel = 0;
-    if (Bus::pif_ram8[0x3F] > 1)
+    if (ram[0x3F] > 1)
     {
-        switch (Bus::pif_ram8[0x3F])
+        switch (ram[0x3F])
         {
         case 0x02:
             char challenge[30], response[30];
             // format the 'challenge' message into 30 nibbles for X-Scale's CIC code
             for (i = 0; i < 15; i++)
             {
-                challenge[i * 2] = (Bus::pif_ram8[48 + i] >> 4) & 0x0f;
-                challenge[i * 2 + 1] = Bus::pif_ram8[48 + i] & 0x0f;
+                challenge[i * 2] = (ram[48 + i] >> 4) & 0x0f;
+                challenge[i * 2 + 1] = ram[48 + i] & 0x0f;
             }
             // calculate the proper response for the given challenge (X-Scale's algorithm)
             n64_cic_nus_6105(challenge, response, CHL_LEN - 2);
-            Bus::pif_ram8[46] = 0;
-            Bus::pif_ram8[47] = 0;
+            ram[46] = 0;
+            ram[47] = 0;
             // re-format the 'response' into a byte stream
             for (i = 0; i < 15; i++)
             {
-                Bus::pif_ram8[48 + i] = (response[i * 2] << 4) + response[i * 2 + 1];
+                ram[48 + i] = (response[i * 2] << 4) + response[i * 2 + 1];
             }
             // the last byte (2 nibbles) is always 0
-            Bus::pif_ram8[63] = 0;
+            ram[63] = 0;
             break;
         case 0x08:
-            Bus::pif_ram8[0x3F] = 0;
+            ram[0x3F] = 0;
             break;
         default:
-            LOG_WARNING("%s: error in write: %x", __FUNCTION__, Bus::pif_ram8[0x3F]);
+            LOG_WARNING("%s: error in write: %x", __FUNCTION__, ram[0x3F]);
             break;
         }
         return;
     }
     while (i < 0x40)
     {
-        switch (Bus::pif_ram8[i])
+        switch (ram[i])
         {
         case 0x00:
             channel++;
@@ -158,7 +165,7 @@ void PIF::pifWrite(void)
         case 0xFF:
             break;
         default:
-            if (!(Bus::pif_ram8[i] & 0xC0))
+            if (!(ram[i] & 0xC0))
             {
                 if (channel < 4)
                 {
@@ -167,24 +174,24 @@ void PIF::pifWrite(void)
                     {
                         if (Bus::plugins->input()->ControllerCommand != nullptr)
                         {
-                            Bus::plugins->input()->ControllerCommand(channel, &Bus::pif_ram8[i]);
+                            Bus::plugins->input()->ControllerCommand(channel, &ram[i]);
                         }
                     }
                     else
                     {
-                        controllerCommand(channel, &Bus::pif_ram8[i]);
+                        controllerCommand(channel, &ram[i]);
                     }
                 }
                 else if (channel == 4)
                 {
-                    _eeprom->eepromCommand(&Bus::pif_ram8[i]);
+                    _eeprom->eepromCommand(&ram[i]);
                 }
                 else
                 {
                     LOG_WARNING("%s: channel >= 4", __FUNCTION__);
                 }
 
-                i += Bus::pif_ram8[i] + (Bus::pif_ram8[(i + 1)] & 0x3F) + 1;
+                i += ram[i] + (ram[(i + 1)] & 0x3F) + 1;
                 channel++;
             }
             else
@@ -330,5 +337,50 @@ void PIF::controllerCommand(int32_t controller, uint8_t* cmd)
         }
         break;
     }
+}
+
+OPStatus PIF::read(uint32_t address, uint32_t* data)
+{
+    uint32_t addr = PIF_ADDRESS(address);
+
+    if (addr >= PIF_RAM_SIZE)
+    {
+        LOG_ERROR("Reading a byte in PIF at invalid address 0x%x", address);
+        *data = 0;
+        return OP_ERROR;
+    }
+
+    *data = byteswap_u32(*(uint32_t*)(ram + addr));
+
+    return OP_OK;
+}
+
+OPStatus PIF::write(uint32_t address, uint32_t data, uint32_t mask)
+{
+    uint32_t addr = PIF_ADDRESS(address);
+
+    if (addr >= PIF_RAM_SIZE)
+    {
+        LOG_ERROR("Invalid PIF address: %08x", address);
+        return OP_ERROR;
+    }
+
+    masked_write((uint32_t*)(&ram[addr]), byteswap_u32(data), byteswap_u32(mask));
+
+    if ((addr == 0x3c) && (mask & 0xff))
+    {
+        if (ram[0x3f] == 0x08)
+        {
+            ram[0x3f] = 0;
+            Bus::cpu->getCp0()->updateCount(*Bus::PC);
+            Bus::interrupt->addInterruptEvent(SI_INT, 0x900);
+        }
+        else
+        {
+            pifWrite();
+        }
+    }
+
+    return OP_OK;
 }
 

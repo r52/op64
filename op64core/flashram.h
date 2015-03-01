@@ -2,8 +2,9 @@
 
 #include <cstdint>
 #include <boost/filesystem/fstream.hpp>
+#include "rcpinterface.h"
 
-class FlashRam
+class FlashRam : public RCPInterface
 {
     enum FlashRamMode
     {
@@ -22,6 +23,10 @@ public:
     void dmaFromFlash(uint8_t* dest, int32_t offset, int32_t len);
     uint32_t readFlashStatus(void);
     void writeFlashCommand(uint32_t command);
+
+    // Interface
+    virtual OPStatus read(uint32_t address, uint32_t* data) override;
+    virtual OPStatus write(uint32_t address, uint32_t data, uint32_t mask) override;
 
 private:
     void loadFlashRam(void);

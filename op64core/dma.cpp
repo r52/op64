@@ -12,22 +12,23 @@
 #include "pif.h"
 #include "sram.h"
 #include "flashram.h"
+#include "rdramcontroller.h"
 
 using namespace Bus;
 
 void DMA::readSP(void)
 {
-    uint32_t len_reg = sp_reg[SP_WR_LEN_REG];
+    uint32_t len_reg = rcp->sp.reg[SP_WR_LEN_REG];
 
     uint32_t length = ((len_reg & 0xfff) | 7) + 1;
     uint32_t count = ((len_reg >> 12) & 0xff) + 1;
     uint32_t skip = ((len_reg >> 20) & 0xfff);
 
-    uint32_t memaddr = sp_reg[SP_MEM_ADDR_REG] & 0xfff;
-    uint32_t dramaddr = sp_reg[SP_DRAM_ADDR_REG] & 0xffffff;
+    uint32_t memaddr = rcp->sp.reg[SP_MEM_ADDR_REG] & 0xfff;
+    uint32_t dramaddr = rcp->sp.reg[SP_DRAM_ADDR_REG] & 0xffffff;
 
-    uint8_t* spmem = ((sp_reg[SP_MEM_ADDR_REG] & 0x1000) != 0) ? sp_imem8 : sp_dmem8;
-    uint8_t* dram = rdram8;
+    uint8_t* spmem = ((rcp->sp.reg[SP_MEM_ADDR_REG] & 0x1000) != 0) ? (uint8_t*)rcp->sp.imem : (uint8_t*)rcp->sp.dmem;
+    uint8_t* dram = (uint8_t*)rdram->mem;
 
     for (uint32_t j = 0; j < count; j++) {
         for (uint32_t i = 0; i < length; i++) {
@@ -41,17 +42,17 @@ void DMA::readSP(void)
 
 void DMA::writeSP(void)
 {
-    uint32_t len_reg = sp_reg[SP_RD_LEN_REG];
+    uint32_t len_reg = rcp->sp.reg[SP_RD_LEN_REG];
 
     uint32_t length = ((len_reg & 0xfff) | 7) + 1;
     uint32_t count = ((len_reg >> 12) & 0xff) + 1;
     uint32_t skip = ((len_reg >> 20) & 0xfff);
 
-    uint32_t memaddr = sp_reg[SP_MEM_ADDR_REG] & 0xfff;
-    uint32_t dramaddr = sp_reg[SP_DRAM_ADDR_REG] & 0xffffff;
+    uint32_t memaddr = rcp->sp.reg[SP_MEM_ADDR_REG] & 0xfff;
+    uint32_t dramaddr = rcp->sp.reg[SP_DRAM_ADDR_REG] & 0xffffff;
 
-    uint8_t* spmem = ((sp_reg[SP_MEM_ADDR_REG] & 0x1000) != 0) ? sp_imem8 : sp_dmem8;
-    uint8_t* dram = rdram8;
+    uint8_t* spmem = ((rcp->sp.reg[SP_MEM_ADDR_REG] & 0x1000) != 0) ? (uint8_t*)rcp->sp.imem : (uint8_t*)rcp->sp.dmem;
+    uint8_t* dram = (uint8_t*)rdram->mem;
 
     for (uint32_t j = 0; j < count; j++) {
         for (uint32_t i = 0; i < length; i++) {
@@ -65,8 +66,8 @@ void DMA::writeSP(void)
 
 void DMA::readPI(void)
 {
-    if (pi_reg[PI_CART_ADDR_REG] >= 0x08000000
-        && pi_reg[PI_CART_ADDR_REG] < 0x08010000)
+    if (rcp->pi.reg[PI_CART_ADDR_REG] >= 0x08000000
+        && rcp->pi.reg[PI_CART_ADDR_REG] < 0x08010000)
     {
         if (rom->getSaveType() == SAVETYPE_AUTO)
         {
@@ -76,18 +77,18 @@ void DMA::readPI(void)
         if (rom->getSaveType() == SAVETYPE_SRAM)
         {
             sram->dmaToSRAM(
-                rdram8 + pi_reg[PI_DRAM_ADDR_REG],
-                pi_reg[PI_CART_ADDR_REG] - 0x08000000,
-                (pi_reg[PI_RD_LEN_REG] & 0xFFFFFF) + 1
+                (uint8_t*)rdram->mem + rcp->pi.reg[PI_DRAM_ADDR_REG],
+                rcp->pi.reg[PI_CART_ADDR_REG] - 0x08000000,
+                (rcp->pi.reg[PI_RD_LEN_REG] & 0xFFFFFF) + 1
                 );
         }
 
         if (rom->getSaveType() == SAVETYPE_FLASH_RAM)
         {
             flashram->dmaToFlash(
-                rdram8 + pi_reg[PI_DRAM_ADDR_REG],
-                pi_reg[PI_CART_ADDR_REG] - 0x08000000,
-                (pi_reg[PI_WR_LEN_REG] & 0xFFFFFF) + 1
+                (uint8_t*)rdram->mem + rcp->pi.reg[PI_DRAM_ADDR_REG],
+                rcp->pi.reg[PI_CART_ADDR_REG] - 0x08000000,
+                (rcp->pi.reg[PI_WR_LEN_REG] & 0xFFFFFF) + 1
                 );
         }
     }
@@ -96,17 +97,17 @@ void DMA::readPI(void)
         LOG_WARNING("%s: Unknown dma read", __FUNCTION__);
     }
 
-    pi_reg[PI_STATUS_REG] |= 1;
+    rcp->pi.reg[PI_STATUS_REG] |= 1;
     cpu->getCp0()->updateCount(*PC);
-    interrupt->addInterruptEvent(PI_INT, 0x1000/*pi_register.pi_rd_len_reg*/);
+    interrupt->addInterruptEvent(PI_INT, 0x1000/*rcp->pi.register.pi_rd_len_reg*/);
 }
 
 void DMA::writePI(void)
 {
-    if (pi_reg[PI_CART_ADDR_REG] < 0x10000000)
+    if (rcp->pi.reg[PI_CART_ADDR_REG] < 0x10000000)
     {
-        if (pi_reg[PI_CART_ADDR_REG] >= 0x08000000
-            && pi_reg[PI_CART_ADDR_REG] < 0x08010000)
+        if (rcp->pi.reg[PI_CART_ADDR_REG] >= 0x08000000
+            && rcp->pi.reg[PI_CART_ADDR_REG] < 0x08010000)
         {
             if (rom->getSaveType() == SAVETYPE_AUTO)
             {
@@ -116,57 +117,57 @@ void DMA::writePI(void)
             if (rom->getSaveType() == SAVETYPE_SRAM)
             {
                 sram->dmaFromSRAM(
-                    rdram8 + pi_reg[PI_DRAM_ADDR_REG],
-                    (pi_reg[PI_CART_ADDR_REG] - 0x08000000) & 0xFFFF,
-                    (pi_reg[PI_WR_LEN_REG] & 0xFFFFFF) + 1
+                    (uint8_t*)rdram->mem + rcp->pi.reg[PI_DRAM_ADDR_REG],
+                    (rcp->pi.reg[PI_CART_ADDR_REG] - 0x08000000) & 0xFFFF,
+                    (rcp->pi.reg[PI_WR_LEN_REG] & 0xFFFFFF) + 1
                     );
             }
 
             if (rom->getSaveType() == SAVETYPE_FLASH_RAM)
             {
                 flashram->dmaFromFlash(
-                    rdram8 + pi_reg[PI_DRAM_ADDR_REG],
-                    (pi_reg[PI_CART_ADDR_REG] - 0x08000000) & 0xFFFF,
-                    (pi_reg[PI_WR_LEN_REG] & 0xFFFFFF) + 1
+                    (uint8_t*)rdram->mem + rcp->pi.reg[PI_DRAM_ADDR_REG],
+                    (rcp->pi.reg[PI_CART_ADDR_REG] - 0x08000000) & 0xFFFF,
+                    (rcp->pi.reg[PI_WR_LEN_REG] & 0xFFFFFF) + 1
                     );
             }
         }
-        else if (pi_reg[PI_CART_ADDR_REG] >= 0x06000000
-            && pi_reg[PI_CART_ADDR_REG] < 0x08000000)
+        else if (rcp->pi.reg[PI_CART_ADDR_REG] >= 0x06000000
+            && rcp->pi.reg[PI_CART_ADDR_REG] < 0x08000000)
         {
         }
         else
         {
-            LOG_WARNING("%s: Unknown dma write 0x%x", __FUNCTION__, (int32_t)pi_reg[PI_CART_ADDR_REG]);
+            LOG_WARNING("%s: Unknown dma write 0x%x", __FUNCTION__, (int32_t)rcp->pi.reg[PI_CART_ADDR_REG]);
         }
 
-        pi_reg[PI_STATUS_REG] |= 1;
+        rcp->pi.reg[PI_STATUS_REG] |= 1;
         cpu->getCp0()->updateCount(*PC);
-        interrupt->addInterruptEvent(PI_INT, /*pi_register.pi_wr_len_reg*/0x1000);
+        interrupt->addInterruptEvent(PI_INT, /*rcp->pi.register.pi_wr_len_reg*/0x1000);
 
         return;
     }
 
-    if (pi_reg[PI_CART_ADDR_REG] >= 0x1fc00000) // for paper mario
+    if (rcp->pi.reg[PI_CART_ADDR_REG] >= 0x1fc00000) // for paper mario
     {
-        pi_reg[PI_STATUS_REG] |= 1;
+        rcp->pi.reg[PI_STATUS_REG] |= 1;
         cpu->getCp0()->updateCount(*PC);
         interrupt->addInterruptEvent(PI_INT, 0x1000);
 
         return;
     }
 
-    uint32_t longueur = (pi_reg[PI_WR_LEN_REG] & 0xFFFFFF) + 1;
-    int32_t i = (pi_reg[PI_CART_ADDR_REG] - 0x10000000) & 0x3FFFFFF;
+    uint32_t longueur = (rcp->pi.reg[PI_WR_LEN_REG] & 0xFFFFFF) + 1;
+    int32_t i = (rcp->pi.reg[PI_CART_ADDR_REG] - 0x10000000) & 0x3FFFFFF;
     longueur = (i + (int32_t)longueur) > rom->getSize() ?
         (rom->getSize() - i) : longueur;
 
-    longueur = (pi_reg[PI_DRAM_ADDR_REG] + longueur) > 0x7FFFFF ?
-        (0x7FFFFF - pi_reg[PI_DRAM_ADDR_REG]) : longueur;
+    longueur = (rcp->pi.reg[PI_DRAM_ADDR_REG] + longueur) > 0x7FFFFF ?
+        (0x7FFFFF - rcp->pi.reg[PI_DRAM_ADDR_REG]) : longueur;
 
-    if (i > rom->getSize() || pi_reg[PI_DRAM_ADDR_REG] > 0x7FFFFF)
+    if (i > rom->getSize() || rcp->pi.reg[PI_DRAM_ADDR_REG] > 0x7FFFFF)
     {
-        pi_reg[PI_STATUS_REG] |= 3;
+        rcp->pi.reg[PI_STATUS_REG] |= 3;
         cpu->getCp0()->updateCount(*PC);
         interrupt->addInterruptEvent(PI_INT, longueur / 8);
 
@@ -175,13 +176,13 @@ void DMA::writePI(void)
 
     vec_for(i = 0; i < (int32_t)longueur; i++)
     {
-        rdram8[BES(pi_reg[PI_DRAM_ADDR_REG] + i)] =
-            rom_image[BES(((pi_reg[PI_CART_ADDR_REG] - 0x10000000) & 0x3FFFFFF) + i)];
+        ((uint8_t*)rdram->mem)[BES(rcp->pi.reg[PI_DRAM_ADDR_REG] + i)] =
+            rom->getImage()[BES(((rcp->pi.reg[PI_CART_ADDR_REG] - 0x10000000) & 0x3FFFFFF) + i)];
     }
 
     // Set the RDRAM memory size when copying main ROM code
     // (This is just a convenient way to run this code once at the beginning)
-    if (pi_reg[PI_CART_ADDR_REG] == 0x10001000)
+    if (rcp->pi.reg[PI_CART_ADDR_REG] == 0x10001000)
     {
         switch (rom->getCICChip())
         {
@@ -189,22 +190,22 @@ void DMA::writePI(void)
         case 2:
         case 3:
         case 6:
-            rdram[0x318 / 4] = 0x800000;
+            rdram->mem[0x318 / 4] = 0x800000;
             break;
         case 5:
-            rdram[0x3F0 / 4] = 0x800000;
+            rdram->mem[0x3F0 / 4] = 0x800000;
             break;
         }
     }
 
-    pi_reg[PI_STATUS_REG] |= 3;
+    rcp->pi.reg[PI_STATUS_REG] |= 3;
     cpu->getCp0()->updateCount(*PC);
     interrupt->addInterruptEvent(PI_INT, longueur / 8);
 }
 
 void DMA::readSI(void)
 {
-    if (Bus::si_reg[SI_PIF_ADDR_RD64B_REG] != 0x1FC007C0)
+    if (rcp->si.reg[SI_PIF_ADDR_RD64B_REG] != 0x1FC007C0)
     {
         LOG_ERROR("%s: unknown SI use", __FUNCTION__);
         Bus::stop = true;
@@ -212,9 +213,9 @@ void DMA::readSI(void)
 
     Bus::pif->pifRead();
 
-    for (uint32_t i = 0; i < (64 / 4); i++)
+    for (uint32_t i = 0; i < PIF_RAM_SIZE; i += 4)
     {
-        Bus::rdram[Bus::si_reg[SI_DRAM_ADDR_REG] / 4 + i] = byteswap_u32(Bus::pif_ram32[i]);
+        rdram->mem[(rcp->si.reg[SI_DRAM_ADDR_REG] + i) / 4] = byteswap_u32(*(uint32_t*)&pif->ram[i]);
     }
 
     Bus::cpu->getCp0()->updateCount(*Bus::PC);
@@ -223,23 +224,23 @@ void DMA::readSI(void)
         Bus::interrupt->addInterruptEvent(SI_INT, /*0x100*/0x900);
     }
     else {
-        Bus::mi_reg[MI_INTR_REG] |= 0x02; // SI
-        Bus::si_reg[SI_STATUS_REG] |= 0x1000; // INTERRUPT
+        rcp->mi.reg[MI_INTR_REG] |= 0x02; // SI
+        rcp->si.reg[SI_STATUS_REG] |= 0x1000; // INTERRUPT
         Bus::interrupt->checkInterrupt();
     }
 }
 
 void DMA::writeSI(void)
 {
-    if (Bus::si_reg[SI_PIF_ADDR_WR64B_REG] != 0x1FC007C0)
+    if (rcp->si.reg[SI_PIF_ADDR_WR64B_REG] != 0x1FC007C0)
     {
         LOG_ERROR("%s: unknown SI use", __FUNCTION__);
         Bus::stop = true;
     }
 
-    for (uint32_t i = 0; i < (64 / 4); i++)
+    for (uint32_t i = 0; i < PIF_RAM_SIZE; i += 4)
     {
-        Bus::pif_ram32[i] = byteswap_u32(Bus::rdram[Bus::si_reg[SI_DRAM_ADDR_REG] / 4 + i]);
+        *((uint32_t*)(&pif->ram[i])) = byteswap_u32(rdram->mem[(rcp->si.reg[SI_DRAM_ADDR_REG] + i) / 4]);
     }
 
     Bus::pif->pifWrite();
@@ -249,8 +250,8 @@ void DMA::writeSI(void)
         Bus::interrupt->addInterruptEvent(SI_INT, /*0x100*/0x900);
     }
     else {
-        Bus::mi_reg[MI_INTR_REG] |= 0x02; // SI
-        Bus::si_reg[SI_STATUS_REG] |= 0x1000; // INTERRUPT
+        rcp->mi.reg[MI_INTR_REG] |= 0x02; // SI
+        rcp->si.reg[SI_STATUS_REG] |= 0x1000; // INTERRUPT
         Bus::interrupt->checkInterrupt();
     }
 }

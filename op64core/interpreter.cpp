@@ -8,7 +8,7 @@
 #include "interrupthandler.h"
 #include "util.h"
 #include "tlb.h"
-#include "ai_controller.h"
+
 
 // borrowed from pj64
 static const uint32_t SWL_MASK[4] = { 0x00000000, 0xFF000000, 0xFFFF0000, 0xFFFFFF00 };
@@ -170,27 +170,27 @@ void Interpreter::softReset(void)
     _cp0_reg[CP0_STATUS_REG] = 0x34000000;
     _cp0_reg[CP0_CONFIG_REG] = 0x0006E463;
 
-    Bus::sp_reg[SP_STATUS_REG] = 1;
-    Bus::sp2_reg[SP_PC_REG] = 0;
+    Bus::rcp->sp.reg[SP_STATUS_REG] = 1;
+    Bus::rcp->sp.stat[SP_PC_REG] = 0;
 
     uint32_t bsd_dom1_config = *(uint32_t*)Bus::rom->getImage();
-    Bus::pi_reg[PI_BSD_DOM1_LAT_REG] = bsd_dom1_config & 0xff;
-    Bus::pi_reg[PI_BSD_DOM1_PWD_REG] = (bsd_dom1_config >> 8) & 0xff;
-    Bus::pi_reg[PI_BSD_DOM1_PGS_REG] = (bsd_dom1_config >> 16) & 0x0f;
-    Bus::pi_reg[PI_BSD_DOM1_RLS_REG] = (bsd_dom1_config >> 20) & 0x03;
-    Bus::pi_reg[PI_STATUS_REG] = 0;
+    Bus::rcp->pi.reg[PI_BSD_DOM1_LAT_REG] = bsd_dom1_config & 0xff;
+    Bus::rcp->pi.reg[PI_BSD_DOM1_PWD_REG] = (bsd_dom1_config >> 8) & 0xff;
+    Bus::rcp->pi.reg[PI_BSD_DOM1_PGS_REG] = (bsd_dom1_config >> 16) & 0x0f;
+    Bus::rcp->pi.reg[PI_BSD_DOM1_RLS_REG] = (bsd_dom1_config >> 20) & 0x03;
+    Bus::rcp->pi.reg[PI_STATUS_REG] = 0;
 
-    Bus::ai.reg[AI_DRAM_ADDR_REG] = 0;
-    Bus::ai.reg[AI_LEN_REG] = 0;
+    Bus::rcp->ai.reg[AI_DRAM_ADDR_REG] = 0;
+    Bus::rcp->ai.reg[AI_LEN_REG] = 0;
 
-    Bus::vi_reg[VI_INTR_REG] = 1023;
-    Bus::vi_reg[VI_CURRENT_REG] = 0;
-    Bus::vi_reg[VI_H_START_REG] = 0;
+    Bus::rcp->vi.reg[VI_INTR_REG] = 1023;
+    Bus::rcp->vi.reg[VI_CURRENT_REG] = 0;
+    Bus::rcp->vi.reg[VI_H_START_REG] = 0;
 
-    Bus::mi_reg[MI_INTR_REG] &= ~(0x10 | 0x8 | 0x4 | 0x1);
+    Bus::rcp->mi.reg[MI_INTR_REG] &= ~(0x10 | 0x8 | 0x4 | 0x1);
 
     // copy boot code
-    memcpy(Bus::sp_dmem8 + 0x40, Bus::rom->getImage() + 0x40, 0xFC0);
+    memcpy((uint8_t*)Bus::rcp->sp.dmem + 0x40, Bus::rom->getImage() + 0x40, 0xFC0);
 
     _reg[19].u = 0; // 0:Cart, 1:DD
     _reg[20].u = get_system_type_reg(Bus::rom->getSystemType());    // 0:PAL, 1:NTSC, 2:MPAL
@@ -198,7 +198,7 @@ void Interpreter::softReset(void)
     _reg[22].u = get_cic_seed(Bus::rom->getCICChip());
     _reg[23].u = 0;
 
-    uint32_t* sp_imem = Bus::sp_imem32;
+    uint32_t* sp_imem = Bus::rcp->sp.imem;
 
     // required by CIC x105
     sp_imem[0] = 0x3C0DBFC0;

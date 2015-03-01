@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include "op64.h"
 #include <atomic>
 
 // forward decls to avoid include creep
@@ -15,8 +15,9 @@ class PIF;
 class Plugins;
 class SysTiming;
 class CheatEngine;
+class RCP;
 
-class AiController;
+class RDRAMController;
 
 struct _controller_data;
 typedef struct _controller_data CONTROL;
@@ -34,6 +35,7 @@ namespace Bus
     extern CheatEngine* cheat;
 
     // managed devices
+    extern RCP* rcp;
     extern InterruptHandler* interrupt;
     extern PIF* pif;
     extern CONTROL* controllers;
@@ -41,7 +43,7 @@ namespace Bus
     extern FlashRam* flashram;
 
     // controllers
-    extern AiController ai;
+    extern RDRAMController* rdram;
 
     // regs
     extern uint32_t* cp0_reg;
@@ -52,31 +54,6 @@ namespace Bus
     extern uint32_t next_interrupt;
     extern uint32_t skip_jump;
     extern std::atomic<bool> stop;
-
-    // mem pointers
-    extern uint8_t* rom_image;
-    extern uint32_t* sp_dmem32;
-    extern uint32_t* sp_imem32;
-    extern uint8_t* sp_dmem8;
-    extern uint8_t* sp_imem8;
-    extern uint32_t* rdram;
-    extern uint8_t* rdram8;
-    extern uint32_t* pif_ram32;
-    extern uint8_t* pif_ram8;
-
-
-    // in-memory regs
-    extern uint32_t* vi_reg;
-    extern uint32_t* mi_reg;
-    extern uint32_t* rdram_reg;
-    extern uint32_t* sp_reg;
-    extern uint32_t* sp2_reg;
-
-    extern uint32_t* pi_reg;
-    extern uint32_t* ri_reg;
-    extern uint32_t* si_reg;
-    extern uint32_t* dp_reg;
-    extern uint32_t* dps_reg;
 
     // vi state
     extern uint32_t next_vi;
@@ -89,6 +66,9 @@ namespace Bus
     // core control
     extern std::atomic<bool> doHardReset;
     extern std::atomic<bool> limitVI;
+
+    OPStatus BusStartup(void);
+    OPStatus BusShutdown(void);
 
     bool connectRom(Rom* dev);
     bool connectMemory(IMemory* dev);

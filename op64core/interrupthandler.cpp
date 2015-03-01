@@ -10,7 +10,9 @@
 #include "systiming.h"
 #include "corecontrol.h"
 #include "cheatengine.h"
-#include "ai_controller.h"
+#include "rcp.h"
+#include "pif.h"
+
 
 bool Interrupt::operator<(const Interrupt& i) const
 {
@@ -190,7 +192,7 @@ void InterruptHandler::generateInterrupt(void)
 
         Bus::next_vi += Bus::vi_delay;
 
-        if (Bus::vi_reg[VI_STATUS_REG] & 0x40)
+        if (Bus::rcp->vi.reg[VI_STATUS_REG] & 0x40)
             Bus::vi_field = 1 - Bus::vi_field;
         else 
             Bus::vi_field = 0;
@@ -198,9 +200,9 @@ void InterruptHandler::generateInterrupt(void)
         popInterruptEvent();
         addInterruptEventCount(VI_INT, Bus::next_vi);
 
-        Bus::mi_reg[MI_INTR_REG] |= 0x08;
+        Bus::rcp->mi.reg[MI_INTR_REG] |= 0x08;
 
-        if (Bus::mi_reg[MI_INTR_REG] & Bus::mi_reg[MI_INTR_MASK_REG])
+        if (Bus::rcp->mi.reg[MI_INTR_REG] & Bus::rcp->mi.reg[MI_INTR_MASK_REG])
         {
             Bus::cp0_reg[CP0_CAUSE_REG] = (Bus::cp0_reg[CP0_CAUSE_REG] | 0x400) & 0xFFFFFF83;
         }
@@ -236,12 +238,12 @@ void InterruptHandler::generateInterrupt(void)
         break;
     case SI_INT:
     {
-        Bus::pif_ram8[0x3F] = 0x0;
+        Bus::pif->ram[0x3F] = 0x0;
         popInterruptEvent();
-        Bus::mi_reg[MI_INTR_REG] |= 0x02;
-        Bus::si_reg[SI_STATUS_REG] |= 0x1000;
+        Bus::rcp->mi.reg[MI_INTR_REG] |= 0x02;
+        Bus::rcp->si.reg[SI_STATUS_REG] |= 0x1000;
 
-        if (Bus::mi_reg[MI_INTR_REG] & Bus::mi_reg[MI_INTR_MASK_REG])
+        if (Bus::rcp->mi.reg[MI_INTR_REG] & Bus::rcp->mi.reg[MI_INTR_MASK_REG])
         {
             Bus::cp0_reg[CP0_CAUSE_REG] = (Bus::cp0_reg[CP0_CAUSE_REG] | 0x400) & 0xFFFFFF83;
         }
@@ -260,10 +262,10 @@ void InterruptHandler::generateInterrupt(void)
     case PI_INT:
     {
         popInterruptEvent();
-        Bus::mi_reg[MI_INTR_REG] |= 0x10;
-        Bus::pi_reg[PI_STATUS_REG] &= ~3;
+        Bus::rcp->mi.reg[MI_INTR_REG] |= 0x10;
+        Bus::rcp->pi.reg[PI_STATUS_REG] &= ~3;
 
-        if (Bus::mi_reg[MI_INTR_REG] & Bus::mi_reg[MI_INTR_MASK_REG])
+        if (Bus::rcp->mi.reg[MI_INTR_REG] & Bus::rcp->mi.reg[MI_INTR_MASK_REG])
         {
             Bus::cp0_reg[CP0_CAUSE_REG] = (Bus::cp0_reg[CP0_CAUSE_REG] | 0x400) & 0xFFFFFF83;
         }
@@ -281,18 +283,18 @@ void InterruptHandler::generateInterrupt(void)
         break;
     case AI_INT:
     {
-        if (Bus::ai.reg[AI_STATUS_REG] & 0x80000000) // full
+        if (Bus::rcp->ai.reg[AI_STATUS_REG] & 0x80000000) // full
         {
             uint32_t ai_event = findEvent(AI_INT);
             popInterruptEvent();
-            Bus::ai.reg[AI_STATUS_REG] &= ~0x80000000;
-            Bus::ai.fifo[0].delay = Bus::ai.fifo[1].delay;
-            Bus::ai.fifo[0].length = Bus::ai.fifo[1].length;
-            addInterruptEventCount(AI_INT, ai_event + Bus::ai.fifo[1].delay);
+            Bus::rcp->ai.reg[AI_STATUS_REG] &= ~0x80000000;
+            Bus::rcp->ai.fifo[0].delay = Bus::rcp->ai.fifo[1].delay;
+            Bus::rcp->ai.fifo[0].length = Bus::rcp->ai.fifo[1].length;
+            addInterruptEventCount(AI_INT, ai_event + Bus::rcp->ai.fifo[1].delay);
 
-            Bus::mi_reg[MI_INTR_REG] |= 0x04;
+            Bus::rcp->mi.reg[MI_INTR_REG] |= 0x04;
 
-            if (Bus::mi_reg[MI_INTR_REG] & Bus::mi_reg[MI_INTR_MASK_REG])
+            if (Bus::rcp->mi.reg[MI_INTR_REG] & Bus::rcp->mi.reg[MI_INTR_MASK_REG])
             {
                 Bus::cp0_reg[CP0_CAUSE_REG] = (Bus::cp0_reg[CP0_CAUSE_REG] | 0x400) & 0xFFFFFF83;
             }
@@ -310,11 +312,11 @@ void InterruptHandler::generateInterrupt(void)
         else
         {
             popInterruptEvent();
-            Bus::ai.reg[AI_STATUS_REG] &= ~0x40000000;
+            Bus::rcp->ai.reg[AI_STATUS_REG] &= ~0x40000000;
 
-            Bus::mi_reg[MI_INTR_REG] |= 0x04;
+            Bus::rcp->mi.reg[MI_INTR_REG] |= 0x04;
 
-            if (Bus::mi_reg[MI_INTR_REG] & Bus::mi_reg[MI_INTR_MASK_REG])
+            if (Bus::rcp->mi.reg[MI_INTR_REG] & Bus::rcp->mi.reg[MI_INTR_MASK_REG])
             {
                 Bus::cp0_reg[CP0_CAUSE_REG] = (Bus::cp0_reg[CP0_CAUSE_REG] | 0x400) & 0xFFFFFF83;
             }
@@ -334,15 +336,15 @@ void InterruptHandler::generateInterrupt(void)
     case SP_INT:
     {
         popInterruptEvent();
-        Bus::sp_reg[SP_STATUS_REG] |= 0x203;
+        Bus::rcp->sp.reg[SP_STATUS_REG] |= 0x203;
         // sp_register.sp_status_reg |= 0x303;
 
-        if (!(Bus::sp_reg[SP_STATUS_REG] & 0x40))
+        if (!(Bus::rcp->sp.reg[SP_STATUS_REG] & 0x40))
             return; // !intr_on_break
 
-        Bus::mi_reg[MI_INTR_REG] |= 0x01;
+        Bus::rcp->mi.reg[MI_INTR_REG] |= 0x01;
 
-        if (Bus::mi_reg[MI_INTR_REG] & Bus::mi_reg[MI_INTR_MASK_REG])
+        if (Bus::rcp->mi.reg[MI_INTR_REG] & Bus::rcp->mi.reg[MI_INTR_MASK_REG])
         {
             Bus::cp0_reg[CP0_CAUSE_REG] = (Bus::cp0_reg[CP0_CAUSE_REG] | 0x400) & 0xFFFFFF83;
         }
@@ -361,11 +363,11 @@ void InterruptHandler::generateInterrupt(void)
     case DP_INT:
     {
         popInterruptEvent();
-        Bus::dp_reg[DPC_STATUS_REG] &= ~2;
-        Bus::dp_reg[DPC_STATUS_REG] |= 0x81;
-        Bus::mi_reg[MI_INTR_REG] |= 0x20;
+        Bus::rcp->dpc.reg[DPC_STATUS_REG] &= ~2;
+        Bus::rcp->dpc.reg[DPC_STATUS_REG] |= 0x81;
+        Bus::rcp->mi.reg[MI_INTR_REG] |= 0x20;
 
-        if (Bus::mi_reg[MI_INTR_REG] & Bus::mi_reg[MI_INTR_MASK_REG])
+        if (Bus::rcp->mi.reg[MI_INTR_REG] & Bus::rcp->mi.reg[MI_INTR_MASK_REG])
         {
             Bus::cp0_reg[CP0_CAUSE_REG] = (Bus::cp0_reg[CP0_CAUSE_REG] | 0x400) & 0xFFFFFF83;
         }
@@ -402,7 +404,7 @@ void InterruptHandler::generateInterrupt(void)
         _vi_counter = 0;
         initialize();
         // clear the audio status register so that subsequent write_ai() calls will work properly
-        Bus::ai.reg[AI_STATUS_REG] = 0;
+        Bus::rcp->ai.reg[AI_STATUS_REG] = 0;
         // set ErrorEPC with the last instruction address
         Bus::cp0_reg[CP0_ERROREPC_REG] = (uint32_t)*(Bus::PC);
         
@@ -482,7 +484,7 @@ uint32_t InterruptHandler::findEvent(int32_t type)
 
 void InterruptHandler::checkInterrupt(void)
 {
-    if (Bus::mi_reg[MI_INTR_REG] & Bus::mi_reg[MI_INTR_MASK_REG])
+    if (Bus::rcp->mi.reg[MI_INTR_REG] & Bus::rcp->mi.reg[MI_INTR_MASK_REG])
     {
         Bus::cp0_reg[CP0_CAUSE_REG] = (Bus::cp0_reg[CP0_CAUSE_REG] | 0x400) & 0xFFFFFF83;
     }

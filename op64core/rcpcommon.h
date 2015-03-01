@@ -140,3 +140,30 @@ enum
     VI_Y_SCALE_REG,
     VI_NUM_REGS
 };
+
+// Memory address to register macros
+#define COMMON_REG(addr) ((addr & 0xffff) >> 2)
+
+#define RDRAM_ADDRESS(addr) ((addr & 0xffffff) >> 2)
+#define RDRAM_REG(addr) ((addr & 0x3ff) >> 2)
+
+#define RSP_ADDRESS(addr) ((addr & 0x1fff) >> 2)
+#define RSP_REG(addr) COMMON_REG(addr)
+#define RSP_REG2(addr) COMMON_REG(addr)
+
+#define DPC_REG(addr) COMMON_REG(addr)
+#define DPS_REG(addr) COMMON_REG(addr)
+
+#define MI_REG(addr) COMMON_REG(addr)
+#define VI_REG(addr) COMMON_REG(addr)
+#define AI_REG(addr) COMMON_REG(addr)
+#define PI_REG(addr) COMMON_REG(addr)
+#define RI_REG(addr) COMMON_REG(addr)
+#define SI_REG(addr) COMMON_REG(addr)
+
+#define ROM_ADDRESS(addr) (addr & 0x03fffffc)
+
+#define PIF_ADDRESS(addr) ((addr & 0xfffc) - 0x7c0)
+
+// Largest is VI with 14 but whatever
+#define RCP_MAX_NUM_REGS 16

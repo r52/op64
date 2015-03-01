@@ -8,7 +8,7 @@
 #include "plugins.h"
 #include "systiming.h"
 #include "cheatengine.h"
-#include "ai_controller.h"
+#include "rcp.h"
 
 // Exposed states for device communication
 namespace Bus
@@ -28,8 +28,9 @@ namespace Bus
     SRAM* sram = nullptr;
     FlashRam* flashram = nullptr;
 
-    // controllers (can be persistent)
-    AiController ai;
+    // controllers (persistent)
+    RCP* rcp = nullptr;
+    RDRAMController* rdram = nullptr;
 
     // regs
     uint32_t* cp0_reg = nullptr;
@@ -40,31 +41,6 @@ namespace Bus
     uint32_t next_interrupt = 0;
     uint32_t skip_jump = 0;
     std::atomic<bool> stop = true;
-
-    // mem
-    uint8_t* rom_image = nullptr;
-    uint32_t* sp_dmem32 = nullptr;
-    uint32_t* sp_imem32 = nullptr;
-    uint8_t* sp_dmem8 = nullptr;
-    uint8_t* sp_imem8 = nullptr;
-    uint32_t* rdram = nullptr;
-    uint8_t* rdram8 = nullptr;
-    uint32_t* pif_ram32 = nullptr;
-    uint8_t* pif_ram8 = nullptr;
-
-
-    // in-memory regs
-    uint32_t* vi_reg = nullptr;
-    uint32_t* mi_reg = nullptr;
-    uint32_t* rdram_reg = nullptr;
-    uint32_t* sp_reg = nullptr;
-    uint32_t* sp2_reg = nullptr;
-
-    uint32_t* pi_reg = nullptr;
-    uint32_t* ri_reg = nullptr;
-    uint32_t* si_reg = nullptr;
-    uint32_t* dp_reg = nullptr;
-    uint32_t* dps_reg = nullptr;
 
     // vi state
     uint32_t next_vi = 0;
@@ -251,6 +227,52 @@ namespace Bus
         LOG_INFO("Soft resetting emulator...");
 
         interrupt->softReset();
+    }
+
+    OPStatus BusStartup(void)
+    {
+        // Start up any persistent devices
+        if (nullptr != rcp)
+        {
+            delete rcp; rcp = nullptr;
+        }
+
+        if (nullptr != rdram)
+        {
+            delete rdram; rdram = nullptr;
+        }
+
+        if (nullptr != pif)
+        {
+            delete pif; pif = nullptr;
+        }
+
+        rcp = new RCP;
+        rdram = new RDRAMController;
+        pif = new PIF;
+
+        return OP_OK;
+    }
+
+    OPStatus BusShutdown(void)
+    {
+        // Shutdown any persistent devices
+        if (nullptr != rcp)
+        {
+            delete rcp; rcp = nullptr;
+        }
+
+        if (nullptr != rdram)
+        {
+            delete rdram; rdram = nullptr;
+        }
+
+        if (nullptr != pif)
+        {
+            delete pif; pif = nullptr;
+        }
+
+        return OP_OK;
     }
 
 }

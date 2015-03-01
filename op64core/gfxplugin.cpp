@@ -1,6 +1,8 @@
 #include "gfxplugin.h"
 #include "bus.h"
 #include "rcpcommon.h"
+#include "rcp.h"
+#include "rom.h"
 
 
 void gfx_dummy_func(void) {}
@@ -250,36 +252,36 @@ bool GfxPlugin::initialize(void* renderWindow, void* statusBar)
     Info.hWnd = renderWindow;
     Info.hStatusBar = statusBar;
 
-    Info.HEADER = Bus::rom_image;
-    Info.RDRAM = Bus::rdram8;
-    Info.DMEM = Bus::sp_dmem8;
-    Info.IMEM = Bus::sp_imem8;
+    Info.HEADER = Bus::rom->getImage();
+    Info.RDRAM = (uint8_t*)Bus::rdram->mem;
+    Info.DMEM = (uint8_t*)Bus::rcp->sp.dmem;
+    Info.IMEM = (uint8_t*)Bus::rcp->sp.imem;
 
-    Info.MI_INTR_REG = &Bus::mi_reg[MI_INTR_REG];
+    Info.MI_INTR_REG = &Bus::rcp->mi.reg[MI_INTR_REG];
 
-    Info.DPC_START_REG = &Bus::dp_reg[DPC_START_REG];
-    Info.DPC_END_REG = &Bus::dp_reg[DPC_END_REG];
-    Info.DPC_CURRENT_REG = &Bus::dp_reg[DPC_CURRENT_REG];
-    Info.DPC_STATUS_REG = &Bus::dp_reg[DPC_STATUS_REG];
-    Info.DPC_CLOCK_REG = &Bus::dp_reg[DPC_CLOCK_REG];
-    Info.DPC_BUFBUSY_REG = &Bus::dp_reg[DPC_BUFBUSY_REG];
-    Info.DPC_PIPEBUSY_REG = &Bus::dp_reg[DPC_PIPEBUSY_REG];
-    Info.DPC_TMEM_REG = &Bus::dp_reg[DPC_TMEM_REG];
+    Info.DPC_START_REG = &Bus::rcp->dpc.reg[DPC_START_REG];
+    Info.DPC_END_REG = &Bus::rcp->dpc.reg[DPC_END_REG];
+    Info.DPC_CURRENT_REG = &Bus::rcp->dpc.reg[DPC_CURRENT_REG];
+    Info.DPC_STATUS_REG = &Bus::rcp->dpc.reg[DPC_STATUS_REG];
+    Info.DPC_CLOCK_REG = &Bus::rcp->dpc.reg[DPC_CLOCK_REG];
+    Info.DPC_BUFBUSY_REG = &Bus::rcp->dpc.reg[DPC_BUFBUSY_REG];
+    Info.DPC_PIPEBUSY_REG = &Bus::rcp->dpc.reg[DPC_PIPEBUSY_REG];
+    Info.DPC_TMEM_REG = &Bus::rcp->dpc.reg[DPC_TMEM_REG];
 
-    Info.VI_STATUS_REG = &Bus::vi_reg[VI_STATUS_REG];
-    Info.VI_ORIGIN_REG = &Bus::vi_reg[VI_ORIGIN_REG];
-    Info.VI_WIDTH_REG = &Bus::vi_reg[VI_WIDTH_REG];
-    Info.VI_INTR_REG = &Bus::vi_reg[VI_INTR_REG];
-    Info.VI_V_CURRENT_LINE_REG = &Bus::vi_reg[VI_CURRENT_REG];
-    Info.VI_TIMING_REG = &Bus::vi_reg[VI_BURST_REG];
-    Info.VI_V_SYNC_REG = &Bus::vi_reg[VI_V_SYNC_REG];
-    Info.VI_H_SYNC_REG = &Bus::vi_reg[VI_H_SYNC_REG];
-    Info.VI_LEAP_REG = &Bus::vi_reg[VI_LEAP_REG];
-    Info.VI_H_START_REG = &Bus::vi_reg[VI_H_START_REG];
-    Info.VI_V_START_REG = &Bus::vi_reg[VI_V_START_REG];
-    Info.VI_V_BURST_REG = &Bus::vi_reg[VI_V_BURST_REG];
-    Info.VI_X_SCALE_REG = &Bus::vi_reg[VI_X_SCALE_REG];
-    Info.VI_Y_SCALE_REG = &Bus::vi_reg[VI_Y_SCALE_REG];
+    Info.VI_STATUS_REG = &Bus::rcp->vi.reg[VI_STATUS_REG];
+    Info.VI_ORIGIN_REG = &Bus::rcp->vi.reg[VI_ORIGIN_REG];
+    Info.VI_WIDTH_REG = &Bus::rcp->vi.reg[VI_WIDTH_REG];
+    Info.VI_INTR_REG = &Bus::rcp->vi.reg[VI_INTR_REG];
+    Info.VI_V_CURRENT_LINE_REG = &Bus::rcp->vi.reg[VI_CURRENT_REG];
+    Info.VI_TIMING_REG = &Bus::rcp->vi.reg[VI_BURST_REG];
+    Info.VI_V_SYNC_REG = &Bus::rcp->vi.reg[VI_V_SYNC_REG];
+    Info.VI_H_SYNC_REG = &Bus::rcp->vi.reg[VI_H_SYNC_REG];
+    Info.VI_LEAP_REG = &Bus::rcp->vi.reg[VI_LEAP_REG];
+    Info.VI_H_START_REG = &Bus::rcp->vi.reg[VI_H_START_REG];
+    Info.VI_V_START_REG = &Bus::rcp->vi.reg[VI_V_START_REG];
+    Info.VI_V_BURST_REG = &Bus::rcp->vi.reg[VI_V_BURST_REG];
+    Info.VI_X_SCALE_REG = &Bus::rcp->vi.reg[VI_X_SCALE_REG];
+    Info.VI_Y_SCALE_REG = &Bus::rcp->vi.reg[VI_Y_SCALE_REG];
 
     _initialized = (InitiateGFX(Info) != 0);
 

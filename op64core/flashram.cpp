@@ -157,3 +157,41 @@ void FlashRam::writeFlashCommand(uint32_t command)
         break;
     }
 }
+
+OPStatus FlashRam::write(uint32_t address, uint32_t data, uint32_t mask)
+{
+    if (Bus::rom->getSaveType() == SAVETYPE_AUTO)
+    {
+        Bus::rom->setSaveType(SAVETYPE_FLASH_RAM);
+    }
+
+    if (Bus::rom->getSaveType() == SAVETYPE_FLASH_RAM && !(address & 0xffff))
+    {
+        writeFlashCommand(data & mask);
+    }
+    else
+    {
+        LOG_WARNING("Writing flashram command with non-flashram save type");
+    }
+
+    return OP_OK;
+}
+
+OPStatus FlashRam::read(uint32_t address, uint32_t* data)
+{
+    if (Bus::rom->getSaveType() == SAVETYPE_AUTO)
+    {
+        Bus::rom->setSaveType(SAVETYPE_FLASH_RAM);
+    }
+
+    if (Bus::rom->getSaveType() == SAVETYPE_FLASH_RAM && !(address & 0xffff))
+    {
+        *data = readFlashStatus();
+    }
+    else
+    {
+        LOG_WARNING("Reading flashram command with non-flashram save type");
+    }
+
+    return OP_OK;
+}

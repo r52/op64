@@ -34,6 +34,10 @@ QOP64Window::QOP64Window(QWidget *parent)
     setupDirectories();
 
     setupGUI();
+
+    // Start bus
+    Bus::BusStartup();
+
     // Set up log callback
     LOG.setLogCallback(std::bind(&QOP64Window::logCallback, this, std::placeholders::_1, std::placeholders::_2));
 
@@ -299,6 +303,9 @@ void QOP64Window::shudownEverything(void)
     {
         _logWindow->deleteLater(); _logWindow = nullptr;
     }
+    
+    // Stop bus
+    Bus::BusShutdown();
 }
 
 void QOP64Window::toggleFullscreen(void)

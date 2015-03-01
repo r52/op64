@@ -5,6 +5,7 @@
 
 #include "bus.h"
 #include "cheat.h"
+#include "rcpinterface.h"
 
 enum SystemType
 {
@@ -72,7 +73,7 @@ typedef struct
     uint16_t Country_code;             /* 0x3E */
 } rom_header;
 
-class Rom
+class Rom : public RCPInterface
 {
 public:
     Rom(void);
@@ -80,10 +81,12 @@ public:
 
     bool loadRom(const char* name);
 
+    virtual OPStatus read(uint32_t address, uint32_t* data) override;
+    virtual OPStatus write(uint32_t address, uint32_t data, uint32_t mask) override;
 
     inline uint8_t* getImage(void)
     {
-        return Bus::rom_image;
+        return _image;
     }
 
     inline uint8_t getSaveType(void)
@@ -183,6 +186,8 @@ private:
     std::string _goodname;
     rom_header _header;
     boost::filesystem::path _filename;
+
+    uint32_t _rom_lastwrite = 0;
 
     // Rom hacks that cannot be changed by the user
     CheatList _romhacks;

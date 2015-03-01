@@ -80,7 +80,7 @@
     <ProjectReference />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ai_controller.h" />
+    <ClInclude Include="audiointerface.h" />
     <ClInclude Include="audioplugin.h" />
     <ClInclude Include="bus.h" />
     <ClInclude Include="cheat.h" />
@@ -90,6 +90,8 @@
     <ClInclude Include="corecontrol.h" />
     <ClInclude Include="cp1.h" />
     <ClInclude Include="dma.h" />
+    <ClInclude Include="dpcinterface.h" />
+    <ClInclude Include="dpsinterface.h" />
     <ClInclude Include="eeprom.h" />
     <ClInclude Include="flashram.h" />
     <ClInclude Include="fpu.h" />
@@ -101,23 +103,33 @@
     <ClInclude Include="imemory.h" />
     <ClInclude Include="cp0.h" />
     <ClInclude Include="mempak.h" />
+    <ClInclude Include="mipsinterface.h" />
     <ClInclude Include="mpmemory.h" />
     <ClInclude Include="interpreter.h" />
-    <ClInclude Include="mpmemory_regs.h" />
     <ClInclude Include="n64_cic_nus_6105.h" />
+    <ClInclude Include="op64.h" />
+    <ClInclude Include="peripheralinterface.h" />
     <ClInclude Include="pif.h" />
     <ClInclude Include="plugins.h" />
+    <ClInclude Include="rcp.h" />
     <ClInclude Include="rcpcommon.h" />
+    <ClInclude Include="rcpinterface.h" />
+    <ClInclude Include="rdramcontroller.h" />
+    <ClInclude Include="rdraminterface.h" />
+    <ClInclude Include="registerinterface.h" />
     <ClInclude Include="rom.h" />
     <ClInclude Include="romdb.h" />
+    <ClInclude Include="rspinterface.h" />
     <ClInclude Include="rspplugin.h" />
+    <ClInclude Include="serialinterface.h" />
     <ClInclude Include="sram.h" />
     <ClInclude Include="systiming.h" />
     <ClInclude Include="tlb.h" />
     <ClInclude Include="version.h" />
+    <ClInclude Include="videointerface.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ai_controller.cpp" />
+    <ClCompile Include="audiointerface.cpp" />
     <ClCompile Include="audioplugin.cpp" />
     <ClCompile Include="bus.cpp" />
     <ClCompile Include="cheatengine.cpp" />
@@ -125,6 +137,8 @@
     <ClCompile Include="corecontrol.cpp" />
     <ClCompile Include="cp1.cpp" />
     <ClCompile Include="dma.cpp" />
+    <ClCompile Include="dpcinterface.cpp" />
+    <ClCompile Include="dpsinterface.cpp" />
     <ClCompile Include="eeprom.cpp" />
     <ClCompile Include="flashram.cpp" />
     <ClCompile Include="gfxplugin.cpp" />
@@ -134,6 +148,7 @@
     <ClCompile Include="cp0.cpp" />
     <ClCompile Include="imemory.cpp" />
     <ClCompile Include="mempak.cpp" />
+    <ClCompile Include="mipsinterface.cpp" />
     <ClCompile Include="mpmemory.cpp" />
     <ClCompile Include="interpreter.cpp" />
     <ClCompile Include="interpreter_cop0.cpp" />
@@ -141,14 +156,20 @@
     <ClCompile Include="interpreter_regimm.cpp" />
     <ClCompile Include="interpreter_special.cpp" />
     <ClCompile Include="n64_cic_nus_6105.cpp" />
+    <ClCompile Include="peripheralinterface.cpp" />
     <ClCompile Include="pif.cpp" />
     <ClCompile Include="plugins.cpp" />
+    <ClCompile Include="rdramcontroller.cpp" />
+    <ClCompile Include="rdraminterface.cpp" />
     <ClCompile Include="rom.cpp" />
     <ClCompile Include="romdb.cpp" />
+    <ClCompile Include="rspinterface.cpp" />
     <ClCompile Include="rspplugin.cpp" />
+    <ClCompile Include="serialinterface.cpp" />
     <ClCompile Include="sram.cpp" />
     <ClCompile Include="systiming.cpp" />
     <ClCompile Include="tlb.cpp" />
+    <ClCompile Include="videointerface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\op64-util\op64-util.vcxproj">

@@ -233,7 +233,6 @@ bool Rom::loadRom(const char* name)
             roml[i] = byteswap_u32(roml[i]);
         }
 
-        Bus::rom_image = _image;
         calculateCIC();
 
         LOG_INFO("ROM: ROM loaded");
@@ -292,5 +291,29 @@ void Rom::setGameHacks(uint16_t cartid)
     default:
         break;
     }
+}
+
+OPStatus Rom::read(uint32_t address, uint32_t* data)
+{
+    uint32_t addr = ROM_ADDRESS(address);
+
+    if (_rom_lastwrite != 0)
+    {
+        *data = _rom_lastwrite;
+        _rom_lastwrite = 0;
+    }
+    else
+    {
+        *data = *(uint32_t*)(_image + addr);
+    }
+
+    return OP_OK;
+}
+
+OPStatus Rom::write(uint32_t address, uint32_t data, uint32_t mask)
+{
+    _rom_lastwrite = data & mask;
+
+    return OP_OK;
 }
 
