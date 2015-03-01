@@ -53,7 +53,4 @@ public:
 
         return nullptr;
     }
-
-protected:
-    IMemory();
 };

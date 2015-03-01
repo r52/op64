@@ -24,8 +24,5 @@ public:
     }
 
 protected:
-    RCPInterface();
-
-protected:
     RCPIOMode _iomode = RCP_IO_REG;
 };
