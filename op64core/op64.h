@@ -4,6 +4,6 @@
 
 enum OPStatus
 {
-    OP_OK = 0,
-    OP_ERROR
+    OP_ERROR = 0,
+    OP_OK
 };

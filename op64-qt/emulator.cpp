@@ -52,8 +52,8 @@ bool Emulator::loadRom(const char* filename)
         return false;
     }
 
-    Rom* rom = new Rom();
-    if (rom->loadRom(filename))
+    Rom* rom;
+    if (Rom::loadRom(filename, rom))
     {
         Bus::connectRom(rom); rom = nullptr;
         setState(ROM_LOADED);
@@ -63,7 +63,6 @@ bool Emulator::loadRom(const char* filename)
     {
         // something went wrong. kill it
         Bus::disconnectDevices();
-        delete rom; rom = nullptr;
     }
 
     return false;

@@ -76,10 +76,9 @@ typedef struct
 class Rom : public RCPInterface
 {
 public:
-    Rom(void);
     ~Rom(void);
 
-    bool loadRom(const char* name);
+    static bool loadRom(const char* name, Rom*& outRom);
 
     virtual OPStatus read(uint32_t address, uint32_t* data) override;
     virtual OPStatus write(uint32_t address, uint32_t data, uint32_t mask) override;
@@ -165,7 +164,8 @@ public:
     }
 
 private:
-    bool isValidRom(const uint8_t* image);
+    Rom(void);
+    static bool isValidRom(const uint8_t* image);
     void swapRom(uint8_t* rom, uint_fast32_t size);
     void calculateCIC(void);
     void setGameHacks(uint16_t cartid);

@@ -90,6 +90,12 @@ Rom::~Rom(void)
 
 bool Rom::isValidRom(const uint8_t* image)
 {
+    if (nullptr == image)
+    {
+        LOG_ERROR("ROM: null image");
+        return false;
+    }
+
     // .z64
     if ((image[0] == 0x80) && (image[1] == 0x37) && (image[2] == 0x12) && (image[3] == 0x40))
     {
@@ -137,23 +143,28 @@ void Rom::swapRom(uint8_t* rom, uint_fast32_t size)
 }
 
 
-bool Rom::loadRom(const char* name)
+bool Rom::loadRom(const char* name, Rom*& outRom)
 {
-    if (nullptr != _image)
+    Rom* rom = new Rom();
+
+    if (nullptr != rom->_image)
     {
+        // Sanity
         LOG_ERROR("ROM: unrecoverable error");
+        delete rom;
         return false;
     }
 
-    _filename = boost::filesystem::path(name);
-    if (!exists(_filename) || !is_regular_file(_filename))
+    rom->_filename = boost::filesystem::path(name);
+    if (!exists(rom->_filename) || !is_regular_file(rom->_filename))
     {
         // file doesn't exist or is bad
         LOG_ERROR("ROM: file %s not found or is an invalid file", name);
+        delete rom;
         return false;
     }
 
-    ifstream file(_filename, std::ios::in | std::ios::binary | std::ios::ate);
+    ifstream file(rom->_filename, std::ios::in | std::ios::binary | std::ios::ate);
     if (file.is_open() && file.good())
     {
         LOG_INFO("ROM: Loading %s", name);
@@ -162,6 +173,8 @@ bool Rom::loadRom(const char* name)
 
         if (size < 4096)
         {
+            LOG_ERROR("ROM: bad ROM size: %u", size);
+            delete rom;
             return false;
         }
 
@@ -169,6 +182,7 @@ bool Rom::loadRom(const char* name)
         if (nullptr == image)
         {
             LOG_ERROR("ROM: error allocating %u bytes for ROM!", size);
+            delete rom;
             return false;
         }
 
@@ -180,65 +194,70 @@ bool Rom::loadRom(const char* name)
         {
             LOG_ERROR("ROM: invalid N64 ROM");
             delete[] image;
+            delete rom;
             return false;
         }
 
-        _image = image;
-        _imagesize = static_cast<unsigned int>(size);
+        rom->_image = image; image = nullptr;
+        rom->_imagesize = static_cast<unsigned int>(size);
 
-        swapRom(_image, _imagesize);
+        rom->swapRom(rom->_image, rom->_imagesize);
 
-        memcpy(&_header, _image, sizeof(rom_header));
+        memcpy(&rom->_header, rom->_image, sizeof(rom_header));
 
         // Calculate md5 for rom db search
         MD5 md = MD5();
-        md.update(_image, _imagesize);
+        md.update(rom->_image, rom->_imagesize);
         md.finalize();
-        _md5 = boost::to_upper_copy(md.hexdigest());
+        rom->_md5 = boost::to_upper_copy(md.hexdigest());
 
-        _systemtype = rom_country_code_to_system_type(_header.Country_code);
-        _vilimit = (_systemtype == SYSTEM_NTSC) ? 60 : 50;
-        _aidacrate = rom_system_type_to_ai_dac_rate(_systemtype);
+        rom->_systemtype = rom_country_code_to_system_type(rom->_header.Country_code);
+        rom->_vilimit = (rom->_systemtype == SYSTEM_NTSC) ? 60 : 50;
+        rom->_aidacrate = rom_system_type_to_ai_dac_rate(rom->_systemtype);
 
         RomSettings settings;
-        if (RomDB::getInstance().get(_md5, settings))
+        if (RomDB::getInstance().get(rom->_md5, settings))
         {
-            _count_per_op = settings.countperop;
-            _savetype = settings.savetype;
-            _goodname = settings.goodname;
-            _romhacks = settings.romhacks;
+            rom->_count_per_op = settings.countperop;
+            rom->_savetype = settings.savetype;
+            rom->_goodname = settings.goodname;
+            rom->_romhacks = settings.romhacks;
         }
 
-        LOG_VERBOSE("GoodName: %s", _goodname.c_str());
-        LOG_VERBOSE("Name: %s", _header.Name);
-        LOG_VERBOSE("CRC: %X %X", _header.CRC1, _header.CRC2);
-        LOG_VERBOSE("System Type: %s", systemTypeString[_systemtype]);
-        LOG_VERBOSE("Save Type: %s", saveTypeString[_savetype]);
-        LOG_VERBOSE("Rom Size: %d Megabits", _imagesize / 1024 / 1024 * 8);
-        LOG_VERBOSE("ClockRate: %X", byteswap_u32(_header.ClockRate));
-        LOG_VERBOSE("Release Code: %X", byteswap_u32(_header.Release));
-        LOG_VERBOSE("Manufacturer ID: %X", byteswap_u32(_header.Manufacturer_ID));
-        LOG_VERBOSE("Cartridge ID: %X", _header.Cartridge_ID);
-        LOG_VERBOSE("Country Code: %X", _header.Country_code);
-        LOG_VERBOSE("PC: 0x%X", byteswap_u32(_header.PC));
+        LOG_VERBOSE("GoodName: %s", rom->_goodname.c_str());
+        LOG_VERBOSE("Name: %s", rom->_header.Name);
+        LOG_VERBOSE("CRC: %X %X", rom->_header.CRC1, rom->_header.CRC2);
+        LOG_VERBOSE("System Type: %s", systemTypeString[rom->_systemtype]);
+        LOG_VERBOSE("Save Type: %s", saveTypeString[rom->_savetype]);
+        LOG_VERBOSE("Rom Size: %d Megabits", rom->_imagesize / 1024 / 1024 * 8);
+        LOG_VERBOSE("ClockRate: %X", byteswap_u32(rom->_header.ClockRate));
+        LOG_VERBOSE("Release Code: %X", byteswap_u32(rom->_header.Release));
+        LOG_VERBOSE("Manufacturer ID: %X", byteswap_u32(rom->_header.Manufacturer_ID));
+        LOG_VERBOSE("Cartridge ID: %X", rom->_header.Cartridge_ID);
+        LOG_VERBOSE("Country Code: %X", rom->_header.Country_code);
+        LOG_VERBOSE("PC: 0x%X", byteswap_u32(rom->_header.PC));
 
-        LOG_DEBUG("ROM: %d ROM hacks enabled", _romhacks.size());
+        LOG_DEBUG("ROM: %d ROM hacks enabled", rom->_romhacks.size());
 
-        setGameHacks(_header.Cartridge_ID);
+        rom->setGameHacks(rom->_header.Cartridge_ID);
 
         // Swap it again because little endian cpu
-        uint32_t* roml = (uint32_t*)_image;
-        vec_for (uint32_t i = 0; i < (_imagesize / 4); i++)
+        uint32_t* roml = (uint32_t*)rom->_image;
+        vec_for(uint32_t i = 0; i < (rom->_imagesize / 4); i++)
         {
             roml[i] = byteswap_u32(roml[i]);
         }
 
-        calculateCIC();
+        rom->calculateCIC();
 
+        outRom = rom; rom = nullptr;
         LOG_INFO("ROM: ROM loaded");
 
         return true;
     }
+
+    delete rom;
+    LOG_ERROR("ROM: bad ROM file");
 
     return false;
 }
