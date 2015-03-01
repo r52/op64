@@ -35,7 +35,10 @@ void IMemory::uninitialize(void)
 {
     using namespace Bus;
 
-    pif->uninitialize();
+    if (nullptr != pif)
+    {
+        pif->uninitialize();
+    }
 
     if (nullptr != sram)
     {
