@@ -1,8 +1,6 @@
 #pragma once
 
 #include "rcpinterface.h"
-
-#include "inputtypes.h"
 #include "eeprom.h"
 #include "mempak.h"
 
@@ -31,7 +29,6 @@ public:
     uint8_t ram[PIF_RAM_SIZE];
 
 private:
-    CONTROL _controllers[4];
     EEPROM* _eeprom;
     MemPak* _mempak;
 };

@@ -19,14 +19,11 @@ PIF::PIF(void) :
 _eeprom(nullptr),
 _mempak(nullptr)
 {
-    Bus::controllers = _controllers;
 }
 
 PIF::~PIF(void)
 {
     uninitialize();
-
-    Bus::controllers = nullptr;
 }
 
 
@@ -34,9 +31,9 @@ void PIF::initialize(void)
 {
     for (uint32_t i = 0; i < 4; i++)
     {
-        _controllers[i].Present = 0;
-        _controllers[i].RawData = 0;
-        _controllers[i].Plugin = PLUGIN_NONE;
+        Bus::controllers[i].Present = 0;
+        Bus::controllers[i].RawData = 0;
+        Bus::controllers[i].Plugin = PLUGIN_NONE;
     }
 
     uninitialize();
@@ -86,8 +83,8 @@ void PIF::pifRead(void)
             {
                 if (channel < 4)
                 {
-                    if (_controllers[channel].Present &&
-                        _controllers[channel].RawData)
+                    if (Bus::controllers[channel].Present &&
+                        Bus::controllers[channel].RawData)
                     {
                         if (Bus::plugins->input()->ReadController != nullptr)
                         {
@@ -169,8 +166,8 @@ void PIF::pifWrite(void)
             {
                 if (channel < 4)
                 {
-                    if (_controllers[channel].Present &&
-                        _controllers[channel].RawData)
+                    if (Bus::controllers[channel].Present &&
+                        Bus::controllers[channel].RawData)
                     {
                         if (Bus::plugins->input()->ControllerCommand != nullptr)
                         {
@@ -213,7 +210,7 @@ void PIF::readController(int32_t controller, uint8_t* cmd)
     switch (cmd[2])
     {
     case 1:
-        if (_controllers[controller].Present)
+        if (Bus::controllers[controller].Present)
         {
             // TODO: pj64 polls getkeys at every VI and
             // simply copies the most recent values here.
@@ -224,9 +221,9 @@ void PIF::readController(int32_t controller, uint8_t* cmd)
         }
         break;
     case 2: // read controller pack
-        if (_controllers[controller].Present)
+        if (Bus::controllers[controller].Present)
         {
-            if (_controllers[controller].Plugin == PLUGIN_RAW)
+            if (Bus::controllers[controller].Plugin == PLUGIN_RAW)
             {
                 if (Bus::plugins->input()->ReadController != nullptr) {
                     Bus::plugins->input()->ReadController(controller, cmd);
@@ -235,9 +232,9 @@ void PIF::readController(int32_t controller, uint8_t* cmd)
         }
         break;
     case 3: // write controller pack
-        if (_controllers[controller].Present)
+        if (Bus::controllers[controller].Present)
         {
-            if (_controllers[controller].Plugin == PLUGIN_RAW)
+            if (Bus::controllers[controller].Plugin == PLUGIN_RAW)
             {
                 if (Bus::plugins->input()->ReadController != nullptr) {
                     Bus::plugins->input()->ReadController(controller, cmd);
@@ -259,11 +256,11 @@ void PIF::controllerCommand(int32_t controller, uint8_t* cmd)
             break;
         }
 
-        if (_controllers[controller].Present)
+        if (Bus::controllers[controller].Present)
         {
             cmd[3] = 0x05;
             cmd[4] = 0x00;
-            switch (_controllers[controller].Plugin)
+            switch (Bus::controllers[controller].Plugin)
             {
             case PLUGIN_MEMPAK:
                 cmd[5] = 1;
@@ -282,16 +279,16 @@ void PIF::controllerCommand(int32_t controller, uint8_t* cmd)
         }
         break;
     case 0x01:
-        if (!_controllers[controller].Present)
+        if (!Bus::controllers[controller].Present)
         {
             cmd[1] |= 0x80;
         }
         break;
     case 0x02: // read controller pack
-        if (_controllers[controller].Present)
+        if (Bus::controllers[controller].Present)
         {
             int address = (cmd[3] << 8) | cmd[4];
-            switch (_controllers[controller].Plugin)
+            switch (Bus::controllers[controller].Plugin)
             {
             case PLUGIN_MEMPAK:
                 _mempak->read(controller, address, &cmd[5]);
@@ -313,10 +310,10 @@ void PIF::controllerCommand(int32_t controller, uint8_t* cmd)
         }
         break;
     case 0x03: // write controller pack
-        if (_controllers[controller].Present)
+        if (Bus::controllers[controller].Present)
         {
             int address = (cmd[3] << 8) | cmd[4];
-            switch (_controllers[controller].Plugin)
+            switch (Bus::controllers[controller].Plugin)
             {
             case PLUGIN_MEMPAK:
                 _mempak->write(controller, address, &cmd[5]);

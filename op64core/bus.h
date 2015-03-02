@@ -1,6 +1,8 @@
 #pragma once
 
 #include "op64.h"
+#include "inputtypes.h"
+
 #include <atomic>
 
 // forward decls to avoid include creep
@@ -19,8 +21,6 @@ class RCP;
 
 class RDRAMController;
 
-struct _controller_data;
-typedef struct _controller_data CONTROL;
 class SRAM;
 class FlashRam;
 
@@ -29,24 +29,26 @@ namespace Bus
     // unmanaged devices
     extern ICPU* cpu;
     extern IMemory* mem;
-    extern Rom* rom;
     extern Plugins* plugins;
-    extern SysTiming* systimer;
-    extern CheatEngine* cheat;
 
     // managed devices
-    extern RCP* rcp;
+    extern SysTiming* systimer;
+    extern CheatEngine* cheat;
+    extern Rom* rom;
     extern InterruptHandler* interrupt;
     extern PIF* pif;
-    extern CONTROL* controllers;
     extern SRAM* sram;
     extern FlashRam* flashram;
 
     // controllers
+    extern RCP* rcp;
     extern RDRAMController* rdram;
 
     // regs
     extern uint32_t* cp0_reg;
+
+    // controller data
+    extern CONTROL controllers[4];
 
     // cpu state
     extern ProgramCounter* PC;

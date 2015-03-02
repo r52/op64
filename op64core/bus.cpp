@@ -14,17 +14,16 @@
 namespace Bus
 {
     // unmanaged devices
-    Rom* rom = nullptr;
     ICPU* cpu = nullptr;
     IMemory* mem = nullptr;
     Plugins* plugins = nullptr;
-    SysTiming* systimer = nullptr;
-    CheatEngine* cheat = nullptr;
 
     // managed devices
+    SysTiming* systimer = nullptr;
+    CheatEngine* cheat = nullptr;
+    Rom* rom = nullptr;
     InterruptHandler* interrupt = nullptr;
     PIF* pif = nullptr;
-    CONTROL* controllers = nullptr;
     SRAM* sram = nullptr;
     FlashRam* flashram = nullptr;
 
@@ -34,6 +33,9 @@ namespace Bus
 
     // regs
     uint32_t* cp0_reg = nullptr;
+
+    // controller data
+    CONTROL controllers[4];
 
     // cpu state
     ProgramCounter* PC = nullptr;

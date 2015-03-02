@@ -63,11 +63,6 @@ public:
 
     void softReset(void);
 
-    inline bool isSpecialDone(void)
-    {
-        return _SPECIAL_done;
-    }
-
 private:
     void doHardReset(void);
     void popInterruptEvent(void);
@@ -76,5 +71,4 @@ private:
     InterruptQueue q;
 
     int32_t _vi_counter = 0;
-    bool _SPECIAL_done;
 };

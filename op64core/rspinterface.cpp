@@ -138,7 +138,7 @@ void RSPInterface::prepareRSP(void)
         }
 
         // unprotecting old frame buffers
-        ((MPMemory*)Bus::mem)->unprotectFramebuffer();
+        Bus::mem->unprotectFramebuffer();
 
         stat[SP_PC_REG] &= 0xFFF;
         Bus::plugins->rsp()->DoRspCycles(0xffffffff);
@@ -160,7 +160,7 @@ void RSPInterface::prepareRSP(void)
         reg[SP_STATUS_REG] &= ~0x303;
 
         // protecting new frame buffers
-        ((MPMemory*)Bus::mem)->protectFramebuffer();
+        Bus::mem->protectFramebuffer();
     }
     // Audio task
     else if (dmem[0xFC0 / 4] == 2)

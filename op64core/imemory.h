@@ -28,7 +28,10 @@ public:
     virtual void readmem(uint32_t& address, uint64_t* dest, DataSize size) = 0;
     virtual void writemem(uint32_t address, uint64_t src, DataSize size) = 0;
 
-    // shouldn't be using this except with mupen interpreter
+    // shouldn't be using these except with mupen interpreter
+    virtual void unprotectFramebuffer(void) = 0;
+    virtual void protectFramebuffer(void) = 0;
+
     inline uint32_t* fastFetch(uint32_t address)
     {
         if ((address & 0xc0000000) != 0x80000000)

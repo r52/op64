@@ -13,6 +13,7 @@
 #include "rcp.h"
 #include "pif.h"
 
+static bool _SPECIAL_done = false;
 
 bool Interrupt::operator<(const Interrupt& i) const
 {
@@ -31,10 +32,17 @@ bool Interrupt::operator<(const Interrupt& i) const
         {
             if ((cp0_reg[CP0_COUNT_REG] - i.count) < 0x10000000)
             {
-                if (i.type == SPECIAL_INT && Bus::interrupt->isSpecialDone())
-                    return true;
-
-                return false;
+                switch (i.type)
+                {
+                case SPECIAL_INT:
+                    if (_SPECIAL_done)
+                        return true;
+                    else
+                        return false;
+                    break;
+                default:
+                    return false;
+                }
             }
             
             return true;

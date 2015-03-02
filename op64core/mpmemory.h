@@ -33,8 +33,8 @@ public:
         (this->*writemem_table[address >> 16])(address, src, size);
     }
 
-    void unprotectFramebuffer(void);
-    void protectFramebuffer(void);
+    virtual void unprotectFramebuffer(void);
+    virtual void protectFramebuffer(void);
 
 private:
     // Data read
