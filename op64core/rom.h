@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <boost/filesystem.hpp>
 
-#include "bus.h"
 #include "cheat.h"
 #include "rcpinterface.h"
 

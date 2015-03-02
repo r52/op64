@@ -5,8 +5,8 @@
 #include "rom.h"
 
 
-void gfx_dummy_func(void) {}
-void DummyMoveScreen(int32_t, int32_t) {}
+static void gfx_dummy_func(void) {}
+static void DummyMoveScreen(int32_t, int32_t) {}
 
 GfxPlugin::GfxPlugin(const char* libPath) :
 CaptureScreen(nullptr),

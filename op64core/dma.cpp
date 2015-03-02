@@ -13,6 +13,7 @@
 #include "sram.h"
 #include "flashram.h"
 #include "rdramcontroller.h"
+#include "util.h"
 
 using namespace Bus;
 

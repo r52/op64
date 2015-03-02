@@ -1,3 +1,4 @@
+#include "bus.h"
 #include "flashram.h"
 #include "configstore.h"
 #include "rom.h"

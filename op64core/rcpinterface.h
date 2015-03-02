@@ -1,8 +1,6 @@
 #pragma once
 
 #include "op64.h"
-#include "rcpcommon.h"
-
 
 // Optional I/O mode can be implemented by interfaces 
 enum RCPIOMode
@@ -15,6 +13,7 @@ enum RCPIOMode
 class RCPInterface
 {
 public:
+    virtual ~RCPInterface() {}
     virtual OPStatus read(uint32_t address, uint32_t* data) = 0;
     virtual OPStatus write(uint32_t address, uint32_t data, uint32_t mask) = 0;
 

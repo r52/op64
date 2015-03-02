@@ -1,7 +1,5 @@
 #pragma once
 
-#include "rcpcommon.h"
-#include "util.h"
 #include "tlb.h"
 #include "bus.h"
 #include "rcp.h"
@@ -21,7 +19,7 @@ class IMemory
 {
 
 public:
-    ~IMemory();
+    virtual ~IMemory();
 
     virtual void initialize(void);
     virtual void uninitialize(void);

@@ -1,3 +1,4 @@
+#include "bus.h"
 #include "cp0.h"
 #include "icpu.h"
 #include "rom.h"

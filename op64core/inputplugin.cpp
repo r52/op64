@@ -2,7 +2,6 @@
 #include "bus.h"
 #include "rom.h"
 
-
 InputPlugin::InputPlugin(const char* libPath) :
 _libHandle(nullptr),
 _initialized(false),

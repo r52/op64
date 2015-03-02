@@ -2,6 +2,7 @@
 #include "util.h"
 #include "logger.h"
 #include "bus.h"
+#include "cp0.h"
 
 #if defined(_MSC_VER)
 #include <intrin.h>

@@ -5,6 +5,7 @@
 #include "cp1.h"
 #include "interrupthandler.h"
 #include "tlb.h"
+#include "util.h"
 
 
 void Interpreter::MFC0(void)

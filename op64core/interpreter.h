@@ -4,7 +4,6 @@
 
 #include <cstdint>
 #include "icpu.h"
-#include "cp0.h"
 
 #include "bus.h"
 #include "imemory.h"

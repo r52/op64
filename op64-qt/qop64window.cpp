@@ -5,6 +5,7 @@
 #include "plugins.h"
 #include "configstore.h"
 #include "romdb.h"
+#include "bus.h"
 
 #include <QFileDialog>
 #include <QMessageBox>

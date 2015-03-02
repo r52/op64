@@ -1,8 +1,10 @@
 #include "interpreter.h"
 #include "logger.h"
 #include "bus.h"
+#include "cp0.h"
 #include "cp1.h"
 #include "fpu.h"
+#include "util.h"
 
 
 void Interpreter::MFC1(void)

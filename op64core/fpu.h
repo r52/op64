@@ -1,12 +1,7 @@
 #pragma once
 
-#include "bus.h"
-#include "icpu.h"
-#include "cp1.h"
-
 #include <cfenv>
 #include <xmmintrin.h>
-
 
 enum CompareFlag
 {

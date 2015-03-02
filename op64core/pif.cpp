@@ -14,6 +14,10 @@
 #include "cp0.h"
 #include "interrupthandler.h"
 
+#include "eeprom.h"
+#include "mempak.h"
+#include "rcpcommon.h"
+
 
 PIF::PIF(void) :
 _eeprom(nullptr),

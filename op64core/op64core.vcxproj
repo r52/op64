@@ -70,6 +70,7 @@
       <StructMemberAlignment>16Bytes</StructMemberAlignment>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <OmitFramePointers>true</OmitFramePointers>
+      <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

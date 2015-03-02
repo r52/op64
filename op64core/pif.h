@@ -1,10 +1,11 @@
 #pragma once
 
 #include "rcpinterface.h"
-#include "eeprom.h"
-#include "mempak.h"
 
 #define PIF_RAM_SIZE 0x40
+
+class EEPROM;
+class MemPak;
 
 class PIF : public RCPInterface
 {

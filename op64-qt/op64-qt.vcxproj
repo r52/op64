@@ -56,6 +56,8 @@
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <StructMemberAlignment>16Bytes</StructMemberAlignment>
       <OmitFramePointers>false</OmitFramePointers>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -85,6 +87,8 @@
       <InterproceduralOptimization>MultiFile</InterproceduralOptimization>
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>true</WholeProgramOptimization>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

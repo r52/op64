@@ -188,7 +188,7 @@ class ICPU
     typedef std::array<instruction_ptr, 64> InstructionTable;
 
 public:
-    ~ICPU(void);
+    virtual ~ICPU(void);
     virtual uint32_t getCPUType(void) = 0;
 
     virtual void initialize(void) = 0;

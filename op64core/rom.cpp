@@ -8,6 +8,8 @@
 #include "util.h"
 #include "md5.h"
 #include "romdb.h"
+#include "bus.h"
+#include "rcpcommon.h"
 
 using namespace boost::filesystem;
 

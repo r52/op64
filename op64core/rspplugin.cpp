@@ -3,6 +3,7 @@
 #include "audioplugin.h"
 #include "rcpcommon.h"
 #include "rcp.h"
+#include "bus.h"
 
 RSPPlugin::RSPPlugin(const char* libPath) :
 Config(false),

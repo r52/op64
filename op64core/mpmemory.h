@@ -2,11 +2,10 @@
 #pragma once
 
 #include <cstdint>
-#include "imemory.h"
-#include "bus.h"
-#include "tlb.h"
-#include "rcpinterface.h"
 
+#include "imemory.h"
+
+class RCPInterface;
 
 class MPMemory : public IMemory
 {
@@ -105,6 +104,4 @@ private:
 
     memptr_read readmem_table[0x10000];
     memptr_write writemem_table[0x10000];
-
-    uint32_t _rom_lastwrite = 0;
 };

@@ -5,7 +5,7 @@
 #include "configstore.h"
 #include "optime.h"
 
-unsigned char byte2bcd(int n)
+static unsigned char byte2bcd(int n)
 {
     n %= 100;
     return (unsigned char)((n / 10) << 4) | (n % 10);
