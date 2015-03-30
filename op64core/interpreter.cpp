@@ -837,8 +837,13 @@ void Interpreter::globalJump(uint32_t addr)
     _PC = addr;
 }
 
+// NOTE: these exceptions assume that we never go into
+// extended addressing mode, which is probably true for
+// most if not all N64 games
 void Interpreter::generalException(void)
 {
+    unsigned offset = 0x180;
+
     _cp0->updateCount(_PC);
     _cp0_reg[CP0_STATUS_REG] |= 2;
 
@@ -854,7 +859,15 @@ void Interpreter::generalException(void)
         _cp0_reg[CP0_CAUSE_REG] &= 0x7FFFFFFF;
     }
 
-    globalJump(0x80000180);
+    if (_cp0_reg[CP0_STATUS_REG] & 0x400000)
+    {
+        globalJump(0xBFC00200U + offset);
+    }
+    else
+    {
+        globalJump(0x80000000U + offset);
+    }
+
     Bus::last_jump_addr = (uint32_t)_PC;
 
     if (_delay_slot)
@@ -865,9 +878,9 @@ void Interpreter::generalException(void)
 
 }
 
-void Interpreter::TLBRefillException(unsigned int address, TLBProbeMode mode)
+void Interpreter::TLBRefillException(unsigned int address, TLBProbeMode mode, bool miss)
 {
-    bool usual_handler = false;
+    unsigned type, offset;
 
     if (mode != TLB_FAST_READ)
     {
@@ -876,64 +889,72 @@ void Interpreter::TLBRefillException(unsigned int address, TLBProbeMode mode)
 
     if (mode == TLB_WRITE)
     {
-        _cp0_reg[CP0_CAUSE_REG] = (3 << 2);
+        type = 0x3;
     }
     else
     {
-        _cp0_reg[CP0_CAUSE_REG] = (2 << 2);
-    }
-
-    _cp0_reg[CP0_BADVADDR_REG] = address;
-    _cp0_reg[CP0_CONTEXT_REG] = (_cp0_reg[CP0_CONTEXT_REG] & 0xFF80000F) | ((address >> 9) & 0x007FFFF0);
-    _cp0_reg[CP0_ENTRYHI_REG] = address & 0xFFFFE000;
-
-    if (_cp0_reg[CP0_STATUS_REG] & 0x2) // Test de EXL
-    {
-        globalJump(0x80000180);
-        if (_delay_slot)
-        {
-            _cp0_reg[CP0_CAUSE_REG] |= 0x80000000;
-        }
-        else
-        {
-            _cp0_reg[CP0_CAUSE_REG] &= 0x7FFFFFFF;
-        }
-    }
-    else
-    {
-        _cp0_reg[CP0_EPC_REG] = (uint32_t)_PC;
-
-        _cp0_reg[CP0_CAUSE_REG] &= ~0x80000000;
-        _cp0_reg[CP0_STATUS_REG] |= 0x2; //EXL=1
-
-        if (address >= 0x80000000 && address < 0xc0000000)
-        {
-            usual_handler = true;
-        }
-
-        if (usual_handler)
-        {
-            globalJump(0x80000180);
-        }
-        else
-        {
-            globalJump(0x80000000);
-        }
+        type = 0x2;
     }
 
     if (_delay_slot)
     {
-        _cp0_reg[CP0_CAUSE_REG] |= 0x80000000;
-        _cp0_reg[CP0_EPC_REG] -= 4;
+        if (!(_cp0_reg[CP0_STATUS_REG] & 0x2))
+        {
+            _cp0_reg[CP0_CAUSE_REG] |= 0x80000000;
+            _cp0_reg[CP0_EPC_REG] = (uint32_t)_PC - 4;
+
+            // NOTE: offset should be 0x80 if we are in extended mode, but we don't implement it
+            offset = 0x000;
+        }
+        else
+        {
+            offset = 0x180;
+        }
     }
     else
     {
-        _cp0_reg[CP0_CAUSE_REG] &= 0x7FFFFFFF;
+        if (!(_cp0_reg[CP0_STATUS_REG] & 0x2))
+        {
+            _cp0_reg[CP0_CAUSE_REG] &= ~0x80000000;
+            _cp0_reg[CP0_EPC_REG] = (uint32_t)_PC;
+
+            // NOTE: offset should be 0x80 if we are in extended mode, but we don't implement it
+            offset = 0x000;
+        }
+        else
+        {
+            offset = 0x180;
+        }
     }
 
-    if (mode != TLB_FAST_READ)
+    uint32_t vpn2 = address >> 13 & 0x7FFFF;
+    uint8_t asid = _cp0_reg[CP0_ENTRYHI_REG];
+
+    uint64_t entryhi = (int32_t)((vpn2 << 13) | asid);
+
+    uint64_t context = _cp0_reg[CP0_CONTEXT_REG];
+    context &= ~(0x7FFFFULL << 4);
+    context |= vpn2 << 4;
+
+    _cp0_reg[CP0_ENTRYHI_REG] = entryhi;
+    _cp0_reg[CP0_CONTEXT_REG] = context;
+    _cp0_reg[CP0_BADVADDR_REG] = address;
+
+    if (!miss)
     {
-        _cp0_reg[CP0_EPC_REG] -= 4;
+        offset = 0x180;
+    }
+
+    _cp0_reg[CP0_STATUS_REG] |= 0x2;
+    _cp0_reg[CP0_CAUSE_REG] = (_cp0_reg[CP0_CAUSE_REG] & ~0xFF) | (type << 2);
+
+    if (_cp0_reg[CP0_STATUS_REG] & 0x400000)
+    {
+        globalJump(0xBFC00200U + offset);
+    }
+    else
+    {
+        globalJump(0x80000000U + offset);
     }
 
     Bus::last_jump_addr = (uint32_t)_PC;

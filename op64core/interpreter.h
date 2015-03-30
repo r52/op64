@@ -44,7 +44,7 @@ public:
     virtual void globalJump(uint32_t addr);
 
     virtual void generalException(void);
-    virtual void TLBRefillException(unsigned int address, TLBProbeMode mode);
+    virtual void TLBRefillException(unsigned int address, TLBProbeMode mode, bool miss);
 
 private:
     inline void prefetch(void)

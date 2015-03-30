@@ -200,7 +200,7 @@ public:
 
     // COP0
     virtual void generalException(void) = 0;
-    virtual void TLBRefillException(unsigned int address, TLBProbeMode mode) = 0;
+    virtual void TLBRefillException(unsigned int address, TLBProbeMode mode, bool miss) = 0;
 
     inline CP0* getCp0(void)
     {

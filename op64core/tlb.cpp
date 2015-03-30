@@ -76,10 +76,8 @@ uint32_t TLB::virtual_to_physical_address(uint32_t address, TLBProbeMode mode)
 {
     if (address >= 0x7f000000 && address < 0x80000000 && (Bus::rom->getGameHacks() & GAME_HACK_GOLDENEYE))
     {
-        /**************************************************
-        GoldenEye 007 hack allows for use of TLB.
-        Recoded by okaygo to support all US, J, and E ROMS.
-        **************************************************/
+        //GoldenEye 007 hack allows for use of TLB.
+        //Recoded by okaygo to support all US, J, and E ROMS.
         switch (Bus::rom->getHeader()->Country_code & 0xFF)
         {
         case 0x45:
@@ -103,18 +101,18 @@ uint32_t TLB::virtual_to_physical_address(uint32_t address, TLBProbeMode mode)
 
     unsigned asid = Bus::cp0_reg[CP0_ENTRYHI_REG] & 0xFF;
     CP0* cp0 = Bus::cpu->getCp0();
-    int index = tlb_probe(cp0->tlb, address, asid);
+    unsigned index;
+    bool tlb_miss = tlb_probe(cp0->tlb, address, asid, &index);
+    uint32_t page_mask = cp0->page_mask[index];
+    unsigned select = ((page_mask + 1) & address) != 0;
 
-    if (index >= 0)
+    if (tlb_miss || !(cp0->state[index][select] & 2))
     {
-        uint32_t page_mask = cp0->page_mask[index];
-        unsigned select = ((page_mask + 1) & address) == 0 ? 0 : 1;
-        return (0x80000000 | (cp0->pfn[index][select]) | (address & page_mask));
+        Bus::cpu->TLBRefillException(address, mode, tlb_miss);
+        return 0x00000000;
     }
 
-    Bus::cpu->TLBRefillException(address, mode);
-
-    return 0x00000000;
+    return (0x80000000 | (cp0->pfn[index][select]) | (address & page_mask));
 }
 
 /* Ported cen64 tlb implementation */
@@ -122,15 +120,15 @@ void TLB::tlb_init(tlb_o& tlb)
 {
     for (uint32_t i = 0; i < 32; i++)
     {
-        tlb.vpn2[i] = ~0;
+        tlb.vpn2.data[i] = ~0;
     }
 }
 
 void TLB::tlb_write(tlb_o& tlb, unsigned index, uint64_t entry_hi, uint64_t entry_lo_0, uint64_t entry_lo_1, uint32_t page_mask)
 {
-    tlb.page_mask[index] = ~(page_mask >> 13);
+    tlb.page_mask.data[index] = ~(page_mask >> 13);
 
-    tlb.vpn2[index] =
+    tlb.vpn2.data[index] =
         (entry_hi >> 35 & 0x18000000U) |
         (entry_hi >> 13 & 0x7FFFFFF);
 
@@ -141,13 +139,13 @@ void TLB::tlb_write(tlb_o& tlb, unsigned index, uint64_t entry_hi, uint64_t entr
 void TLB::tlb_read(const tlb_o& tlb, unsigned index, uint64_t *entry_hi)
 {
     *entry_hi =
-        ((tlb.vpn2[index] & 0x18000000LLU) << 35) |
-        ((tlb.vpn2[index] & 0x7FFFFFFLLU) << 13) |
+        ((tlb.vpn2.data[index] & 0x18000000LLU) << 35) |
+        ((tlb.vpn2.data[index] & 0x7FFFFFFLLU) << 13) |
         ((tlb.global[index] & 1) << 12) |
         (tlb.asid[index]);
 }
 
-int TLB::tlb_probe(const tlb_o& tlb, uint64_t vaddr, uint8_t vasid)
+bool TLB::tlb_probe(const tlb_o& tlb, uint64_t vaddr, uint8_t vasid, unsigned* index)
 {
     int one_hot_idx;
 
@@ -168,10 +166,10 @@ int TLB::tlb_probe(const tlb_o& tlb, uint64_t vaddr, uint8_t vasid)
         __m128i check_a, check_g, asid_check;
         __m128i check;
 
-        __m128i page_mask_l = _mm_load_si128((__m128i*) (tlb.page_mask + j + 0));
-        __m128i page_mask_h = _mm_load_si128((__m128i*) (tlb.page_mask + j + 4));
-        __m128i vpn_l = _mm_load_si128((__m128i*) (tlb.vpn2 + j + 0));
-        __m128i vpn_h = _mm_load_si128((__m128i*) (tlb.vpn2 + j + 4));
+        __m128i page_mask_l = _mm_load_si128((__m128i*) (tlb.page_mask.data + j + 0));
+        __m128i page_mask_h = _mm_load_si128((__m128i*) (tlb.page_mask.data + j + 4));
+        __m128i vpn_l = _mm_load_si128((__m128i*) (tlb.vpn2.data + j + 0));
+        __m128i vpn_h = _mm_load_si128((__m128i*) (tlb.vpn2.data + j + 4));
 
         // Check for matching VPNs.
         check_l = _mm_and_si128(vpn, page_mask_l);
@@ -191,9 +189,11 @@ int TLB::tlb_probe(const tlb_o& tlb, uint64_t vaddr, uint8_t vasid)
         check = _mm_and_si128(vpn_check, asid_check);
         if ((one_hot_idx = _mm_movemask_epi8(check)) != 0)
         {
-            return j + one_hot_lut[one_hot_idx & 0xFF];
+            *index = j + one_hot_lut[one_hot_idx & 0xFF];
+            return false;
         }
     }
 
-    return -1;
+    *index = 0;
+    return true;
 }

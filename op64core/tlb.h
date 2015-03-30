@@ -28,10 +28,16 @@ EVEN IF AD
 #pragma once
 
 #include <cstdint>
+#include <emmintrin.h>
+
+union aligned_tlb_data {
+    __m128i __align[8];
+    uint32_t data[32];
+};
 
 struct tlb_o {
-    uint32_t page_mask[32];
-    uint32_t vpn2[32];
+    union aligned_tlb_data page_mask;
+    union aligned_tlb_data vpn2;
     uint8_t global[32];
     uint8_t asid[32];
 };
@@ -49,7 +55,9 @@ public:
     static uint32_t virtual_to_physical_address(uint32_t address, TLBProbeMode mode);
 
     static void tlb_init(tlb_o& tlb);
-    static int tlb_probe(const tlb_o& tlb, uint64_t vaddr, uint8_t vasid);
+
+    // Return true if miss, false otherwise
+    static bool tlb_probe(const tlb_o& tlb, uint64_t vaddr, uint8_t vasid, unsigned* index);
     static void tlb_read(const tlb_o& tlb, unsigned index, uint64_t *entry_hi);
     static void tlb_write(tlb_o& tlb, unsigned index, uint64_t entry_hi, uint64_t entry_lo_0, uint64_t entry_lo_1, uint32_t page_mask);
 };

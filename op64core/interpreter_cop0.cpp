@@ -179,8 +179,9 @@ void Interpreter::TLBWR(void)
     uint64_t entry_lo_0 = _cp0_reg[CP0_ENTRYLO0_REG] & 0x000000007FFFFFFFULL;
     uint64_t entry_lo_1 = _cp0_reg[CP0_ENTRYLO1_REG] & 0x000000007FFFFFFFULL;
     uint32_t page_mask = _cp0_reg[CP0_PAGEMASK_REG] & 0x0000000001FFE000ULL;
-    unsigned index = _cp0_reg[CP0_RANDOM_REG];
+    unsigned index = _cp0_reg[CP0_WIRED_REG] & 0x3F;
 
+    index = rand() % (32 - index) + index;
     TLB::tlb_write(_cp0->tlb, index, entry_hi, entry_lo_0, entry_lo_1, page_mask);
 
     _cp0->page_mask[index] = (page_mask | 0x1FFF) >> 1;
@@ -195,11 +196,11 @@ void Interpreter::TLBWR(void)
 void Interpreter::TLBP(void)
 {
     uint64_t entry_hi = _cp0_reg[CP0_ENTRYHI_REG] & 0x0000000001FFE000ULL;
-    int index;
+    unsigned index;
 
     _cp0_reg[CP0_INDEX_REG] |= 0x80000000;
 
-    if ((index = TLB::tlb_probe(_cp0->tlb, entry_hi, entry_hi & 0xFF)) != -1)
+    if (!TLB::tlb_probe(_cp0->tlb, entry_hi, entry_hi & 0xFF, &index))
     {
         _cp0_reg[CP0_INDEX_REG] = index;
     }
@@ -212,14 +213,15 @@ void Interpreter::ERET(void)
     _cp0->updateCount(_PC);
     if (_cp0_reg[CP0_STATUS_REG] & 0x4)
     {
-        LOG_ERROR("Error in ERET");
-        Bus::stop = true;
+        _cp0_reg[CP0_STATUS_REG] &= ~0x4;
+        globalJump(_cp0_reg[CP0_ERROREPC_REG]);
     }
     else
     {
         _cp0_reg[CP0_STATUS_REG] &= ~0x2;
         globalJump(_cp0_reg[CP0_EPC_REG]);
     }
+
     _llbit = 0;
     Bus::interrupt->checkInterrupt();
     Bus::last_jump_addr = _PC;
