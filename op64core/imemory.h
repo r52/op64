@@ -34,7 +34,10 @@ public:
     {
         if ((address & 0xc0000000) != 0x80000000)
         {
-            address = TLB::virtual_to_physical_address(address, TLB_FAST_READ);
+            if (!(address = TLB::virtual_to_physical_address(address, TLB_FAST_READ)))
+            {
+                return nops;
+            }
         }
 
         address &= 0x1ffffffc;
@@ -54,4 +57,7 @@ public:
 
         return nullptr;
     }
+
+private:
+    uint32_t nops[2];
 };

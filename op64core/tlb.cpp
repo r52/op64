@@ -112,7 +112,7 @@ uint32_t TLB::virtual_to_physical_address(uint32_t address, TLBProbeMode mode)
         return 0x00000000;
     }
 
-    return (0x80000000 | (cp0->pfn[index][select]) | (address & page_mask));
+    return (0x80000000 + ((cp0->pfn[index][select]) | (address & page_mask)));
 }
 
 /* Ported cen64 tlb implementation */

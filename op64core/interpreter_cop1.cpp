@@ -692,8 +692,6 @@ void Interpreter::C_EQ_D(void)
     if (_cp0->COP1Unusable())
         return;
 
-    ++_PC;
-
     uint8_t result = c_cmp_64(_d_reg[_cur_instr.fs], _d_reg[_cur_instr.ft]);
 
     if (result == CMP_UNORDERED)
@@ -703,6 +701,8 @@ void Interpreter::C_EQ_D(void)
     }
 
     _FCR31 = (result == CMP_EQUAL) ? _FCR31 | 0x800000 : _FCR31&~0x800000;
+
+    ++_PC;
 }
 
 void Interpreter::C_UEQ_D(void)

@@ -29,6 +29,8 @@ void IMemory::initialize(void)
     flashram = new FlashRam();
 
     pif->initialize();
+
+    fill_array(nops, 0, 2, 0);
 }
 
 void IMemory::uninitialize(void)

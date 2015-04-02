@@ -18,6 +18,7 @@ void Interpreter::MFC0(void)
         _reg[_cur_instr.rt].s = signextend<int32_t, int64_t>(_cp0_reg[_cur_instr.rd]);
         break;
     }
+
     ++_PC;
 }
 
