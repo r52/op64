@@ -1,9 +1,10 @@
 #pragma once
 
-#include "op64.h"
-#include "inputtypes.h"
-
 #include <atomic>
+
+#include <op64.h>
+
+#include "inputtypes.h"
 
 // forward decls to avoid include creep
 class IMemory;
