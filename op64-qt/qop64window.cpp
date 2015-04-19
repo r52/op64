@@ -1,22 +1,27 @@
-#include "qop64window.h"
-#include "emulator.h"
-#include "logger.h"
-#include "version.h"
-#include "plugins.h"
-#include "configstore.h"
-#include "romdb.h"
-#include "bus.h"
-
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QCloseEvent>
 #include <QSettings>
 
 #include <boost/filesystem.hpp>
+
+// op64-util
+#include <logger.h>
+
+// local
+#include "qop64window.h"
+#include "emulator.h"
+
 #include "guiconfig.h"
 #include "configdialog.h"
 #include "renderwidget.h"
 #include "logwindow.h"
+
+//op64core
+#include <version.h>
+#include <ui/configstore.h>
+#include <ui/romdb.h>
+#include <core/bus.h>
 
 
 static const char* logLevelFormatting[LOG_LEVEL_NUM] = {

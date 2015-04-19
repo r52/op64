@@ -2,7 +2,8 @@
 
 #include "configdialog.h"
 #include "configpages.h"
-#include "configstore.h"
+
+#include <ui/configstore.h>
 
 ConfigDialog::ConfigDialog(QWidget* parent)
     : QDialog(parent)

@@ -1,12 +1,13 @@
-#include "emulator.h"
-#include "rom.h"
-#include "bus.h"
-#include "plugins.h"
-#include "interpreter.h"
-#include "mpmemory.h"
-#include "gfxplugin.h"
-
 #include <QThread>
+
+#include "emulator.h"
+
+#include <rom/rom.h>
+#include <core/bus.h>
+#include <plugin/plugins.h>
+#include <plugin/gfxplugin.h>
+#include <cpu/interpreter.h>
+#include <mem/mpmemory.h>
 
 
 Emulator::Emulator(WId mainwindow) :

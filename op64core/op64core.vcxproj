@@ -49,7 +49,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\op64-util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\op64-util;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <StructMemberAlignment>16Bytes</StructMemberAlignment>
     </ClCompile>
     <Link>
@@ -61,7 +61,7 @@
       <SDLCheck>true</SDLCheck>
       <Parallelization>true</Parallelization>
       <UseIntelOptimizedHeaders>true</UseIntelOptimizedHeaders>
-      <AdditionalIncludeDirectories>..\op64-util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\op64-util;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <InterproceduralOptimization>MultiFile</InterproceduralOptimization>
@@ -81,96 +81,96 @@
     <ProjectReference />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="audiointerface.h" />
-    <ClInclude Include="audioplugin.h" />
-    <ClInclude Include="bus.h" />
-    <ClInclude Include="cheat.h" />
-    <ClInclude Include="cheatengine.h" />
-    <ClInclude Include="configdefs.h" />
-    <ClInclude Include="configstore.h" />
-    <ClInclude Include="corecontrol.h" />
-    <ClInclude Include="cp1.h" />
-    <ClInclude Include="dma.h" />
-    <ClInclude Include="dpcinterface.h" />
-    <ClInclude Include="dpsinterface.h" />
-    <ClInclude Include="eeprom.h" />
-    <ClInclude Include="flashram.h" />
-    <ClInclude Include="fpu.h" />
-    <ClInclude Include="gfxplugin.h" />
-    <ClInclude Include="icpu.h" />
-    <ClInclude Include="inputplugin.h" />
-    <ClInclude Include="inputtypes.h" />
-    <ClInclude Include="interrupthandler.h" />
-    <ClInclude Include="imemory.h" />
-    <ClInclude Include="cp0.h" />
-    <ClInclude Include="mempak.h" />
-    <ClInclude Include="mipsinterface.h" />
-    <ClInclude Include="mpmemory.h" />
-    <ClInclude Include="interpreter.h" />
-    <ClInclude Include="n64_cic_nus_6105.h" />
+    <ClInclude Include="cheat\cheat.h" />
+    <ClInclude Include="cheat\cheatengine.h" />
+    <ClInclude Include="core\bus.h" />
+    <ClInclude Include="core\inputtypes.h" />
+    <ClInclude Include="core\systiming.h" />
+    <ClInclude Include="cpu\cp0.h" />
+    <ClInclude Include="cpu\cp1.h" />
+    <ClInclude Include="cpu\dma.h" />
+    <ClInclude Include="cpu\fpu.h" />
+    <ClInclude Include="cpu\icpu.h" />
+    <ClInclude Include="cpu\interpreter.h" />
+    <ClInclude Include="cpu\interrupthandler.h" />
+    <ClInclude Include="mem\imemory.h" />
+    <ClInclude Include="mem\mpmemory.h" />
     <ClInclude Include="op64.h" />
-    <ClInclude Include="peripheralinterface.h" />
-    <ClInclude Include="pif.h" />
-    <ClInclude Include="plugins.h" />
-    <ClInclude Include="rcp.h" />
-    <ClInclude Include="rcpcommon.h" />
-    <ClInclude Include="rcpinterface.h" />
-    <ClInclude Include="rdramcontroller.h" />
-    <ClInclude Include="rdraminterface.h" />
-    <ClInclude Include="registerinterface.h" />
-    <ClInclude Include="rom.h" />
-    <ClInclude Include="romdb.h" />
-    <ClInclude Include="rspinterface.h" />
-    <ClInclude Include="rspplugin.h" />
-    <ClInclude Include="serialinterface.h" />
-    <ClInclude Include="sram.h" />
-    <ClInclude Include="systiming.h" />
+    <ClInclude Include="pif\eeprom.h" />
+    <ClInclude Include="pif\mempak.h" />
+    <ClInclude Include="pif\n64_cic_nus_6105.h" />
+    <ClInclude Include="pif\pif.h" />
+    <ClInclude Include="plugin\audioplugin.h" />
+    <ClInclude Include="plugin\gfxplugin.h" />
+    <ClInclude Include="plugin\inputplugin.h" />
+    <ClInclude Include="plugin\plugins.h" />
+    <ClInclude Include="plugin\rspplugin.h" />
+    <ClInclude Include="rcp\audiointerface.h" />
+    <ClInclude Include="rcp\dpcinterface.h" />
+    <ClInclude Include="rcp\dpsinterface.h" />
+    <ClInclude Include="rcp\mipsinterface.h" />
+    <ClInclude Include="rcp\peripheralinterface.h" />
+    <ClInclude Include="rcp\rcp.h" />
+    <ClInclude Include="rcp\rcpcommon.h" />
+    <ClInclude Include="rcp\rcpinterface.h" />
+    <ClInclude Include="rcp\rdramcontroller.h" />
+    <ClInclude Include="rcp\rdraminterface.h" />
+    <ClInclude Include="rcp\registerinterface.h" />
+    <ClInclude Include="rcp\rspinterface.h" />
+    <ClInclude Include="rcp\serialinterface.h" />
+    <ClInclude Include="rcp\videointerface.h" />
+    <ClInclude Include="rom\flashram.h" />
+    <ClInclude Include="rom\rom.h" />
+    <ClInclude Include="rom\sram.h" />
     <ClInclude Include="tlb.h" />
+    <ClInclude Include="ui\configdefs.h" />
+    <ClInclude Include="ui\configstore.h" />
+    <ClInclude Include="ui\corecontrol.h" />
+    <ClInclude Include="ui\romdb.h" />
     <ClInclude Include="version.h" />
-    <ClInclude Include="videointerface.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="audiointerface.cpp" />
-    <ClCompile Include="audioplugin.cpp" />
-    <ClCompile Include="bus.cpp" />
-    <ClCompile Include="cheatengine.cpp" />
-    <ClCompile Include="configstore.cpp" />
-    <ClCompile Include="corecontrol.cpp" />
-    <ClCompile Include="cp1.cpp" />
-    <ClCompile Include="dma.cpp" />
-    <ClCompile Include="dpcinterface.cpp" />
-    <ClCompile Include="dpsinterface.cpp" />
-    <ClCompile Include="eeprom.cpp" />
-    <ClCompile Include="flashram.cpp" />
-    <ClCompile Include="gfxplugin.cpp" />
-    <ClCompile Include="icpu.cpp" />
-    <ClCompile Include="inputplugin.cpp" />
-    <ClCompile Include="interrupthandler.cpp" />
-    <ClCompile Include="cp0.cpp" />
-    <ClCompile Include="imemory.cpp" />
-    <ClCompile Include="mempak.cpp" />
-    <ClCompile Include="mipsinterface.cpp" />
-    <ClCompile Include="mpmemory.cpp" />
-    <ClCompile Include="interpreter.cpp" />
-    <ClCompile Include="interpreter_cop0.cpp" />
-    <ClCompile Include="interpreter_cop1.cpp" />
-    <ClCompile Include="interpreter_regimm.cpp" />
-    <ClCompile Include="interpreter_special.cpp" />
-    <ClCompile Include="n64_cic_nus_6105.cpp" />
-    <ClCompile Include="peripheralinterface.cpp" />
-    <ClCompile Include="pif.cpp" />
-    <ClCompile Include="plugins.cpp" />
-    <ClCompile Include="rdramcontroller.cpp" />
-    <ClCompile Include="rdraminterface.cpp" />
-    <ClCompile Include="rom.cpp" />
-    <ClCompile Include="romdb.cpp" />
-    <ClCompile Include="rspinterface.cpp" />
-    <ClCompile Include="rspplugin.cpp" />
-    <ClCompile Include="serialinterface.cpp" />
-    <ClCompile Include="sram.cpp" />
-    <ClCompile Include="systiming.cpp" />
-    <ClCompile Include="tlb.cpp" />
-    <ClCompile Include="videointerface.cpp" />
+    <ClCompile Include="cheat\cheatengine.cpp" />
+    <ClCompile Include="core\bus.cpp" />
+    <ClCompile Include="core\systiming.cpp" />
+    <ClCompile Include="cpu\cp0.cpp" />
+    <ClCompile Include="cpu\cp1.cpp" />
+    <ClCompile Include="cpu\dma.cpp" />
+    <ClCompile Include="cpu\icpu.cpp" />
+    <ClCompile Include="cpu\interpreter.cpp" />
+    <ClCompile Include="cpu\interpreter_cop0.cpp" />
+    <ClCompile Include="cpu\interpreter_cop1.cpp" />
+    <ClCompile Include="cpu\interpreter_regimm.cpp" />
+    <ClCompile Include="cpu\interpreter_special.cpp" />
+    <ClCompile Include="cpu\interrupthandler.cpp" />
+    <ClCompile Include="mem\imemory.cpp" />
+    <ClCompile Include="mem\mpmemory.cpp" />
+    <ClCompile Include="pif\eeprom.cpp" />
+    <ClCompile Include="pif\mempak.cpp" />
+    <ClCompile Include="pif\n64_cic_nus_6105.cpp" />
+    <ClCompile Include="pif\pif.cpp" />
+    <ClCompile Include="plugin\audioplugin.cpp" />
+    <ClCompile Include="plugin\gfxplugin.cpp" />
+    <ClCompile Include="plugin\inputplugin.cpp" />
+    <ClCompile Include="plugin\plugins.cpp" />
+    <ClCompile Include="plugin\rspplugin.cpp" />
+    <ClCompile Include="rcp\audiointerface.cpp" />
+    <ClCompile Include="rcp\dpcinterface.cpp" />
+    <ClCompile Include="rcp\dpsinterface.cpp" />
+    <ClCompile Include="rcp\mipsinterface.cpp" />
+    <ClCompile Include="rcp\peripheralinterface.cpp" />
+    <ClCompile Include="rcp\rdramcontroller.cpp" />
+    <ClCompile Include="rcp\rdraminterface.cpp" />
+    <ClCompile Include="rcp\rspinterface.cpp" />
+    <ClCompile Include="rcp\serialinterface.cpp" />
+    <ClCompile Include="rcp\videointerface.cpp" />
+    <ClCompile Include="rom\flashram.cpp" />
+    <ClCompile Include="rom\rom.cpp" />
+    <ClCompile Include="rom\sram.cpp" />
+    <ClCompile Include="tlb\tlb.cpp" />
+    <ClCompile Include="ui\configstore.cpp" />
+    <ClCompile Include="ui\corecontrol.cpp" />
+    <ClCompile Include="ui\romdb.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\op64-util\op64-util.vcxproj">

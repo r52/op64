@@ -25,15 +25,6 @@
     <Filter Include="Source Files\cpu">
       <UniqueIdentifier>{9d5ae354-70c0-4ccb-904a-eea78b89f8a8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\memory\mupen">
-      <UniqueIdentifier>{f06efc76-6a16-4157-954d-8b4fd9aa45e3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\memory\mupen">
-      <UniqueIdentifier>{e5df5003-2374-4473-8f53-2eaf76ec5b1e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\cpu\interpreter">
-      <UniqueIdentifier>{da718fe3-efbf-4c86-a26e-d4fbd1fc6504}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\cpu\interpreter">
       <UniqueIdentifier>{46d23dff-f0fc-49d9-8678-ecd65ac45439}</UniqueIdentifier>
     </Filter>
@@ -43,23 +34,11 @@
     <Filter Include="Source Files\tlb">
       <UniqueIdentifier>{0d681ba0-7104-4f15-80a4-23b7576f8b54}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\cpu\fpu">
-      <UniqueIdentifier>{a74bec3c-f3bb-48ad-9534-6db2135f8ce5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\pif">
       <UniqueIdentifier>{7e18ca9f-ec12-4114-95a8-7c9b23b3253f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\pif">
       <UniqueIdentifier>{c29fff6e-c4b6-46c1-bbab-c3b056432047}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\input">
-      <UniqueIdentifier>{02f8912e-eedb-42e5-9111-4a22cf5ca347}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\save">
-      <UniqueIdentifier>{6299bd8b-357b-4d2a-b332-a28df329dd8c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\save">
-      <UniqueIdentifier>{23360af5-2a8d-4784-b448-b497b18e1599}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\plugins">
       <UniqueIdentifier>{03a7396a-a7df-4898-8022-f2cd25c97a1e}</UniqueIdentifier>
@@ -69,18 +48,6 @@
     </Filter>
     <Filter Include="Source Files\cpu\fpu">
       <UniqueIdentifier>{e7813743-ad95-4e34-8986-2db428b6c2cb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\config">
-      <UniqueIdentifier>{663ffd8b-8900-4056-ba76-7a2a786af16f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\config">
-      <UniqueIdentifier>{516bf050-def6-41aa-a854-e8733e13aeee}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\romdb">
-      <UniqueIdentifier>{50dbaab2-7cb4-4723-8f7d-e829dee41a0a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\romdb">
-      <UniqueIdentifier>{7d895bc2-e343-4c15-810f-a7666bf9c046}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\cheat">
       <UniqueIdentifier>{c3d73d9e-ef7a-4b71-98c4-5360ccde2f88}</UniqueIdentifier>
@@ -148,279 +115,291 @@
     <Filter Include="Source Files\rcp\sp">
       <UniqueIdentifier>{8da7e9fe-a715-441a-a6c6-fb599a646cd9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\rdram">
-      <UniqueIdentifier>{9473b81a-6ab4-49e0-8188-0b438090f7f4}</UniqueIdentifier>
+    <Filter Include="Header Files\core">
+      <UniqueIdentifier>{3ed7dde9-a6f9-491a-b94c-bda6dade75e5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\rdram">
-      <UniqueIdentifier>{5a41c2a3-dd25-4e33-a813-fd605f78964b}</UniqueIdentifier>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{47f8601d-4246-46fb-bdd5-98fef5110aae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ui">
+      <UniqueIdentifier>{757646bd-023f-4831-9c4a-8d05d48e0171}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rom">
+      <UniqueIdentifier>{abf70f3b-bbf7-41ba-b5e8-2079c165b91c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ui">
+      <UniqueIdentifier>{d5721b48-beea-43eb-ba9b-5ff27e504af2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rom">
+      <UniqueIdentifier>{9d11ce35-1169-4376-9f0f-7570db3a0780}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="rom.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="icpu.h">
-      <Filter>Header Files\cpu</Filter>
-    </ClInclude>
-    <ClInclude Include="mpmemory.h">
-      <Filter>Header Files\memory\mupen</Filter>
-    </ClInclude>
-    <ClInclude Include="interrupthandler.h">
-      <Filter>Header Files\cpu</Filter>
-    </ClInclude>
-    <ClInclude Include="cp1.h">
-      <Filter>Header Files\cpu</Filter>
-    </ClInclude>
-    <ClInclude Include="cp0.h">
-      <Filter>Header Files\cpu</Filter>
-    </ClInclude>
-    <ClInclude Include="bus.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="tlb.h">
       <Filter>Header Files\tlb</Filter>
-    </ClInclude>
-    <ClInclude Include="fpu.h">
-      <Filter>Header Files\cpu\fpu</Filter>
-    </ClInclude>
-    <ClInclude Include="pif.h">
-      <Filter>Header Files\pif</Filter>
-    </ClInclude>
-    <ClInclude Include="n64_cic_nus_6105.h">
-      <Filter>Header Files\pif</Filter>
-    </ClInclude>
-    <ClInclude Include="inputtypes.h">
-      <Filter>Header Files\input</Filter>
-    </ClInclude>
-    <ClInclude Include="imemory.h">
-      <Filter>Header Files\memory</Filter>
-    </ClInclude>
-    <ClInclude Include="rcpcommon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dma.h">
-      <Filter>Header Files\cpu</Filter>
-    </ClInclude>
-    <ClInclude Include="sram.h">
-      <Filter>Header Files\save</Filter>
-    </ClInclude>
-    <ClInclude Include="flashram.h">
-      <Filter>Header Files\save</Filter>
-    </ClInclude>
-    <ClInclude Include="eeprom.h">
-      <Filter>Header Files\save</Filter>
-    </ClInclude>
-    <ClInclude Include="mempak.h">
-      <Filter>Header Files\save</Filter>
-    </ClInclude>
-    <ClInclude Include="plugins.h">
-      <Filter>Header Files\plugins</Filter>
-    </ClInclude>
-    <ClInclude Include="gfxplugin.h">
-      <Filter>Header Files\plugins</Filter>
-    </ClInclude>
-    <ClInclude Include="audioplugin.h">
-      <Filter>Header Files\plugins</Filter>
-    </ClInclude>
-    <ClInclude Include="rspplugin.h">
-      <Filter>Header Files\plugins</Filter>
-    </ClInclude>
-    <ClInclude Include="inputplugin.h">
-      <Filter>Header Files\plugins</Filter>
-    </ClInclude>
-    <ClInclude Include="systiming.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="corecontrol.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="configdefs.h">
-      <Filter>Header Files\config</Filter>
-    </ClInclude>
-    <ClInclude Include="configstore.h">
-      <Filter>Header Files\config</Filter>
-    </ClInclude>
-    <ClInclude Include="romdb.h">
-      <Filter>Header Files\romdb</Filter>
-    </ClInclude>
-    <ClInclude Include="cheat.h">
-      <Filter>Header Files\cheat</Filter>
-    </ClInclude>
-    <ClInclude Include="cheatengine.h">
-      <Filter>Header Files\cheat</Filter>
-    </ClInclude>
-    <ClInclude Include="interpreter.h">
-      <Filter>Header Files\cpu\interpreter</Filter>
-    </ClInclude>
-    <ClInclude Include="rcpinterface.h">
-      <Filter>Header Files\rcp</Filter>
-    </ClInclude>
     <ClInclude Include="op64.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="rcp.h">
+    <ClInclude Include="cheat\cheat.h">
+      <Filter>Header Files\cheat</Filter>
+    </ClInclude>
+    <ClInclude Include="cheat\cheatengine.h">
+      <Filter>Header Files\cheat</Filter>
+    </ClInclude>
+    <ClInclude Include="core\bus.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\inputtypes.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\systiming.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\configdefs.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\configstore.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\corecontrol.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\romdb.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="mem\imemory.h">
+      <Filter>Header Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="mem\mpmemory.h">
+      <Filter>Header Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\cp0.h">
+      <Filter>Header Files\cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\cp1.h">
+      <Filter>Header Files\cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\dma.h">
+      <Filter>Header Files\cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\fpu.h">
+      <Filter>Header Files\cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\icpu.h">
+      <Filter>Header Files\cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\interpreter.h">
+      <Filter>Header Files\cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\interrupthandler.h">
+      <Filter>Header Files\cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="pif\n64_cic_nus_6105.h">
+      <Filter>Header Files\pif</Filter>
+    </ClInclude>
+    <ClInclude Include="pif\pif.h">
+      <Filter>Header Files\pif</Filter>
+    </ClInclude>
+    <ClInclude Include="pif\eeprom.h">
+      <Filter>Header Files\pif</Filter>
+    </ClInclude>
+    <ClInclude Include="pif\mempak.h">
+      <Filter>Header Files\pif</Filter>
+    </ClInclude>
+    <ClInclude Include="plugin\audioplugin.h">
+      <Filter>Header Files\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="plugin\gfxplugin.h">
+      <Filter>Header Files\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="plugin\inputplugin.h">
+      <Filter>Header Files\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="plugin\plugins.h">
+      <Filter>Header Files\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="plugin\rspplugin.h">
+      <Filter>Header Files\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="rcp\rcp.h">
       <Filter>Header Files\rcp</Filter>
     </ClInclude>
-    <ClInclude Include="audiointerface.h">
+    <ClInclude Include="rcp\rcpinterface.h">
+      <Filter>Header Files\rcp</Filter>
+    </ClInclude>
+    <ClInclude Include="rcp\registerinterface.h">
+      <Filter>Header Files\rcp</Filter>
+    </ClInclude>
+    <ClInclude Include="rcp\rcpcommon.h">
+      <Filter>Header Files\rcp</Filter>
+    </ClInclude>
+    <ClInclude Include="rcp\audiointerface.h">
       <Filter>Header Files\rcp\ai</Filter>
     </ClInclude>
-    <ClInclude Include="mipsinterface.h">
-      <Filter>Header Files\rcp\mi</Filter>
-    </ClInclude>
-    <ClInclude Include="dpcinterface.h">
+    <ClInclude Include="rcp\dpcinterface.h">
       <Filter>Header Files\rcp\dpc</Filter>
     </ClInclude>
-    <ClInclude Include="dpsinterface.h">
+    <ClInclude Include="rcp\dpsinterface.h">
       <Filter>Header Files\rcp\dps</Filter>
     </ClInclude>
-    <ClInclude Include="rspinterface.h">
-      <Filter>Header Files\rcp\sp</Filter>
+    <ClInclude Include="rcp\mipsinterface.h">
+      <Filter>Header Files\rcp\mi</Filter>
     </ClInclude>
-    <ClInclude Include="peripheralinterface.h">
+    <ClInclude Include="rcp\peripheralinterface.h">
       <Filter>Header Files\rcp\pi</Filter>
     </ClInclude>
-    <ClInclude Include="serialinterface.h">
-      <Filter>Header Files\rcp\si</Filter>
-    </ClInclude>
-    <ClInclude Include="rdraminterface.h">
+    <ClInclude Include="rcp\rdraminterface.h">
       <Filter>Header Files\rcp\ri</Filter>
     </ClInclude>
-    <ClInclude Include="rdramcontroller.h">
-      <Filter>Header Files\rdram</Filter>
+    <ClInclude Include="rcp\rspinterface.h">
+      <Filter>Header Files\rcp\sp</Filter>
     </ClInclude>
-    <ClInclude Include="videointerface.h">
+    <ClInclude Include="rcp\serialinterface.h">
+      <Filter>Header Files\rcp\si</Filter>
+    </ClInclude>
+    <ClInclude Include="rcp\videointerface.h">
       <Filter>Header Files\rcp\vi</Filter>
     </ClInclude>
-    <ClInclude Include="registerinterface.h">
+    <ClInclude Include="rcp\rdramcontroller.h">
       <Filter>Header Files\rcp</Filter>
+    </ClInclude>
+    <ClInclude Include="rom\flashram.h">
+      <Filter>Header Files\rom</Filter>
+    </ClInclude>
+    <ClInclude Include="rom\rom.h">
+      <Filter>Header Files\rom</Filter>
+    </ClInclude>
+    <ClInclude Include="rom\sram.h">
+      <Filter>Header Files\rom</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="rom.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="icpu.cpp">
-      <Filter>Source Files\cpu</Filter>
-    </ClCompile>
-    <ClCompile Include="mpmemory.cpp">
-      <Filter>Source Files\memory\mupen</Filter>
-    </ClCompile>
-    <ClCompile Include="interrupthandler.cpp">
-      <Filter>Source Files\cpu</Filter>
-    </ClCompile>
-    <ClCompile Include="cp1.cpp">
-      <Filter>Source Files\cpu</Filter>
-    </ClCompile>
-    <ClCompile Include="cp0.cpp">
-      <Filter>Source Files\cpu</Filter>
-    </ClCompile>
-    <ClCompile Include="bus.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tlb.cpp">
-      <Filter>Source Files\tlb</Filter>
-    </ClCompile>
-    <ClCompile Include="n64_cic_nus_6105.cpp">
-      <Filter>Source Files\pif</Filter>
-    </ClCompile>
-    <ClCompile Include="pif.cpp">
-      <Filter>Source Files\pif</Filter>
-    </ClCompile>
-    <ClCompile Include="imemory.cpp">
-      <Filter>Source Files\memory</Filter>
-    </ClCompile>
-    <ClCompile Include="dma.cpp">
-      <Filter>Source Files\cpu</Filter>
-    </ClCompile>
-    <ClCompile Include="sram.cpp">
-      <Filter>Source Files\save</Filter>
-    </ClCompile>
-    <ClCompile Include="flashram.cpp">
-      <Filter>Source Files\save</Filter>
-    </ClCompile>
-    <ClCompile Include="eeprom.cpp">
-      <Filter>Source Files\save</Filter>
-    </ClCompile>
-    <ClCompile Include="mempak.cpp">
-      <Filter>Source Files\save</Filter>
-    </ClCompile>
-    <ClCompile Include="plugins.cpp">
-      <Filter>Source Files\plugins</Filter>
-    </ClCompile>
-    <ClCompile Include="gfxplugin.cpp">
-      <Filter>Source Files\plugins</Filter>
-    </ClCompile>
-    <ClCompile Include="audioplugin.cpp">
-      <Filter>Source Files\plugins</Filter>
-    </ClCompile>
-    <ClCompile Include="rspplugin.cpp">
-      <Filter>Source Files\plugins</Filter>
-    </ClCompile>
-    <ClCompile Include="inputplugin.cpp">
-      <Filter>Source Files\plugins</Filter>
-    </ClCompile>
-    <ClCompile Include="systiming.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="corecontrol.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="configstore.cpp">
-      <Filter>Source Files\config</Filter>
-    </ClCompile>
-    <ClCompile Include="romdb.cpp">
-      <Filter>Source Files\romdb</Filter>
-    </ClCompile>
-    <ClCompile Include="cheatengine.cpp">
+    <ClCompile Include="cheat\cheatengine.cpp">
       <Filter>Source Files\cheat</Filter>
     </ClCompile>
-    <ClCompile Include="interpreter.cpp">
-      <Filter>Source Files\cpu\interpreter</Filter>
+    <ClCompile Include="core\bus.cpp">
+      <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="interpreter_cop0.cpp">
-      <Filter>Source Files\cpu\interpreter</Filter>
+    <ClCompile Include="core\systiming.cpp">
+      <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="interpreter_cop1.cpp">
-      <Filter>Source Files\cpu\interpreter</Filter>
+    <ClCompile Include="mem\imemory.cpp">
+      <Filter>Source Files\memory</Filter>
     </ClCompile>
-    <ClCompile Include="interpreter_regimm.cpp">
-      <Filter>Source Files\cpu\interpreter</Filter>
+    <ClCompile Include="mem\mpmemory.cpp">
+      <Filter>Source Files\memory</Filter>
     </ClCompile>
-    <ClCompile Include="interpreter_special.cpp">
-      <Filter>Source Files\cpu\interpreter</Filter>
+    <ClCompile Include="pif\eeprom.cpp">
+      <Filter>Source Files\pif</Filter>
     </ClCompile>
-    <ClCompile Include="rdramcontroller.cpp">
-      <Filter>Source Files\rdram</Filter>
+    <ClCompile Include="pif\mempak.cpp">
+      <Filter>Source Files\pif</Filter>
     </ClCompile>
-    <ClCompile Include="audiointerface.cpp">
+    <ClCompile Include="pif\n64_cic_nus_6105.cpp">
+      <Filter>Source Files\pif</Filter>
+    </ClCompile>
+    <ClCompile Include="pif\pif.cpp">
+      <Filter>Source Files\pif</Filter>
+    </ClCompile>
+    <ClCompile Include="plugin\audioplugin.cpp">
+      <Filter>Source Files\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="plugin\gfxplugin.cpp">
+      <Filter>Source Files\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="plugin\inputplugin.cpp">
+      <Filter>Source Files\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="plugin\plugins.cpp">
+      <Filter>Source Files\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="plugin\rspplugin.cpp">
+      <Filter>Source Files\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\configstore.cpp">
+      <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\corecontrol.cpp">
+      <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\romdb.cpp">
+      <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="rcp\audiointerface.cpp">
       <Filter>Source Files\rcp\ai</Filter>
     </ClCompile>
-    <ClCompile Include="dpcinterface.cpp">
+    <ClCompile Include="rcp\dpcinterface.cpp">
       <Filter>Source Files\rcp\dpc</Filter>
     </ClCompile>
-    <ClCompile Include="dpsinterface.cpp">
+    <ClCompile Include="rcp\dpsinterface.cpp">
       <Filter>Source Files\rcp\dps</Filter>
     </ClCompile>
-    <ClCompile Include="mipsinterface.cpp">
+    <ClCompile Include="rcp\mipsinterface.cpp">
       <Filter>Source Files\rcp\mi</Filter>
     </ClCompile>
-    <ClCompile Include="rspinterface.cpp">
-      <Filter>Source Files\rcp\sp</Filter>
-    </ClCompile>
-    <ClCompile Include="serialinterface.cpp">
-      <Filter>Source Files\rcp\si</Filter>
-    </ClCompile>
-    <ClCompile Include="peripheralinterface.cpp">
+    <ClCompile Include="rcp\peripheralinterface.cpp">
       <Filter>Source Files\rcp\pi</Filter>
     </ClCompile>
-    <ClCompile Include="rdraminterface.cpp">
+    <ClCompile Include="rcp\rdraminterface.cpp">
       <Filter>Source Files\rcp\ri</Filter>
     </ClCompile>
-    <ClCompile Include="videointerface.cpp">
+    <ClCompile Include="rcp\serialinterface.cpp">
+      <Filter>Source Files\rcp\si</Filter>
+    </ClCompile>
+    <ClCompile Include="rcp\rspinterface.cpp">
+      <Filter>Source Files\rcp\sp</Filter>
+    </ClCompile>
+    <ClCompile Include="rcp\videointerface.cpp">
       <Filter>Source Files\rcp\vi</Filter>
+    </ClCompile>
+    <ClCompile Include="rcp\rdramcontroller.cpp">
+      <Filter>Source Files\rcp</Filter>
+    </ClCompile>
+    <ClCompile Include="tlb\tlb.cpp">
+      <Filter>Source Files\tlb</Filter>
+    </ClCompile>
+    <ClCompile Include="rom\flashram.cpp">
+      <Filter>Source Files\rom</Filter>
+    </ClCompile>
+    <ClCompile Include="rom\rom.cpp">
+      <Filter>Source Files\rom</Filter>
+    </ClCompile>
+    <ClCompile Include="rom\sram.cpp">
+      <Filter>Source Files\rom</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu\cp0.cpp">
+      <Filter>Source Files\cpu</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu\cp1.cpp">
+      <Filter>Source Files\cpu</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu\dma.cpp">
+      <Filter>Source Files\cpu</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu\icpu.cpp">
+      <Filter>Source Files\cpu</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu\interpreter_cop0.cpp">
+      <Filter>Source Files\cpu\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu\interpreter_cop1.cpp">
+      <Filter>Source Files\cpu\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu\interpreter_regimm.cpp">
+      <Filter>Source Files\cpu\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu\interpreter_special.cpp">
+      <Filter>Source Files\cpu\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu\interrupthandler.cpp">
+      <Filter>Source Files\cpu</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu\interpreter.cpp">
+      <Filter>Source Files\cpu\interpreter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,13 +1,14 @@
 #include <QtWidgets>
 #include <boost/filesystem.hpp>
 
+#include <library.h>
+#include <logger.h>
+
 #include "configpages.h"
 #include "configdialog.h"
-#include "configstore.h"
 
-#include "library.h"
-#include "plugins.h"
-#include "logger.h"
+#include <ui/configstore.h>
+#include <plugin/plugins.h>
 
 #ifdef _MSC_VER
 #define LIB_FILTER "*.dll"

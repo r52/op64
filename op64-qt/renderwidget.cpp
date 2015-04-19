@@ -5,9 +5,9 @@
 #include "renderwidget.h"
 #include "emulator.h"
 
-#include "corecontrol.h"
-#include "rom.h"
-#include "bus.h"
+#include <ui/corecontrol.h>
+#include <rom/rom.h>
+#include <core/bus.h>
 
 
 RenderWidget::RenderWidget(Emulator* emu, QWidget* parent /*= 0*/) :
