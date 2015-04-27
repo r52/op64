@@ -28,12 +28,6 @@
 #define _s_sprintf(buf, len, ...) sprintf(buf, __VA_ARGS__)
 #endif
 
-#ifdef _MSC_VER
-#define _s_sscanf(...) sscanf_s(__VA_ARGS__)
-#else
-#define _s_sscanf(...) sscanf(__VA_ARGS__)
-#endif
-
 #if defined(__cilk)
 #include <cilk/cilk.h>
 #define fill_array(arr, start, len, obj) arr[start:len] = obj

@@ -65,7 +65,14 @@ CheatCodeList CheatEngine::toCheatCodeList(const std::string& strcodelist)
     for (std::string code : strcodes)
     {
         CheatCode newcode;
-        if (_s_sscanf(code.c_str(), "%08X %04X", &newcode.address, &newcode.value) == 2)
+
+        // Default value for error checking
+        newcode.address = newcode.value = 0xDEADBEEF;
+
+        std::istringstream convert(code);
+        convert >> std::hex >> newcode.address >> std::hex >> newcode.value;
+
+        if (0xDEADBEEF != newcode.address && 0xDEADBEEF != newcode.value)
         {
             newcode.old_value = CHEAT_CODE_MAGIC_VALUE;
             templist.push_back(newcode);

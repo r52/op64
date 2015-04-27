@@ -1,6 +1,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
+#include <boost/format.hpp>
+
+#include <sstream>
 
 #include <logger.h>
 #include <compiler.h>
@@ -75,7 +78,14 @@ RomDB::RomDB(void)
                 else if (key.first == "CRC")
                 {
                     crc = key.second.get_value<std::string>();
-                    if (_s_sscanf(crc.c_str(), "%X %X", &setting.crc1, &setting.crc2) != 2)
+
+                    // Default value for error checking
+                    setting.crc1 = setting.crc2 = 0xDEADBEEF;
+
+                    std::istringstream convert(crc);
+                    convert >> std::hex >> setting.crc1 >> std::hex >> setting.crc2;
+
+                    if (0xDEADBEEF == setting.crc1 || 0xDEADBEEF == setting.crc2)
                     {
                         LOG_WARNING("RomDB: invalid crc value in entry %s", section.first.c_str());
                     }
@@ -106,10 +116,7 @@ RomDB::RomDB(void)
                 else if (key.first.find("Cheat") != std::string::npos)
                 {
                     Cheat newhack;
-
-                    char namebuf[100];
-                    _s_snprintf(namebuf, 100, "Hack%d", ++numhacks);
-                    newhack.name = std::string(namebuf);
+                    newhack.name = boost::str(boost::format("Hack%1%") % ++numhacks);
 
                     cheats = key.second.get_value<std::string>();
                     newhack.codes = CheatEngine::toCheatCodeList(cheats);
