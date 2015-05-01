@@ -59,5 +59,9 @@ public:
     }
 
 private:
-    uint32_t nops[2];
+#ifdef HAS_CXX11_LIST_INST
+	uint32_t nops[2] = { 0 };
+#else
+	uint32_t nops[2];
+#endif
 };

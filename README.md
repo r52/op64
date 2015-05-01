@@ -30,7 +30,7 @@ These dependencies are large in size and thus cannot be included with the reposi
 
 ## Building on Windows
 
-op64 uses C++11 features that are not available in compilers older than Visual Studio 2013. However, Visual Studio 2013 itself has several problems with standard C++11 features. Ugly workarounds are currently in place to work around these issues for Visual Studio 2013 and will be removed when the issues are fixed in a later update or version. Visual Studio 14 (currently in alpha) fixes these issues but is not recommended as it is still in alpha. Intel C++ 15.0 works perfectly as it fully supports C++11.
+op64 uses C++11 features that are not available in compilers older than Visual Studio 2013. However, Visual Studio 2013 itself has several problems with standard C++11 features. Ugly workarounds are currently in place to work around these issues for Visual Studio 2013 and will be removed when the issues are fixed in a later update or version. Visual Studio 2015  fixes these issues. Intel C++ 15.0 works perfectly as it fully supports C++11.
 
 ### Compilers Tested
 
