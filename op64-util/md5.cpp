@@ -35,7 +35,7 @@ documentation and/or software.
 
 /* system implementation headers */
 #include <cstdio>
-#include "compiler.h"
+#include "oppreproc.h"
 
 
 // Constants for MD5Transform routine.

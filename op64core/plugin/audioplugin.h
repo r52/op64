@@ -3,7 +3,7 @@
 #include <thread>
 #include <atomic>
 
-#include <library.h>
+#include <oplib.h>
 
 #include "plugins.h"
 

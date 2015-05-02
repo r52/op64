@@ -1,8 +1,8 @@
 #include <QtWidgets>
 #include <boost/filesystem.hpp>
 
-#include <library.h>
-#include <logger.h>
+#include <oplib.h>
+#include <oplog.h>
 
 #include "configpages.h"
 #include "configdialog.h"

@@ -1,7 +1,7 @@
 #include <algorithm>
 
-#include <logger.h>
-#include <util.h>
+#include <oplog.h>
+#include <oputil.h>
 
 #include "mpmemory.h"
 

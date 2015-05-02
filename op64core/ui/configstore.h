@@ -7,7 +7,7 @@
 #include <unordered_set>
 
 #include "configdefs.h"
-#include "logger.h"
+#include "oplog.h"
 
 #if defined(_MSC_VER) && ! defined(__INTEL_COMPILER)
 #pragma warning( disable : 4018 )

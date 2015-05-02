@@ -2,7 +2,7 @@
 #include <string>
 #include <cstdint>
 
-#include <library.h>
+#include <oplib.h>
 
 #include "plugins.h"
 #include <core/inputtypes.h>

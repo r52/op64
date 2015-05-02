@@ -1,5 +1,5 @@
 #include "rdraminterface.h"
-#include "util.h"
+#include "oputil.h"
 
 OPStatus RDRAMInterface::read(uint32_t address, uint32_t* data)
 {

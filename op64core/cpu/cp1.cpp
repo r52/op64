@@ -1,5 +1,5 @@
 #include "cp1.h"
-#include "compiler.h"
+#include "oppreproc.h"
 
 #ifdef BIG_ENDIAN
 #define IS_BIG_ENDIAN 1

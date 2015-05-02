@@ -1,7 +1,7 @@
 #include <cstring>
 #include <cstdint>
 
-#include <util.h>
+#include <oputil.h>
 
 #include "interpreter.h"
 #include "cp0.h"

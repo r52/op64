@@ -5,8 +5,8 @@
 
 #include <sstream>
 
-#include <logger.h>
-#include <compiler.h>
+#include <oplog.h>
+#include <oppreproc.h>
 
 #include "romdb.h"
 

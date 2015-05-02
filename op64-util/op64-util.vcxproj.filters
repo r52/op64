@@ -15,42 +15,42 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="logger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="compiler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="optime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="md5.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="library.h">
+    <ClInclude Include="oputil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="strutil.h">
+    <ClInclude Include="opstrutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="oplog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="oplib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="oppreproc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="logger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="compiler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="optime.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="md5.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="library.cpp">
+    <ClCompile Include="oplib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="oplog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="oppreproc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

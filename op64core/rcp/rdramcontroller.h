@@ -2,7 +2,7 @@
 
 #include "rcpinterface.h"
 #include "registerinterface.h"
-#include "compiler.h"
+#include "oppreproc.h"
 
 
 #define RDRAM_SIZE 0x800000

@@ -1,7 +1,7 @@
 #include <functional>
 #include <boost\filesystem.hpp>
 
-#include <logger.h>
+#include <oplog.h>
 
 #include "plugins.h"
 

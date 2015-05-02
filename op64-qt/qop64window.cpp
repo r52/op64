@@ -6,7 +6,7 @@
 #include <boost/filesystem.hpp>
 
 // op64-util
-#include <logger.h>
+#include <oplog.h>
 
 // local
 #include "qop64window.h"

@@ -1,7 +1,7 @@
-#include <strutil.h>
-#include <compiler.h>
-#include <logger.h>
-#include <util.h>
+#include <opstrutil.h>
+#include <oppreproc.h>
+#include <oplog.h>
+#include <oputil.h>
 
 #include "cheatengine.h"
 

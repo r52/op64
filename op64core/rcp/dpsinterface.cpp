@@ -1,5 +1,5 @@
 #include "dpsinterface.h"
-#include "util.h"
+#include "oputil.h"
 
 OPStatus DPSInterface::read(uint32_t address, uint32_t* data)
 {

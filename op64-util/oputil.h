@@ -3,7 +3,7 @@
 #include <cstdint>
 
 // compiler specific abstractions
-#include "compiler.h"
+#include "oppreproc.h"
 
 // borrowed from cxd4/rsp
 #ifdef BIG_ENDIAN

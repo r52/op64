@@ -3,7 +3,7 @@
 #include <string>
 
 #include "plugins.h"
-#include "library.h"
+#include "oplib.h"
 
 typedef struct
 {

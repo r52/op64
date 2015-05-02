@@ -3,8 +3,8 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include <logger.h>
-#include <util.h>
+#include <oplog.h>
+#include <oputil.h>
 #include <md5.h>
 
 #include "rom.h"

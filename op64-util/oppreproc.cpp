@@ -1,4 +1,4 @@
-#include "compiler.h"
+#include "oppreproc.h"
 
 
 #if defined(__cilk)

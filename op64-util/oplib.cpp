@@ -1,5 +1,5 @@
-#include "library.h"
-#include "logger.h"
+#include "oplib.h"
+#include "oplog.h"
 
 #ifndef _MSC_VER
 #include <dlfcn.h>

@@ -1,7 +1,7 @@
 #include <ctime>
 
-#include <logger.h>
-#include <util.h>
+#include <oplog.h>
+#include <oputil.h>
 
 #include "pif.h"
 #include "n64_cic_nus_6105.h"
