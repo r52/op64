@@ -95,6 +95,15 @@
     <ClCompile Include="logwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_op_log_sink.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_op_log_sink.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="op_log_sink.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qop64window.h">
@@ -116,6 +125,9 @@
       <Filter>Header Files\Config Dialog</Filter>
     </CustomBuild>
     <CustomBuild Include="logwindow.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="op_log_sink.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

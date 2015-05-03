@@ -67,7 +67,7 @@ void FlashRam::dmaFromFlash(uint8_t* dest, int32_t offset, int32_t len)
         _flashramfile.read((char*)dest, len);
         break;
     default:
-        LOG_ERROR("Unknown DMA FlashRAM read mode: %x", _mode);
+        LOG_ERROR(FlashRam) << "Unknown DMA FlashRAM read mode: " << std::hex << _mode;
         Bus::stop = true;
         break;
     }
@@ -81,7 +81,7 @@ void FlashRam::dmaToFlash(uint8_t* src, int32_t offset, int32_t len)
         _writepointer = src;
         break;
     default:
-        LOG_ERROR("Unknown DMA FlashRAM write mode: %x", _mode);
+        LOG_ERROR(FlashRam) << "Unknown DMA FlashRAM write mode: " << std::hex << _mode;
         Bus::stop = true;
         break;
     }
@@ -141,7 +141,7 @@ void FlashRam::writeFlashCommand(uint32_t command)
         case STATUS_MODE:
             break;
         default:
-            LOG_ERROR("Unknown flashram command with mode: %x", _mode);
+            LOG_ERROR(FlashRam) << "Unknown flashram command with mode: " << std::hex << _mode;
             Bus::stop = true;
             break;
         }
@@ -156,7 +156,7 @@ void FlashRam::writeFlashCommand(uint32_t command)
         _status = 0x11118004f0000000;
         break;
     default:
-        LOG_WARNING("Unknown flashram command: %x", command);
+        LOG_WARNING(FlashRam) << "Unknown flashram command: %x" << std::hex << command;
         break;
     }
 }
@@ -174,7 +174,7 @@ OPStatus FlashRam::write(uint32_t address, uint32_t data, uint32_t mask)
     }
     else
     {
-        LOG_WARNING("Writing flashram command with non-flashram save type");
+        LOG_WARNING(FlashRam) << "Writing flashram command with non-flashram save type";
     }
 
     return OP_OK;
@@ -193,7 +193,7 @@ OPStatus FlashRam::read(uint32_t address, uint32_t* data)
     }
     else
     {
-        LOG_WARNING("Reading flashram command with non-flashram save type");
+        LOG_WARNING(FlashRam) << "Reading flashram command with non-flashram save type";
     }
 
     return OP_OK;

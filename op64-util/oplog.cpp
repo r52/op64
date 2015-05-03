@@ -1,128 +1,45 @@
-#include "optime.h"
+#include <boost/log/attributes/clock.hpp>
+#include <boost/log/attributes/current_thread_id.hpp>
+#include <boost/log/sinks/text_file_backend.hpp>
+#include <boost/log/sinks/sync_frontend.hpp>
+#include <boost/log/expressions/formatters/named_scope.hpp>
+#include <boost/log/expressions/formatters/date_time.hpp>
+#include <boost/log/support/date_time.hpp>
+#include <boost/make_shared.hpp>
+
 #include "oplog.h"
 
-using namespace std;
 
-static const char* log_levels[LOG_LEVEL_NUM] = {
-    "[DEBUG]",
-    "[INFO]",
-    "[WARNING]",
-    "[ERROR]"
-};
-
-
-void Logger::log(uint32_t level, const char* msg)
+void oplog_init()
 {
-    // Allow the callback receiver to do whatever they
-    // want with the message rather than follow the rules here
-    if (_callback)
+    boost::shared_ptr< logging::core > core = logging::core::get();
+    core->add_global_attribute("TimeStamp", attrs::local_clock());
+    core->add_global_attribute("Scope", attrs::named_scope());
+    core->add_global_attribute("ThreadID", attrs::current_thread_id());
+
+    // TODO: change this to an option
+    bool logToFile = false;
+
+    if (logToFile)
     {
-        _callback(level, msg);
-    }
+        typedef sinks::synchronous_sink< sinks::text_file_backend > file_sink_t;
 
-    if (level < _minlevel)
-        return;
+        boost::shared_ptr< file_sink_t > sink(new file_sink_t(
+            keywords::file_name = "op64_%N.log",
+            keywords::rotation_size = 5 * 1024 * 1024
+            ));
 
-    if (level > 3)
-        level = 3;
+        sink->set_formatter(
+            expr::format("[%1%]    %2%    %3%    %4%    %5%")
+            % expr::format_date_time< boost::posix_time::ptime >("TimeStamp", "%Y-%m-%d %H:%M:%S")
+            % logging::trivial::severity
+            % expr::attr< unsigned int >("ThreadID")
+            % expr::format_named_scope("Scope", keywords::format = "%f:%l    %n")
+            % expr::smessage
+            );
 
-    char buf[350];
+        sink->set_filter(logging::trivial::severity >= logging::trivial::warning);
 
-    if (_useTimeStamp)
-    {
-        time_t now = time(NULL);
-        char tmstr[100];
-        tm t = op::localtime(now);
-        strftime(tmstr, sizeof(tmstr), "%c", &t);
-        _s_snprintf(buf, 350, "%s: %s - %s\n", tmstr, log_levels[level], msg);
-    }
-    else
-    {
-        _s_snprintf(buf, 350, "%s\n", msg);
-    }
-
-    if (_logToFile)
-    {
-        _logFile.write(buf, 350);
+        core->add_sink(sink);
     }
 }
-
-bool Logger::setLogToFile(bool toFile)
-{
-    if (toFile)
-    {
-        if (_logToFile)
-        {
-            // already logging to file
-            return true;
-        }
-
-        if (_logFile.is_open())
-        {
-            _logFile.close();
-        }
-
-        _logFile.open(_filename, ios::out | ios::ate);
-        if (_logFile.is_open() && _logFile.good())
-        {
-            _logToFile = true;
-            return true;
-        }
-        
-        // Fail
-        _logFile.close();        
-    }
-    else
-    {
-        if (!_logToFile)
-        {
-            // already not logging to file
-            return true;
-        }
-
-        _logToFile = false;
-        
-        if (_logFile.is_open())
-        {
-            _logFile.close();
-        }
-
-        return true;
-    }
-
-
-    return false;
-}
-
-void Logger::setLogCallback(LogCallback callback)
-{
-    _callback = callback;
-}
-
-Logger::~Logger(void)
-{
-    _callback = nullptr;
-
-    if (_logFile.is_open())
-    {
-        _logFile.close();
-    }
-}
-
-Logger::Logger(void) :
-_logToFile(false),
-_callback(nullptr),
-_useTimeStamp(true),
-_minlevel(3)
-{
-    //setLogToFile(true);
-}
-
-void Logger::logToFile(const char* msg)
-{
-    if (_logToFile)
-    {
-        _logFile.write(msg, strlen(msg));
-    }
-}
-

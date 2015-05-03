@@ -175,7 +175,7 @@ void Interpreter::DIV(void)
     }
     else
     {
-        LOG_WARNING("DIV: divide by 0");
+        LOG_WARNING(Interpreter) << "DIV: divide by 0";
     }
     ++_PC;
 }
@@ -189,7 +189,7 @@ void Interpreter::DIVU(void)
     }
     else
     {
-        LOG_WARNING("DIVU: divide by 0");
+        LOG_WARNING(Interpreter) << "Divide by 0";
     }
     ++_PC;
 }
@@ -263,7 +263,7 @@ void Interpreter::DDIV(void)
     }
     else
     {
-        LOG_WARNING("DDIV: divide by 0");
+        LOG_WARNING(Interpreter) << "Divide by 0";
     }
     ++_PC;
 }
@@ -277,7 +277,7 @@ void Interpreter::DDIVU(void)
     }
     else
     {
-        LOG_WARNING("DDIVU: divide by 0");
+        LOG_WARNING(Interpreter) << "Divide by 0";
     }
     ++_PC;
 }

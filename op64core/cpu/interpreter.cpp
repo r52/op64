@@ -81,7 +81,7 @@ Interpreter::~Interpreter(void)
 
 void Interpreter::initialize(void)
 {
-    LOG_INFO("Interpreter: initializing...");
+    LOG_INFO(Interpreter) << "Initializing...";
 
     // Disable fpu exceptions
     _MM_SET_EXCEPTION_MASK(_MM_MASK_MASK);
@@ -220,7 +220,7 @@ void Interpreter::softReset(void)
 
 void Interpreter::execute(void)
 {
-    LOG_INFO("Interpreter: running...");
+    LOG_INFO(Interpreter) << "Running...";
     _delay_slot = false;
     Bus::stop = false;
     Bus::skip_jump = 0;
@@ -391,7 +391,7 @@ void Interpreter::LUI(void)
 void Interpreter::SV(void)
 {
     Bus::stop = true;
-    LOG_ERROR("OP: %x; Opcode %u reserved. Stopping...", _cur_instr.code, _cur_instr.op);
+    LOG_ERROR(Interpreter) << "OP: " << std::hex << _cur_instr.code << "; Opcode " << _cur_instr.op << " reserved. Stopping...";
 }
 
 void Interpreter::BEQL(void)

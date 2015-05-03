@@ -65,7 +65,7 @@ namespace Bus
     {
         if (nullptr != rom)
         {
-            LOG_WARNING("Bus: old rom not properly destroyed");
+            LOG_WARNING(Bus) << "Old rom not properly destroyed";
             delete rom; rom = nullptr;
         }
 
@@ -77,7 +77,7 @@ namespace Bus
     {
         if (nullptr != mem)
         {
-            LOG_WARNING("Bus: old memory not properly destroyed");
+            LOG_WARNING(Bus) << "Old memory not properly destroyed";
             delete mem; mem = nullptr;
         }
 
@@ -89,7 +89,7 @@ namespace Bus
     {
         if (nullptr != cpu)
         {
-            LOG_WARNING("Bus: old cpu not properly destroyed");
+            LOG_WARNING(Bus) << "Old cpu not properly destroyed";
             delete cpu; cpu = nullptr;
         }
 
@@ -101,7 +101,7 @@ namespace Bus
     {
         if (nullptr != plugins)
         {
-            LOG_WARNING("Bus: old plugins not properly cleared");
+            LOG_WARNING(Bus) << "Old plugins not properly cleared";
         }
 
         plugins = dev;
@@ -110,29 +110,29 @@ namespace Bus
 
     bool initializeDevices(void)
     {
-        LOG_INFO("Bus: initializing devices");
+        LOG_INFO(Bus) << "Initializing devices";
 
         if (nullptr == rom)
         {
-            LOG_ERROR("Bus: no rom connected");
+            LOG_ERROR(Bus) << "No ROM connected";
             return false;
         }
 
         if (nullptr == mem)
         {
-            LOG_ERROR("Bus: no memory connected");
+            LOG_ERROR(Bus) << "No memory connected";
             return false;
         }
 
         if (nullptr == cpu)
         {
-            LOG_ERROR("Bus: no cpu connected");
+            LOG_ERROR(Bus) << "No cpu connected";
             return false;
         }
 
         if (nullptr == plugins)
         {
-            LOG_ERROR("Bus: no plugins connected");
+            LOG_ERROR(Bus) << "No plugins connected";
             return false;
         }
 
@@ -141,13 +141,13 @@ namespace Bus
 
         if (!plugins->initialize())
         {
-            LOG_ERROR("Bus: one or more plugins failed to initialize");
+            LOG_ERROR(Bus) << "One or more plugins failed to initialize";
             stop = true;       // unnecessary, but just in case
             return false;
         }
 
         devicesInitialized = true;
-        LOG_INFO("Bus: devices successfully initialized");
+        LOG_INFO(Bus) << "Devices successfully initialized";
 
         return true;
     }
@@ -156,11 +156,11 @@ namespace Bus
     {
         if (!devicesInitialized)
         {
-            LOG_ERROR("Bus: execute failed. devices not initialized");
+            LOG_ERROR(Bus) << "Execute failed. devices not initialized";
             return;
         }
 
-        LOG_INFO("Bus: executing emulator...");
+        LOG_INFO(Bus) << "Executing emulator...";
 
         plugins->RomOpened();
 
@@ -172,7 +172,7 @@ namespace Bus
 
         cpu->execute();
 
-        LOG_INFO("Bus: stopping emulator...");
+        LOG_INFO(Bus) << "Stopping emulator...";
 
         plugins->RomClosed();
 
@@ -184,11 +184,11 @@ namespace Bus
     {
         if (!stop)
         {
-            LOG_ERROR("Bus: cannot destroy devices while machine is running!");
+            LOG_ERROR(Bus) << "Cannot destroy devices while emulator is running!";
             return false;
         }
 
-        LOG_INFO("Bus: uninitializing devices");
+        LOG_INFO(Bus) << "Uninitializing devices";
 
         if (nullptr != mem)
         {
@@ -224,11 +224,11 @@ namespace Bus
     {
         if (!devicesInitialized)
         {
-            LOG_ERROR("Bus: reset error. devices not initialized");
+            LOG_ERROR(Bus) << "Reset error. Devices not initialized";
             return;
         }
 
-        LOG_INFO("Soft resetting emulator...");
+        LOG_INFO(Bus) << "Soft resetting emulator...";
 
         interrupt->softReset();
     }

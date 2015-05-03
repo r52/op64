@@ -96,7 +96,7 @@ void DMA::readPI(void)
     }
     else
     {
-        LOG_WARNING("%s: Unknown dma read", __FUNCTION__);
+        LOG_WARNING(DMA) << "Unknown dma read";
     }
 
     rcp->pi.reg[PI_STATUS_REG] |= 1;
@@ -140,7 +140,7 @@ void DMA::writePI(void)
         }
         else
         {
-            LOG_WARNING("%s: Unknown dma write 0x%x", __FUNCTION__, (int32_t)rcp->pi.reg[PI_CART_ADDR_REG]);
+            LOG_WARNING(DMA) << "Unknown dma write 0x" << std::hex << (int32_t)rcp->pi.reg[PI_CART_ADDR_REG];
         }
 
         rcp->pi.reg[PI_STATUS_REG] |= 1;
@@ -209,7 +209,7 @@ void DMA::readSI(void)
 {
     if (rcp->si.reg[SI_PIF_ADDR_RD64B_REG] != 0x1FC007C0)
     {
-        LOG_ERROR("%s: unknown SI use", __FUNCTION__);
+        LOG_ERROR(DMA) << "Unknown SI use";
         Bus::stop = true;
     }
 
@@ -236,7 +236,7 @@ void DMA::writeSI(void)
 {
     if (rcp->si.reg[SI_PIF_ADDR_WR64B_REG] != 0x1FC007C0)
     {
-        LOG_ERROR("%s: unknown SI use", __FUNCTION__);
+        LOG_ERROR(DMA) << "Unknown SI use";
         Bus::stop = true;
     }
 

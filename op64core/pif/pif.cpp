@@ -146,7 +146,7 @@ void PIF::pifWrite(void)
             ram[0x3F] = 0;
             break;
         default:
-            LOG_WARNING("%s: error in write: %x", __FUNCTION__, ram[0x3F]);
+            LOG_WARNING(PIF) << "Error in write: " << std::hex << ram[0x3F];
             break;
         }
         return;
@@ -188,7 +188,7 @@ void PIF::pifWrite(void)
                 }
                 else
                 {
-                    LOG_WARNING("%s: channel >= 4", __FUNCTION__);
+                    LOG_WARNING(PIF) << "Channel >= 4";
                 }
 
                 i += ram[i] + (ram[(i + 1)] & 0x3F) + 1;
@@ -345,7 +345,7 @@ OPStatus PIF::read(uint32_t address, uint32_t* data)
 
     if (addr >= PIF_RAM_SIZE)
     {
-        LOG_ERROR("Reading a byte in PIF at invalid address 0x%x", address);
+        LOG_ERROR(PIF) << "Reading a byte in PIF at invalid address 0x" << std::hex << address;
         *data = 0;
         return OP_ERROR;
     }
@@ -361,7 +361,7 @@ OPStatus PIF::write(uint32_t address, uint32_t data, uint32_t mask)
 
     if (addr >= PIF_RAM_SIZE)
     {
-        LOG_ERROR("Invalid PIF address: %08x", address);
+        LOG_ERROR(PIF) << "Invalid PIF address: " << std::hex << address;
         return OP_ERROR;
     }
 

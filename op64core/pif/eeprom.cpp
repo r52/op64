@@ -15,6 +15,8 @@ static unsigned char byte2bcd(int n)
 
 void EEPROM::eepromCommand(uint8_t* command)
 {
+    BOOST_LOG_NAMED_SCOPE(__func__);
+
     if (Bus::rom->getSaveType() == SAVETYPE_AUTO)
     {
         Bus::rom->setSaveType(SAVETYPE_EEPROM_4KB);
@@ -76,7 +78,8 @@ void EEPROM::eepromCommand(uint8_t* command)
             command[12] = 0x00;
             break;
         case 1:
-            LOG_WARNING("%s: RTC command: read block %d", __FUNCTION__, command[2]);
+            // Can't use the macro here because c2360
+            LOG_LEVEL(EEPROM, warning) << "RTC command: read block " << command[2];
             break;
         case 2:
             time_t curtime_time;
@@ -97,12 +100,12 @@ void EEPROM::eepromCommand(uint8_t* command)
     case 8:
     {
         // write RTC block
-        LOG_WARNING("%s: RTC write: %d not yet implemented", __FUNCTION__, command[2]);
+        LOG_WARNING(EEPROM) << "RTC write: " << command[2] << " not yet implemented";
     }
         break;
     default:
     {
-        LOG_WARNING("%s: unknown command: %x", __FUNCTION__, command[2]);
+        LOG_WARNING(EEPROM) << "Unknown command: " << std::hex << command[2];
     }
         break;
     }

@@ -79,7 +79,7 @@ CheatCodeList CheatEngine::toCheatCodeList(const std::string& strcodelist)
         }
         else
         {
-            LOG_ERROR("Cheat: invalid cheat code %s", code.c_str());
+            LOG_ERROR(CheatEngine) << "Invalid cheat code " << code;
         }
     }
 

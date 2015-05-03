@@ -150,7 +150,7 @@ void PluginPage::populatePluginType(uint16_t type)
         combo = _widgets->rspCombo;
         break;
     default:
-        LOG_ERROR("GUI: bad plugin type");
+        LOG_ERROR(ConfigPage) << "Bad plugin type";
         return;
         break;
     }

@@ -28,7 +28,7 @@ bool opLoadLib(LibHandle* handle, const char* libpath)
 {
     if (handle == nullptr || libpath == nullptr || strlen(libpath) == 0)
     {
-        LOG_ERROR("opLoadLib: No library specified");
+        LOG_ERROR(opLib) << "opLoadLib: No library specified";
         return false;
     }
 
@@ -65,7 +65,7 @@ bool opLoadLib(LibHandle* handle, const char* libpath)
 
         std::string errMsg = MBFromW((LPCTSTR)lpDisplayBuf, CP_ACP);
 
-        LOG_ERROR("opLoadLib('%s') %s", libpath, errMsg.c_str());
+        LOG_ERROR(opLib) << "opLoadLib('" << libpath << "') " << errMsg;
         LocalFree(lpMsgBuf);
         LocalFree(lpDisplayBuf);
         return false;
@@ -75,7 +75,7 @@ bool opLoadLib(LibHandle* handle, const char* libpath)
 
     if (*handle == nullptr)
     {
-        LOG_ERROR("dlopen('%s') failed: %s", libpath, dlerror());
+        LOG_ERROR << "dlopen('" << libpath << "') failed: " << dlerror();
         return false;
     }
 #endif
@@ -105,7 +105,7 @@ bool opLibClose(LibHandle lib)
         DWORD dwErr = GetLastError();
         FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dwErr,
             MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&pchErrMsg, 0, NULL);
-        LOG_ERROR("FreeLibrary() error: %s", pchErrMsg);
+        LOG_ERROR(opLib) << "FreeLibrary() error: " << pchErrMsg;
         LocalFree(pchErrMsg);
         return false;
     }
@@ -114,7 +114,7 @@ bool opLibClose(LibHandle lib)
 
     if (rval != 0)
     {
-        LOG_ERROR("dlclose() failed: %s", dlerror());
+        LOG_ERROR << "dlclose() failed: " << dlerror();
         return false;
     }
 #endif

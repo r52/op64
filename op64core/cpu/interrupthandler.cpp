@@ -89,7 +89,7 @@ void InterruptHandler::initialize(void)
 void InterruptHandler::addInterruptEvent(int32_t type, uint32_t delay)
 {
     if (findEvent(type)) {
-        LOG_WARNING("Two events of type 0x%x in interrupt queue", type);
+        LOG_WARNING(InterruptHandler) << "Two events of type 0x" << std::hex << type << " in interrupt queue";
     }
 
     uint32_t count = Bus::cp0_reg[CP0_COUNT_REG] + delay;
@@ -435,7 +435,7 @@ void InterruptHandler::generateInterrupt(void)
         break;
     default:
     {
-        LOG_WARNING("Unknown interrupt queue event type %.8X.", top.type);
+        LOG_WARNING(InterruptHandler) << "Unknown interrupt queue event type " << std::hex << top.type;
         popInterruptEvent();
     }
         break;
@@ -454,7 +454,7 @@ void InterruptHandler::doHardReset(void)
 
     if (!Bus::plugins->initialize())
     {
-        LOG_ERROR("Reset: one or more plugins failed to initialize");
+        LOG_ERROR(InterruptHandler) << "One or more plugins failed to initialize";
         Bus::stop = true;
         return;
     }

@@ -176,7 +176,7 @@ void Interpreter::DIV_S(void)
     if ((_FCR31 & 0x400) && *_s_reg[_cur_instr.ft] == 0)
     {
         // This warning goes nuts in DK64???
-        //LOG_WARNING("DIV_S: divide by 0");
+        //LOG_WARNING(Interpreter) << "Divide by 0";
     }
 
     set_rounding();
@@ -456,7 +456,7 @@ void Interpreter::C_LT_S(void)
 
     if (result == CMP_UNORDERED)
     {
-        LOG_ERROR("FPU: NaN in %s", __FUNCTION__);
+        LOG_ERROR(Interpreter) << "FPU: NaN in " << __func__;
         Bus::stop = true;
     }
 
@@ -479,7 +479,7 @@ void Interpreter::C_LE_S(void)
 
     if (result == CMP_UNORDERED)
     {
-        LOG_ERROR("FPU: NaN in %s", __FUNCTION__);
+        LOG_ERROR(Interpreter) << "FPU: NaN in " << __func__;
         Bus::stop = true;
     }
 
@@ -497,7 +497,7 @@ void Interpreter::C_NGT_S(void)
 
     if (result == CMP_UNORDERED)
     {
-        LOG_ERROR("FPU: NaN in %s", __FUNCTION__);
+        LOG_ERROR(Interpreter) << "FPU: NaN in " << __func__;
         Bus::stop = true;
     }
 
@@ -543,7 +543,7 @@ void Interpreter::DIV_D(void)
 
     if ((_FCR31 & 0x400) && *_d_reg[_cur_instr.ft] == 0)
     {
-        //LOG_WARNING("DIV_D: divide by 0");
+        //LOG_WARNING(Interpreter) << "Divide by 0";
     }
 
     set_rounding();
@@ -761,7 +761,7 @@ void Interpreter::C_LT_D(void)
 
     if (result == CMP_UNORDERED)
     {
-        LOG_ERROR("FPU: NaN in %s", __FUNCTION__);
+        LOG_ERROR(Interpreter) << "FPU: NaN in " << __func__;
         Bus::stop = true;
     }
 
@@ -784,7 +784,7 @@ void Interpreter::C_LE_D(void)
 
     if (result == CMP_UNORDERED)
     {
-        LOG_ERROR("FPU: NaN in %s", __FUNCTION__);
+        LOG_ERROR(Interpreter) << "FPU: NaN in " << __func__;
         Bus::stop = true;
     }
 

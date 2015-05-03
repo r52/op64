@@ -14,8 +14,8 @@
 
 #define NOT_IMPLEMENTED() \
     Bus::stop = true; \
-    LOG_ERROR("Interpreter: Function %s in %s line %i not implemented. Stopping...", __func__, __FILE__, __LINE__); \
-    LOG_VERBOSE("PC: %X OP: %X", (uint32_t)_PC, _cur_instr.code);
+    LOG_ERROR(Interpreter) << "Not implemented. Stopping..."; \
+    LOG_TRACE(Interpreter) << "PC: " << std::hex << (uint32_t)_PC << std::hex << _cur_instr.code;
 
 #define DO_JUMP(target, condition, link, likely, cop1) \
     if (target == ((uint32_t)_PC) && _check_nop) \
@@ -55,7 +55,7 @@ private:
 
         if (nullptr == mem)
         {
-            LOG_ERROR("Interpreter: Prefetch execution address %x not found. Stopping...", (uint32_t)_PC);
+            LOG_ERROR(Interpreter) << "Prefetch execution address " << std::hex << (uint32_t)_PC << " not found. Stopping...";
             Bus::stop = true;
             _cur_instr.code = 0;
 

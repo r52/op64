@@ -144,13 +144,13 @@ void Emulator::setupBus(Plugins* plugins, ICPU* cpu, IMemory* mem)
 
 void Emulator::setLimitFPS(bool limit)
 {
-    LOG_INFO("Speed limit %s", limit ? "on" : "off");
+    LOG_INFO(EmulatorThread) << "Speed limit " << limit ? "on" : "off";
     Bus::limitVI = limit;
 }
 
 void Emulator::gameHardReset(void)
 {
-    LOG_INFO("Hard resetting emulator...");
+    LOG_INFO(EmulatorThread) << "Hard resetting emulator...";
     Bus::doHardReset = true;
 }
 
@@ -162,7 +162,7 @@ void Emulator::gameSoftReset(void)
 void Emulator::runEmulator(void)
 {
     // Log some threading info
-    LOG_DEBUG("Emulating in thread ID %d", QThread::currentThreadId());
+    LOG_DEBUG(EmulatorThread) << "Emulating in thread ID " << (uint32_t) QThread::currentThreadId();
 
     _plugins->setRenderWindow((void*)_renderwindow);
 

@@ -62,7 +62,7 @@ public:
             }
             else
             {
-                LOG_WARNING("%s: invalid callback id", __FUNCTION__);
+                LOG_WARNING(ConfigStore) << "Invalid callback id";
             }
         }
     }
@@ -71,7 +71,7 @@ public:
     {
         if (id < 0 || id >= _callbackRegistry.size())
         {
-            LOG_ERROR("%s: invalid callback id", __FUNCTION__);
+            LOG_ERROR(ConfigStore) << "Invalid callback id";
             return;
         }
 
@@ -84,7 +84,7 @@ public:
     {
         if (id < 0 || id >= _callbackRegistry.size())
         {
-            LOG_ERROR("%s: invalid callback id", __FUNCTION__);
+            LOG_ERROR(ConfigStore) << "invalid callback id";
             return;
         }
 

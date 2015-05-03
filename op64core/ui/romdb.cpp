@@ -68,7 +68,7 @@ RomDB::RomDB(void)
                     }
                     else
                     {
-                        LOG_WARNING("RomDB: invalid save type value in entry %s", section.first.c_str());
+                        LOG_WARNING(RomDB) << "Invalid save type value in entry " << section.first;
                     }
                 }
                 else if (key.first == "Status")
@@ -87,7 +87,7 @@ RomDB::RomDB(void)
 
                     if (0xDEADBEEF == setting.crc1 || 0xDEADBEEF == setting.crc2)
                     {
-                        LOG_WARNING("RomDB: invalid crc value in entry %s", section.first.c_str());
+                        LOG_WARNING(RomDB) << "Invalid crc value in entry ", section.first;
                     }
                 }
                 else if (key.first == "RefMD5")
@@ -101,7 +101,7 @@ RomDB::RomDB(void)
                     }
                     else
                     {
-                        LOG_WARNING("RomDB: referenced md5 value not found in entry %s", section.first.c_str());
+                        LOG_WARNING(RomDB) << "Referenced md5 value not found in entry ", section.first;
                     }
                 }
                 else if (key.first == "CountPerOp")
@@ -110,7 +110,7 @@ RomDB::RomDB(void)
                     if (setting.countperop < 1 || setting.countperop > 4)
                     {
                         setting.countperop = 2;
-                        LOG_WARNING("RomDB: invalid count per op value in entry %s", section.first.c_str());
+                        LOG_WARNING(RomDB) << "Invalid count per op value in entry ", section.first;
                     }
                 }
                 else if (key.first.find("Cheat") != std::string::npos)
@@ -126,18 +126,18 @@ RomDB::RomDB(void)
                 }
                 else
                 {
-                    LOG_WARNING("RomDB: unrecognized key %s in entry %s", key.first.c_str(), section.first.c_str());
+                    LOG_WARNING(RomDB) << "Unrecognized key " << key.first << " in entry " << section.first;
                 }
             }
 
             _db[section.first] = setting;
         }
 
-        LOG_INFO("RomDB: %d entries loaded", entries);
+        LOG_INFO(RomDB) << entries << " entries loaded";
     }
     else
     {
-        LOG_WARNING("RomDB: rom database file not found");
+        LOG_WARNING(RomDB) << "ROM database file not found";
     }
 }
 

@@ -41,7 +41,6 @@ signals:
 public slots:
     void emulationFinished();
     void emulatorChangeState(EmuState newstate);
-    void logCallback(uint32_t level, const char* msg);
 
 private slots:
     void openRom(void);

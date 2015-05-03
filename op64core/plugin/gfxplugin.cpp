@@ -90,7 +90,7 @@ void GfxPlugin::loadLibrary(const char* libPath)
 {
     if (!opLoadLib(&_libHandle, libPath))
     {
-        LOG_ERROR("%s failed to load", libPath);
+        LOG_ERROR(GfxPlugin) << libPath << " failed to load";
         unloadLibrary();
         return;
     }
@@ -100,7 +100,7 @@ void GfxPlugin::loadLibrary(const char* libPath)
 
     if (GetDllInfo == nullptr)
     {
-        LOG_ERROR("%s: invalid plugin", libPath);
+        LOG_ERROR(GfxPlugin) << libPath << ": invalid plugin";
         unloadLibrary();
         return;
     }
@@ -108,7 +108,7 @@ void GfxPlugin::loadLibrary(const char* libPath)
     GetDllInfo(&_pluginInfo);
     if (!Plugins::ValidPluginVersion(_pluginInfo))
     {
-        LOG_ERROR("%s: unsupported plugin version", libPath);
+        LOG_ERROR(GfxPlugin) << libPath << ": unsupported plugin version";
         unloadLibrary();
         return;
     }

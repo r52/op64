@@ -96,7 +96,7 @@ bool Rom::isValidRom(const uint8_t* image)
 {
     if (nullptr == image)
     {
-        LOG_ERROR("ROM: null image");
+        LOG_ERROR(ROM) << "Null image";
         return false;
     }
 
@@ -154,7 +154,7 @@ bool Rom::loadRom(const char* name, Rom*& outRom)
     if (nullptr != rom->_image)
     {
         // Sanity
-        LOG_ERROR("ROM: unrecoverable error");
+        LOG_ERROR(ROM) << "Unrecoverable error";
         delete rom;
         return false;
     }
@@ -163,7 +163,7 @@ bool Rom::loadRom(const char* name, Rom*& outRom)
     if (!exists(rom->_filename) || !is_regular_file(rom->_filename))
     {
         // file doesn't exist or is bad
-        LOG_ERROR("ROM: file %s not found or is an invalid file", name);
+        LOG_ERROR(ROM) << "File " << name << " not found or is an invalid file";
         delete rom;
         return false;
     }
@@ -171,13 +171,13 @@ bool Rom::loadRom(const char* name, Rom*& outRom)
     ifstream file(rom->_filename, std::ios::in | std::ios::binary | std::ios::ate);
     if (file.is_open() && file.good())
     {
-        LOG_INFO("ROM: Loading %s", name);
+        LOG_INFO(ROM) << "Loading " << name;
 
         std::streampos size = file.tellg();
 
         if (size < 4096)
         {
-            LOG_ERROR("ROM: bad ROM size: %u", size);
+            LOG_ERROR(ROM) << "Bad ROM size: " << size;
             delete rom;
             return false;
         }
@@ -185,7 +185,7 @@ bool Rom::loadRom(const char* name, Rom*& outRom)
         uint8_t* image = new uint8_t[static_cast<unsigned int>(size)];
         if (nullptr == image)
         {
-            LOG_ERROR("ROM: error allocating %u bytes for ROM!", size);
+            LOG_ERROR(ROM) << "Error allocating " << size << " bytes for ROM!";
             delete rom;
             return false;
         }
@@ -196,7 +196,7 @@ bool Rom::loadRom(const char* name, Rom*& outRom)
 
         if (!isValidRom(image))
         {
-            LOG_ERROR("ROM: invalid N64 ROM");
+            LOG_ERROR(ROM) << "Invalid N64 ROM";
             delete[] image;
             delete rom;
             return false;
@@ -228,20 +228,20 @@ bool Rom::loadRom(const char* name, Rom*& outRom)
             rom->_romhacks = settings.romhacks;
         }
 
-        LOG_VERBOSE("GoodName: %s", rom->_goodname.c_str());
-        LOG_VERBOSE("Name: %s", rom->_header.Name);
-        LOG_VERBOSE("CRC: %X %X", rom->_header.CRC1, rom->_header.CRC2);
-        LOG_VERBOSE("System Type: %s", systemTypeString[rom->_systemtype]);
-        LOG_VERBOSE("Save Type: %s", saveTypeString[rom->_savetype]);
-        LOG_VERBOSE("Rom Size: %d Megabits", rom->_imagesize / 1024 / 1024 * 8);
-        LOG_VERBOSE("ClockRate: %X", byteswap_u32(rom->_header.ClockRate));
-        LOG_VERBOSE("Release Code: %X", byteswap_u32(rom->_header.Release));
-        LOG_VERBOSE("Manufacturer ID: %X", byteswap_u32(rom->_header.Manufacturer_ID));
-        LOG_VERBOSE("Cartridge ID: %X", rom->_header.Cartridge_ID);
-        LOG_VERBOSE("Country Code: %X", rom->_header.Country_code);
-        LOG_VERBOSE("PC: 0x%X", byteswap_u32(rom->_header.PC));
+        LOG_TRACE(ROM) << "GoodName: " << rom->_goodname;
+        LOG_TRACE(ROM) << "Name: " << rom->_header.Name;
+        LOG_TRACE(ROM) << "CRC: " << std::hex << rom->_header.CRC1 << " " << std::hex << rom->_header.CRC2;
+        LOG_TRACE(ROM) << "System Type: " << systemTypeString[rom->_systemtype];
+        LOG_TRACE(ROM) << "Save Type: " << saveTypeString[rom->_savetype];
+        LOG_TRACE(ROM) << "Rom Size: " << rom->_imagesize / 1024 / 1024 * 8 << " Megabits";
+        LOG_TRACE(ROM) << "ClockRate: " << std::hex << byteswap_u32(rom->_header.ClockRate);
+        LOG_TRACE(ROM) << "Release Code: " << std::hex << byteswap_u32(rom->_header.Release);
+        LOG_TRACE(ROM) << "Manufacturer ID: " << std::hex << byteswap_u32(rom->_header.Manufacturer_ID);
+        LOG_TRACE(ROM) << "Cartridge ID: " << std::hex << rom->_header.Cartridge_ID;
+        LOG_TRACE(ROM) << "Country Code: " << std::hex << rom->_header.Country_code;
+        LOG_TRACE(ROM) << "PC: 0x" << std::hex << byteswap_u32(rom->_header.PC);
 
-        LOG_DEBUG("ROM: %d ROM hacks enabled", rom->_romhacks.size());
+        LOG_DEBUG(ROM) << rom->_romhacks.size() << " ROM hacks enabled";
 
         rom->setGameHacks(rom->_header.Cartridge_ID);
 
@@ -255,13 +255,13 @@ bool Rom::loadRom(const char* name, Rom*& outRom)
         rom->calculateCIC();
 
         outRom = rom; rom = nullptr;
-        LOG_INFO("ROM: ROM loaded");
+        LOG_INFO(ROM) << "ROM loaded";
 
         return true;
     }
 
     delete rom;
-    LOG_ERROR("ROM: bad ROM file");
+    LOG_ERROR(ROM) << "ROM: bad ROM file";
 
     return false;
 }

@@ -1,135 +1,28 @@
 #pragma once
 
-#include <fstream>
-#include <string>
-#include <functional>
-#include <cstdint>
+#include <boost/log/trivial.hpp>
+#include <boost/log/attributes/named_scope.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/utility/manipulators/add_value.hpp>
 
 #include "oppreproc.h"
 
-enum LogLevel {
-    LOG_LEVEL_DEBUG = 0,
-    LOG_LEVEL_VERBOSE,
-    LOG_LEVEL_INFO,
-    LOG_LEVEL_WARNING,
-    LOG_LEVEL_ERROR,
-    LOG_LEVEL_NUM
-};
+namespace logging = boost::log;
+namespace sinks = boost::log::sinks;
+namespace src = boost::log::sources;
+namespace expr = boost::log::expressions;
+namespace attrs = boost::log::attributes;
+namespace keywords = boost::log::keywords;
 
-typedef std::function<void(uint32_t, const char*)> LogCallback;
+BOOST_LOG_ATTRIBUTE_KEYWORD(modname, "ModName", std::string)
 
-class Logger
-{
-public:
-    static Logger& getInstance()
-    {
-        static Logger instance;
-        return instance;
-    }
+#define LOG_LEVEL(name, level)  BOOST_LOG_TRIVIAL(level) << logging::add_value(modname, __STR__(name))
+#define LOG_SCOPE_LEVEL(name, level) BOOST_LOG_NAMED_SCOPE(__func__); LOG_LEVEL(name, level)
+#define LOG_TRACE(name) LOG_SCOPE_LEVEL(name, trace)
+#define LOG_DEBUG(name) LOG_SCOPE_LEVEL(name, debug)
+#define LOG_INFO(name) LOG_SCOPE_LEVEL(name, info)
+#define LOG_WARNING(name) LOG_SCOPE_LEVEL(name, warning)
+#define LOG_ERROR(name) LOG_SCOPE_LEVEL(name, error)
+#define LOG_FATAL(name) LOG_SCOPE_LEVEL(name, fatal)
 
-    inline void operator()(const char* msg)
-    {
-        log(0, msg);
-    }
-
-    inline void operator()(uint32_t level, const char* msg)
-    {
-        log(level, msg);
-    }
-
-    void log(uint32_t level, const char* msg);
-    void logToFile(const char* msg);
-
-    
-    /* setLogToFile 
-    bool    toFile  set whether to log to file or not
-    return  bool    whether the change was successful
-    */
-    bool setLogToFile(bool toFile);
-    inline bool isLoggingToFile(void)
-    {
-        return _logToFile;
-    }
-
-    void setLogCallback(LogCallback callback);
-
-    inline bool getUseTimeStamp(void)
-    {
-        return _useTimeStamp;
-    }
-
-    inline void setUseTimeStamp(bool timestamp)
-    {
-        _useTimeStamp = timestamp;
-    }
-
-    inline void setMinLogLevel(uint32_t level)
-    {
-        if (level > 3)
-            level = 3;
-
-        _minlevel = level;
-    }
-
-private:
-    Logger(void);
-    ~Logger(void);
-
-    Logger(Logger const&);
-    void operator=(Logger const&);
-
-    
-private:
-    bool _logToFile;
-    bool _useTimeStamp;
-    uint32_t _minlevel;
-    LogCallback _callback;
-    std::ofstream _logFile;
-    std::string _filename = "op64.log";
-};
-
-#define LOG Logger::getInstance()
-
-#define LOG_DEBUG(...) \
-    { \
-        char buf[250]; \
-        _s_snprintf(buf, 250, __VA_ARGS__); \
-        LOG(LOG_LEVEL_DEBUG, buf); \
-    }
-
-#define LOG_ERROR(...) \
-    { \
-        char buf[250]; \
-        _s_snprintf(buf, 250, __VA_ARGS__); \
-        LOG(LOG_LEVEL_ERROR, buf); \
-    }
-
-#define LOG_INFO(...) \
-    { \
-        char buf[250]; \
-        _s_snprintf(buf, 250, __VA_ARGS__); \
-        LOG(LOG_LEVEL_INFO, buf); \
-    }
-
-#define LOG_WARNING(...) \
-    { \
-        char buf[250]; \
-        _s_snprintf(buf, 250, __VA_ARGS__); \
-        LOG(LOG_LEVEL_WARNING, buf); \
-    }
-
-#define LOG_VERBOSE(...) \
-    { \
-        char buf[250]; \
-        _s_snprintf(buf, 250, __VA_ARGS__); \
-        LOG(LOG_LEVEL_VERBOSE, buf); \
-    }
-
-#ifdef _DEBUG
-#define LOG_PC \
-    char buf[20]; \
-    _safe_sprintf(buf, 20, "0x%x\n", (uint32_t)_PC); \
-    LOG.logToFile(buf);
-#else
-#define LOG_PC
-#endif
+void oplog_init(void);

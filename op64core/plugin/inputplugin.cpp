@@ -136,7 +136,7 @@ void InputPlugin::loadLibrary(const char* libPath)
 
     if (!opLoadLib(&_libHandle, libPath))
     {
-        LOG_ERROR("%s failed to load", libPath);
+        LOG_ERROR(InputPlugin) << libPath << " failed to load";
         unloadLibrary();
         return;
     }
@@ -146,7 +146,7 @@ void InputPlugin::loadLibrary(const char* libPath)
     GetDllInfo = (void(*)(PLUGIN_INFO*))opLibGetFunc(_libHandle, "GetDllInfo");
     if (GetDllInfo == nullptr)
     {
-        LOG_ERROR("%s: invalid plugin", libPath);
+        LOG_ERROR(InputPlugin) << libPath << ": invalid plugin";
         unloadLibrary();
         return;
     }
@@ -154,7 +154,7 @@ void InputPlugin::loadLibrary(const char* libPath)
     GetDllInfo(&_pluginInfo);
     if (!Plugins::ValidPluginVersion(_pluginInfo))
     {
-        LOG_ERROR("%s: unsupported plugin version", libPath);
+        LOG_ERROR(InputPlugin) << libPath << ": unsupported plugin version";
         unloadLibrary();
         return;
     }

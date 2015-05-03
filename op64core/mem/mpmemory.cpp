@@ -21,8 +21,8 @@
 
 #define MEM_NOT_IMPLEMENTED() \
     Bus::stop = true; \
-    LOG_ERROR("Memory: Function %s in %s line %i not implemented. Stopping...", __func__, __FILE__, __LINE__); \
-    LOG_VERBOSE("Address: %X", address);
+    LOG_ERROR(MPMemory) << "Not implemented. Stopping..."; \
+    LOG_TRACE(MPMemory) << "Address: " << address;
 
 
 static FrameBufferInfo fbInfo[6];
@@ -31,7 +31,7 @@ static char framebufferRead[0x800];
 
 void MPMemory::initialize(void)
 {
-    LOG_INFO("Memory: initializing...");
+    LOG_INFO(MPMemory) << "Initializing...";
     IMemory::initialize();
 
     fill_array(readmem_table, 0, 0x10000, &MPMemory::read_nomem);
