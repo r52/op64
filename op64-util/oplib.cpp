@@ -75,7 +75,7 @@ bool opLoadLib(LibHandle* handle, const char* libpath)
 
     if (*handle == nullptr)
     {
-        LOG_ERROR << "dlopen('" << libpath << "') failed: " << dlerror();
+        LOG_ERROR(opLib) << "dlopen('" << libpath << "') failed: " << dlerror();
         return false;
     }
 #endif
@@ -114,7 +114,7 @@ bool opLibClose(LibHandle lib)
 
     if (rval != 0)
     {
-        LOG_ERROR << "dlclose() failed: " << dlerror();
+        LOG_ERROR(opLib) << "dlclose() failed: " << dlerror();
         return false;
     }
 #endif
