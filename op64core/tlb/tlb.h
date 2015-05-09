@@ -42,7 +42,7 @@ struct tlb_o {
     uint8_t asid[32];
 };
 
-enum TLBProbeMode
+enum TLBProbeMode : uint8_t
 {
     TLB_READ = 0,
     TLB_WRITE,

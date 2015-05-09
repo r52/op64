@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <array>
 
-#include "oppreproc.h"
+#include <oppreproc.h>
 
 #define PC_SIZE 4
 
@@ -17,7 +17,7 @@ enum
 
 class CP0;
 class CP1;
-enum TLBProbeMode;
+enum TLBProbeMode : uint8_t;
 
 /************************************************************************/
 /* Instruction holder                                                   */
