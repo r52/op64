@@ -12,7 +12,7 @@
 #include <mem/imemory.h>
 
 
-#define NOT_IMPLEMENTED() \
+#define NOT_IMPLEMENTED(uniq) \
     Bus::stop = true; \
     LOG_ERROR(Interpreter) << "Not implemented. Stopping..."; \
     LOG_TRACE(Interpreter) << "PC: " << std::hex << (uint32_t)_PC << std::hex << _cur_instr.code;

@@ -662,12 +662,12 @@ void Interpreter::SW(void)
 
 void Interpreter::SDL(void)
 {
-    NOT_IMPLEMENTED();
+    NOT_IMPLEMENTED(__LINE__);
 }
 
 void Interpreter::SDR(void)
 {
-    NOT_IMPLEMENTED();
+    NOT_IMPLEMENTED(__LINE__);
 }
 
 void Interpreter::SWR(void)
@@ -696,7 +696,7 @@ void Interpreter::CACHE(void)
 
 void Interpreter::LL(void)
 {
-    NOT_IMPLEMENTED();
+    NOT_IMPLEMENTED(__LINE__);
 }
 
 void Interpreter::LWC1(void)
@@ -719,7 +719,7 @@ void Interpreter::LWC1(void)
 
 void Interpreter::LLD(void)
 {
-    NOT_IMPLEMENTED();
+    NOT_IMPLEMENTED(__LINE__);
 }
 
 void Interpreter::LDC1(void)
@@ -763,7 +763,7 @@ void Interpreter::SWC1(void)
 
 void Interpreter::SCD(void)
 {
-    NOT_IMPLEMENTED();
+    NOT_IMPLEMENTED(__LINE__);
 }
 
 void Interpreter::SDC1(void)
