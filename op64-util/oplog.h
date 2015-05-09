@@ -16,8 +16,10 @@ namespace keywords = boost::log::keywords;
 
 BOOST_LOG_ATTRIBUTE_KEYWORD(modname, "ModName", std::string)
 
+#define _SCOPE_SPOT_ __func__ ":" __STR__(__LINE__)
+
 #define LOG_LEVEL(name, level)  BOOST_LOG_TRIVIAL(level) << logging::add_value(modname, __STR__(name))
-#define LOG_SCOPE_LEVEL(name, level) BOOST_LOG_NAMED_SCOPE(__func__); LOG_LEVEL(name, level)
+#define LOG_SCOPE_LEVEL(name, level) BOOST_LOG_NAMED_SCOPE(_SCOPE_SPOT_); LOG_LEVEL(name, level)
 #define LOG_TRACE(name) LOG_SCOPE_LEVEL(name, trace)
 #define LOG_DEBUG(name) LOG_SCOPE_LEVEL(name, debug)
 #define LOG_INFO(name) LOG_SCOPE_LEVEL(name, info)
