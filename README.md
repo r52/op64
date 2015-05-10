@@ -1,6 +1,6 @@
 #op64
 
-op64 is an experimental 64-bit emulator for Windows and Linux (future), based on the [Project 64](http://www.pj64-emu.com/) and [mupen64plus](https://code.google.com/p/mupen64plus/) cores, with support for the zilmar plugin specification plugins. It is licensed under the GNU General Public License version 2.
+op64 is an experimental 64-bit emulator for Windows and Linux, based on the [Project 64](http://www.pj64-emu.com/) and [mupen64plus](https://code.google.com/p/mupen64plus/) cores, with support for the zilmar plugin specification plugins. It is licensed under the GNU General Public License version 2.
 
 ## System Requirements
 * OS
@@ -44,7 +44,15 @@ Use the `op64.sln` solution file and compile the op64-qt project
 
 ## Building on Linux
 
-Coming in the future
+Still experimental
+
+### Compilers Tested
+
+* GCC 4.9.2
+
+### Building
+
+Use `cmake` to configure, the `make && make install` to build.
 
 ## Plugins
 
