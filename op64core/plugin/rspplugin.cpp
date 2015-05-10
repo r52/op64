@@ -7,13 +7,13 @@
 #include <core/bus.h>
 
 RSPPlugin::RSPPlugin(const char* libPath) :
-Config(false),
-DoRspCycles(false),
-CloseDLL(false),
-RomOpen(false),
-RomClosed(false),
-PluginOpened(false),
-_libHandle(false),
+Config(nullptr),
+DoRspCycles(nullptr),
+CloseDLL(nullptr),
+RomOpen(nullptr),
+RomClosed(nullptr),
+PluginOpened(nullptr),
+_libHandle(nullptr),
 _initialized(false),
 _romOpened(false),
 _cycleCount(0)
@@ -93,11 +93,13 @@ bool RSPPlugin::initialize(Plugins* plugins, void* renderWindow, void* statusBar
     Info.ShowCFB = plugins->gfx()->ShowCFB;
     Info.ProcessAlist = plugins->audio()->ProcessAList;
 
+#ifdef _MSC_VER
     Info.hInst = GetModuleHandle(NULL);
+#endif
     Info.RDRAM = (uint8_t*)Bus::rdram->mem;
     Info.DMEM = (uint8_t*)Bus::rcp->sp.dmem;
     Info.IMEM = (uint8_t*)Bus::rcp->sp.imem;
-    Info.MemoryBswaped = FALSE;
+    Info.MemoryBswaped = 0;
 
     Info.MI__INTR_REG = &Bus::rcp->mi.reg[MI_INTR_REG];
 

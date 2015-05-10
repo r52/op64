@@ -63,8 +63,11 @@ bool AudioPlugin::initialize(void* renderWindow, void* statusBar)
     memset(&Info, 0, sizeof(Info));
 
     Info.hwnd = renderWindow;
+
+#ifdef _MSc_VER
     Info.hinst = GetModuleHandle(NULL);
-    Info.MemoryBswaped = TRUE;
+#endif
+    Info.MemoryBswaped = 1;
     Info.HEADER = Bus::rom->getImage();
     Info.RDRAM = (uint8_t*) Bus::rdram->mem;
     Info.DMEM = (uint8_t*) Bus::rcp->sp.dmem;

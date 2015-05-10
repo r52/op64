@@ -248,7 +248,7 @@ bool GfxPlugin::initialize(void* renderWindow, void* statusBar)
     GFX_INFO Info;
     memset(&Info, 0, sizeof(Info));
 
-    Info.MemoryBswaped = TRUE;
+    Info.MemoryBswaped = 1;
     Info.CheckInterrupts = DummyFunction;
     Info.hWnd = renderWindow;
     Info.hStatusBar = statusBar;

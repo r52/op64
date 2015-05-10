@@ -122,7 +122,7 @@ void QOP64Window::setupEmulationThread(void)
     _emuThread.start();
 
     // Log some threading info
-    LOG_DEBUG(Main) << "GUI thread ID " << (uint32_t) QThread::currentThreadId();
+    LOG_DEBUG(Main) << "GUI thread ID " << (uintptr_t) QThread::currentThreadId();
 }
 
 void QOP64Window::connectGUIControls(void)

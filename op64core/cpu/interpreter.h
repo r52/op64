@@ -12,10 +12,10 @@
 #include <mem/imemory.h>
 
 
-#define NOT_IMPLEMENTED(uniq) \
+#define NOT_IMPLEMENTED() \
     Bus::stop = true; \
     LOG_ERROR(Interpreter) << "Not implemented. Stopping..."; \
-    LOG_TRACE(Interpreter) << "PC: " << std::hex << (uint32_t)_PC << std::hex << _cur_instr.code;
+    LOG_LEVEL(Interpreter, trace) << "PC: " << std::hex << (uint32_t)_PC << std::hex << _cur_instr.code;
 
 #define DO_JUMP(target, condition, link, likely, cop1) \
     if (target == ((uint32_t)_PC) && _check_nop) \

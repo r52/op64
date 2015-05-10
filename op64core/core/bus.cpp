@@ -44,7 +44,7 @@ namespace Bus
     uint32_t last_jump_addr = 0;
     uint32_t next_interrupt = 0;
     uint32_t skip_jump = 0;
-    std::atomic<bool> stop = true;
+    std::atomic<bool> stop{true};
 
     // vi state
     uint32_t next_vi = 0;
@@ -55,8 +55,8 @@ namespace Bus
     bool interrupt_unsafe_state = false;
 
     // core control
-    std::atomic<bool> doHardReset = false;
-    std::atomic<bool> limitVI = true;
+    std::atomic<bool> doHardReset{false};
+    std::atomic<bool> limitVI{true};
 
     // local bus state check. if true, then machine ready to execute
     static bool devicesInitialized = false;

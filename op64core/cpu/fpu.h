@@ -351,7 +351,7 @@ inline uint8_t c_cmp_32(float* fs, float* ft)
     fft = _mm_load_ss(ft);
 
     __asm__ __volatile__(
-        "comiss %1, %2\n\t"
+        "comiss %0, %1\n\t"
         : /* No outputs as we call readeflags */
         : "x" (ffs), "x" (fft)
         : "cc"
@@ -383,7 +383,7 @@ inline uint8_t c_cmp_64(double* fs, double* ft)
     fft = _mm_load_sd(ft);
 
     __asm__ __volatile__(
-        "comisd %1, %2\n\t"
+        "comisd %0, %1\n\t"
         : /* No outputs as we call readeflags */
         : "x" (ffs), "x" (fft)
         : "cc"

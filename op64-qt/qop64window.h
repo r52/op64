@@ -11,7 +11,7 @@ class Plugins;
 class ConfigDialog;
 class Emulator;
 class RenderWidget;
-enum EmuState;
+enum EmuState : uint8_t;
 
 class LogWindow;
 class QSettings;

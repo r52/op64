@@ -162,7 +162,7 @@ void Emulator::gameSoftReset(void)
 void Emulator::runEmulator(void)
 {
     // Log some threading info
-    LOG_DEBUG(EmulatorThread) << "Emulating in thread ID " << (uint32_t) QThread::currentThreadId();
+    LOG_DEBUG(EmulatorThread) << "Emulating in thread ID " << (uintptr_t) QThread::currentThreadId();
 
     _plugins->setRenderWindow((void*)_renderwindow);
 

@@ -198,8 +198,8 @@ void Interpreter::DMULT(void)
 {
 #if defined(__GNUC__)
     __int128_t rs128 = (int64_t)_reg[_cur_instr.rs].s;
-    __int128_t rs128 = (int64_t)_reg[_cur_instr.rt].s;
-    __int128_t result = rs128 * rs128;
+    __int128_t rt128 = (int64_t)_reg[_cur_instr.rt].s;
+    __int128_t result = rs128 * rt128;
 
     _lo.s = result;
     _hi.s = (result >> 64);
@@ -228,7 +228,7 @@ void Interpreter::DMULTU(void)
 {
 #if defined(__GNUC__)
     __uint128_t rs128 = _reg[_cur_instr.rs].u;
-    __uint128_t rs128 = _reg[_cur_instr.rt].u;
+    __uint128_t rt128 = _reg[_cur_instr.rt].u;
 
     __uint128_t result = rs128 * rt128;
     _lo.u = result;

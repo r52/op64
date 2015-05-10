@@ -29,20 +29,20 @@ InputPlugin::~InputPlugin()
 
 bool InputPlugin::initialize(void* renderWindow, void* statusBar)
 {
-    Bus::controllers[0].Present = FALSE;
-    Bus::controllers[0].RawData = FALSE;
+    Bus::controllers[0].Present = 0;
+    Bus::controllers[0].RawData = 0;
     Bus::controllers[0].Plugin = PLUGIN_NONE;
 
-    Bus::controllers[1].Present = FALSE;
-    Bus::controllers[1].RawData = FALSE;
+    Bus::controllers[1].Present = 0;
+    Bus::controllers[1].RawData = 0;
     Bus::controllers[1].Plugin = PLUGIN_NONE;
 
-    Bus::controllers[2].Present = FALSE;
-    Bus::controllers[2].RawData = FALSE;
+    Bus::controllers[2].Present = 0;
+    Bus::controllers[2].RawData = 0;
     Bus::controllers[2].Plugin = PLUGIN_NONE;
 
-    Bus::controllers[3].Present = FALSE;
-    Bus::controllers[3].RawData = FALSE;
+    Bus::controllers[3].Present = 0;
+    Bus::controllers[3].RawData = 0;
     Bus::controllers[3].Plugin = PLUGIN_NONE;
 
     //Get DLL information
@@ -81,9 +81,11 @@ bool InputPlugin::initialize(void* renderWindow, void* statusBar)
         CONTROL_INFO ControlInfo;
         ControlInfo.Controls = Bus::controllers;
         ControlInfo.HEADER = Bus::rom->getImage();
+#ifdef _MSC_VER
         ControlInfo.hinst = GetModuleHandle(NULL);
+#endif
         ControlInfo.hMainWindow = renderWindow;
-        ControlInfo.MemoryBswaped = TRUE;
+        ControlInfo.MemoryBswaped = 1;
         InitiateControllers_1_1(ControlInfo);
         _initialized = true;
     }
