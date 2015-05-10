@@ -5,7 +5,7 @@ op64 is an experimental 64-bit emulator for Windows and Linux, based on the [Pro
 ## System Requirements
 * OS
     * Microsoft Windows (Vista or higher).
-    * Linux (future).
+    * Linux (experimental).
 * CPU
     * A 64-bit CPU with SSE2 support (all known 64-bit desktop CPUs have SSE2 support)
 
