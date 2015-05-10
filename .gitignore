@@ -275,3 +275,19 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+### CMake ###
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+### Linux ###
+*~
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
