@@ -127,7 +127,6 @@
     <ClInclude Include="ui\configstore.h" />
     <ClInclude Include="ui\corecontrol.h" />
     <ClInclude Include="ui\romdb.h" />
-    <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cheat\cheatengine.cpp" />

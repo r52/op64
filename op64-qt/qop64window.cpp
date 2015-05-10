@@ -18,7 +18,6 @@
 #include "logwindow.h"
 
 //op64core
-#include <version.h>
 #include <ui/configstore.h>
 #include <ui/romdb.h>
 #include <core/bus.h>

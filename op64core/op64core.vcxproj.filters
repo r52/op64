@@ -138,9 +138,6 @@
     <ClInclude Include="tlb.h">
       <Filter>Header Files\tlb</Filter>
     </ClInclude>
-    <ClInclude Include="version.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="op64.h">
       <Filter>Header Files</Filter>
     </ClInclude>
