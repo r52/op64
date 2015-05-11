@@ -30,10 +30,6 @@ void IMemory::initialize(void)
     flashram = new FlashRam();
 
     pif->initialize();
-
-#ifndef HAS_CXX11_LIST_INST
-    fill_array(nops, 0, 2, 0);
-#endif
 }
 
 void IMemory::uninitialize(void)

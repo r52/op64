@@ -37,12 +37,15 @@
 #define vec_for for
 #endif
 
-#if defined(__INTEL_COMPILER) || defined(__GNUC__) || defined(__clang__) || (defined(_MSC_VER) && _MSC_VER > 1800)
-// If the compiler supports list instantiation *cough* MSVC >:(. Gets around C2797 in VS2013
-#define HAS_CXX11_LIST_INST
+// Check for c++11
+#if ( defined(__GNUC__) && GCC_VERSION >= 40700 ) || \
+    ( defined(__clang__) && CLANG_VERSION >= 30100) || \
+    ( defined(__INTEL_COMPILER) && __INTEL_COMPILER >= 1500 ) || \
+    ( (defined(_MSC_VER) && _MSC_VER > 1800) )
+#define HAS_CXX11
 #endif
 
-#if defined(_MSC_VER) && ! defined(__INTEL_COMPILER)
+#if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
 #define __func__ __FUNCTION__
 #endif
 
@@ -51,11 +54,11 @@
 #define __STR__(x) __STR2__(x)
 
 #if defined(__INTEL_COMPILER)
-#define COMPILER "Intel C++ " __STR__(__INTEL_COMPILER)
+#define COMPILER "Intel C++ " __STR__(__VERSION__)
 #elif defined(__clang__)
-#define COMPILER "clang " __STR__(CLANG_VERSION)
+#define COMPILER "clang " __STR__(__clang_version__)
 #elif defined(__GNUC__)
-#define COMPILER "g++ " __STR__(GCC_VERSION)
+#define COMPILER "g++ " __STR__(__VERSION__)
 #elif defined(_MSC_VER)
 #define COMPILER "MSVC " __STR__(_MSC_VER)
 #endif

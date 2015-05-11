@@ -18,10 +18,6 @@ private:
     void write(uint8_t* buf, int line);
 
 private:
-#ifdef HAS_CXX11_LIST_INST
     uint8_t _eeprom[0x800] = { 0xff };
-#else
-    uint8_t _eeprom[0x800];
-#endif
     boost::filesystem::fstream _eepfile;
 };

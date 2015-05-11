@@ -15,7 +15,7 @@ These dependencies are large in size and thus cannot be included with the reposi
 
 * (Required) [Boost Libraries](http://www.boost.org/)
     * op64 uses the Boost library for cross platform abstractions that are not (yet?) available in the C++ Standard Library
-    * Precompiled .lib's for Visual Studio 2013/2015 for the components used in op64 are available within the repository
+    * Precompiled [statically linked .libs](https://github.com/r52/op64/wiki/Quick-Guide-to-Compiling-Boost-for-op64) for Visual Studio 2015 for the components used in op64 are available within the repository
     * Set the environment variable `BOOST_ROOT` to the root of the Boost library installation
 * (Required) [Qt 5.3 or higher](http://www.qt.io/) for the Qt GUI project
     * Install an opensource 64-bit build for your OS and compiler
@@ -24,17 +24,17 @@ These dependencies are large in size and thus cannot be included with the reposi
     * Set the environment variable `QTDIR` to the root of your Qt installation (contains the include and lib directories)
     * Qt Visual Studio Add-in is recommended for Visual Studio users
 * A C++ compiler with some resemblance of C++11 features, such as
-    * Visual Studio 2013 and later
+    * Visual Studio 2015 and later
     * Intel C++ 15
     * GCC 4.7 and later
+    * Clang 3.1 and later
 
 ## Building on Windows
 
-Visual Studio 2013 and later is a hard requirement as op64 uses C++11 features that are not available in compilers older than Visual Studio 2013. However, Visual Studio 2013 itself has several problems with standard C++11 features. Visual Studio 2015 fixes these issues. Ugly workarounds are in place to support Visual Studio 2013 and will be removed when Visual Studio 2015 RTM is released. Intel C++ 15.0 works perfectly as it fully supports C++11. VS Community editions work perfectly.
+Visual Studio 2015 and later is a hard requirement as op64 uses C++11 features that are not available in compilers older than Visual Studio 2015. Visual Studio 2013 support has been dropped. Intel C++ 15.0 works perfectly as it fully supports C++11. VS Community editions work perfectly.
 
 ### Compilers Tested
 
-* Visual Studio 2013
 * Visual Studio 2015
 * Intel C++ 15.0
 

@@ -15,7 +15,7 @@ static unsigned char byte2bcd(int n)
 
 void EEPROM::eepromCommand(uint8_t* command)
 {
-    BOOST_LOG_NAMED_SCOPE(__func__);
+    BOOST_LOG_NAMED_SCOPE(__STR__(__COUNTER__));
 
     if (Bus::rom->getSaveType() == SAVETYPE_AUTO)
     {
@@ -166,9 +166,6 @@ void EEPROM::write(uint8_t* buf, int line)
 
 EEPROM::EEPROM()
 {
-#ifndef HAS_CXX11_LIST_INST
-    fill_array(_eeprom, 0, 0x800, 0xff);
-#endif
 }
 
 EEPROM::~EEPROM()

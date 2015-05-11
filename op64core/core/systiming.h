@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <boost/chrono/chrono.hpp>
+#include <chrono>
 
 enum TimingMode
 {
@@ -38,5 +38,5 @@ private:
     TimingMode _mode;
     LimitMode _limitmode;
 
-    boost::chrono::high_resolution_clock::time_point _lastVITime;
+    std::chrono::high_resolution_clock::time_point _lastKeyVITime;
 };
