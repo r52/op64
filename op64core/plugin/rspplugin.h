@@ -1,45 +1,28 @@
 #pragma once
 
-#include <string>
-
-#include "plugins.h"
-#include "oplib.h"
+#include "iplugin.h"
 
 
-class RSPPlugin
+class RSPPlugin : public IPlugin
 {
 public:
-    RSPPlugin(const char* libPath);
-    ~RSPPlugin();
+    virtual ~RSPPlugin();
 
-    bool initialize(Plugins* plugins, void* renderWindow, void* statusBar);
-    inline bool isInitialized(void) { return _initialized; }
-    void close(void);
-    void onRomOpen(void);
-    void onRomClose(void);
-    void GameReset(void);
-    std::string PluginName(void) const { return _pluginInfo.Name; }
+    virtual OPStatus initialize(PluginContainer* plugins, void* renderWindow, void* statusBar);
+    static OPStatus loadPlugin(const char* libPath, RSPPlugin*& outplug);
 
-    void(*Config)(void* hParent);
     unsigned int(*DoRspCycles)(unsigned int);
+
+protected:
+    virtual OPStatus unloadPlugin();
 
 private:
     RSPPlugin();
+
+    // Not implemented
     RSPPlugin(const RSPPlugin&);
     RSPPlugin& operator=(const RSPPlugin&);
 
-    void loadLibrary(const char* libPath);
-    void unloadLibrary(void);
-
 private:
-    LibHandle _libHandle;
-    bool _initialized;
-    bool _romOpened;
     uint32_t _cycleCount;
-    PLUGIN_INFO _pluginInfo;
-
-    void(*CloseDLL)(void);
-    void(*RomOpen)(void);
-    void(*RomClosed)(void);
-    void(*PluginOpened)(void);
 };

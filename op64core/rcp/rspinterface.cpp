@@ -4,7 +4,7 @@
 
 #include <rcp/rcp.h>
 #include <core/bus.h>
-#include <plugin/plugins.h>
+#include <plugin/plugincontainer.h>
 #include <plugin/gfxplugin.h>
 #include <plugin/rspplugin.h>
 #include <cpu/interrupthandler.h>

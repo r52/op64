@@ -1,9 +1,6 @@
 #pragma once
 
-#include <string>
-
-#include "plugins.h"
-#include "oplib.h"
+#include "iplugin.h"
 
 typedef struct
 {
@@ -13,23 +10,16 @@ typedef struct
     uint32_t height;
 } FrameBufferInfo;
 
-class GfxPlugin
+class GfxPlugin : public IPlugin
 {
 public:
-    GfxPlugin(const char* libPath);
-    ~GfxPlugin();
+    virtual ~GfxPlugin();
 
-    bool initialize(void* renderWindow, void* statusBar);
-    inline bool isInitialized(void) { return _initialized; }
-    void close(void);
-    void onRomOpen(void);
-    void onRomClose(void);
-    void GameReset(void);
-    std::string PluginName(void) const { return _pluginInfo.Name; }
+    virtual OPStatus initialize(PluginContainer* plugins, void* renderWindow, void* statusBar);
+    static OPStatus loadPlugin(const char* libPath, GfxPlugin*& outplug);
 
     void(*CaptureScreen)(const char *);
     void(*ChangeWindow)(void);
-    void(*Config)(void* hParent);
     void(*DrawScreen)(void);
     void(*MoveScreen)(int32_t xpos, int32_t ypos);
     void(*ProcessDList)(void);
@@ -45,22 +35,13 @@ public:
     void(*fbWrite)(uint32_t addr, uint32_t size);
     void(*fbGetInfo)(void* p);
 
+protected:
+    virtual OPStatus unloadPlugin();
+
 private:
     GfxPlugin();
+
+    // Not implemented
     GfxPlugin(const GfxPlugin&);
     GfxPlugin& operator=(const GfxPlugin&);
-
-    void loadLibrary(const char* libPath);
-    void unloadLibrary(void);
-
-private:
-    LibHandle _libHandle;
-    bool _initialized;
-    bool _romOpened;
-    PLUGIN_INFO _pluginInfo;
-
-    void(*CloseDLL)(void);
-    void(*RomOpen)(void);
-    void(*RomClosed)(void);
-    void(*PluginOpened)(void);
 };

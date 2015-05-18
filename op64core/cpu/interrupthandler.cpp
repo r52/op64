@@ -8,7 +8,7 @@
 #include <cheat/cheatengine.h>
 #include <mem/imemory.h>
 #include <pif/pif.h>
-#include <plugin/plugins.h>
+#include <plugin/plugincontainer.h>
 #include <plugin/gfxplugin.h>
 #include <rcp/rcpcommon.h>
 #include <rcp/rcp.h>

@@ -4,34 +4,24 @@
 #include <rcp/rcp.h>
 
 
-AudioPlugin::AudioPlugin(const char* libPath) :
-_libHandle(nullptr),
-_initialized(false),
-_romOpened(false),
-_usingThread(false),
-m_DacrateChanged(nullptr),
-LenChanged(nullptr),
-Config(nullptr),
-ReadLength(nullptr),
-RomOpen(nullptr),
-RomClosed(nullptr),
-CloseDLL(nullptr),
-ProcessAList(nullptr),
-Update(nullptr),
-PluginOpened(nullptr)
+AudioPlugin::AudioPlugin() :
+    _usingThread(false),
+    LenChanged(nullptr),
+    ReadLength(nullptr),
+    ProcessAList(nullptr),
+    Update(nullptr),
+    _audioThreadStop(false),
+    AiDacrateChanged(nullptr)
 {
-    _audioThreadStop = false;
-    memset(&_pluginInfo, 0, sizeof(_pluginInfo));
-    loadLibrary(libPath);
 }
 
 AudioPlugin::~AudioPlugin()
 {
-    close();
-    unloadLibrary();
+    closePlugin();
+    unloadPlugin();
 }
 
-bool AudioPlugin::initialize(void* renderWindow, void* statusBar)
+OPStatus AudioPlugin::initialize(PluginContainer* plugins, void* renderWindow, void* statusBar)
 {
     // TODO future: linux version (mupen spec)
     struct AUDIO_INFO {
@@ -55,22 +45,33 @@ bool AudioPlugin::initialize(void* renderWindow, void* statusBar)
         void(*CheckInterrupts)(void);
     };
 
-    int (*InitiateAudio)(AUDIO_INFO Audio_Info);
-    InitiateAudio = (int(*)(AUDIO_INFO))opLibGetFunc(_libHandle, "InitiateAudio");
-    if (InitiateAudio == nullptr) { return false; }
+    int(*InitiateAudio)(AUDIO_INFO Audio_Info);
+
+    getPluginFunction(_libHandle, "InitiateAudio", InitiateAudio);
+    if (InitiateAudio == nullptr)
+    {
+        LOG_ERROR(AudioPlugin) << "InitiateAudio not found";
+        return OP_ERROR;
+    }
 
     AUDIO_INFO Info;
     memset(&Info, 0, sizeof(Info));
 
     Info.hwnd = renderWindow;
 
-#ifdef _MSc_VER
-    Info.hinst = GetModuleHandle(NULL);
-#endif
+    Info.hinst = opLibGetMainHandle();
     Info.MemoryBswaped = 1;
-    Info.HEADER = Bus::rom->getImage();
-    Info.RDRAM = (uint8_t*) Bus::rdram->mem;
-    Info.DMEM = (uint8_t*) Bus::rcp->sp.dmem;
+    if (Bus::rom)
+    {
+        Info.HEADER = Bus::rom->getImage();
+    }
+    else
+    {
+        uint8_t buf[100];
+        Info.HEADER = buf;
+    }
+    Info.RDRAM = (uint8_t*)Bus::rdram->mem;
+    Info.DMEM = (uint8_t*)Bus::rcp->sp.dmem;
     Info.IMEM = (uint8_t*)Bus::rcp->sp.imem;
     Info.MI__INTR_REG = &Bus::rcp->mi.reg[MI_INTR_REG];
     Info.AI__DRAM_ADDR_REG = &Bus::rcp->ai.reg[AI_DRAM_ADDR_REG];
@@ -91,120 +92,88 @@ bool AudioPlugin::initialize(void* renderWindow, void* statusBar)
     }
 
     if (Bus::rcp->ai.reg[AI_DACRATE_REG] != 0) {
-        DacrateChanged(SYSTEM_NTSC);
+        DacrateChanged(Bus::rom ? Bus::rom->getSystemType() : SYSTEM_NTSC);
     }
 
-    return _initialized;
+    return _initialized ? OP_OK : OP_ERROR;
 }
 
-void AudioPlugin::close(void)
+OPStatus AudioPlugin::loadPlugin(const char* libPath, AudioPlugin*& outplug)
 {
-    if (_romOpened) {
-        RomClosed();
-        _romOpened = false;
-    }
-    if (_initialized) {
-        CloseDLL();
-        _initialized = false;
-    }
-}
-
-void AudioPlugin::GameReset(void)
-{
-    if (_romOpened)
+    if (nullptr != outplug)
     {
-        RomClosed();
-        if (RomOpen)
+        LOG_DEBUG(AudioPlugin) << "Existing Plugin object";
+        return OP_ERROR;
+    }
+
+    AudioPlugin* plugin = new AudioPlugin;
+
+    if (OP_ERROR == loadLibrary(libPath, plugin->_libHandle, plugin->_pluginInfo))
+    {
+        delete plugin;
+        LOG_ERROR(AudioPlugin) << "Error loading library " << libPath;
+        return OP_ERROR;
+    }
+
+    //Find entries for functions in DLL
+    void(*InitFunc)(void);
+
+    getPluginFunction(plugin->_libHandle, "RomClosed", plugin->RomClosed);
+    getPluginFunction(plugin->_libHandle, "RomOpen", plugin->RomOpen);
+    getPluginFunction(plugin->_libHandle, "CloseDLL", plugin->CloseLib);
+    getPluginFunction(plugin->_libHandle, "DllConfig", plugin->Config);
+
+    getPluginFunction(plugin->_libHandle, "AiDacrateChanged", plugin->AiDacrateChanged);
+    getPluginFunction(plugin->_libHandle, "InitiateAudio", InitFunc);
+    getPluginFunction(plugin->_libHandle, "AiLenChanged", plugin->LenChanged);
+    getPluginFunction(plugin->_libHandle, "AiReadLength", plugin->ReadLength);
+    getPluginFunction(plugin->_libHandle, "ProcessAList", plugin->ProcessAList);
+
+    getPluginFunction(plugin->_libHandle, "AiUpdate", plugin->Update);
+
+    //version 102 functions
+    getPluginFunction(plugin->_libHandle, "PluginLoaded", plugin->PluginOpened);
+
+    if (plugin->AiDacrateChanged == nullptr ||
+        plugin->LenChanged == nullptr ||
+        plugin->ReadLength == nullptr ||
+        InitFunc == nullptr ||
+        plugin->RomClosed == nullptr ||
+        plugin->ProcessAList == nullptr)
+    {
+        freeLibrary(plugin->_libHandle);
+        delete plugin;
+        LOG_ERROR(AudioPlugin) << "Invalid plugin: not all required functions are found";
+        return OP_ERROR;
+    }
+
+    if (plugin->_pluginInfo.Version >= 0x0102)
+    {
+        if (plugin->PluginOpened == nullptr)
         {
-            RomOpen();
+            freeLibrary(plugin->_libHandle);
+            delete plugin;
+            LOG_ERROR(AudioPlugin) << "Invalid plugin: not all required functions are found";
+            return OP_ERROR;
         }
-    }
-}
 
-void AudioPlugin::onRomOpen(void)
-{
-    if (!_romOpened && RomOpen)
-    {
-        RomOpen();
-        _romOpened = true;
+        plugin->PluginOpened();
     }
-}
 
-void AudioPlugin::onRomClose(void)
-{
-    if (_romOpened)
-    {
-        RomClosed();
-        _romOpened = false;
-    }
+    // Return it
+    outplug = plugin; plugin = nullptr;
+
+    return OP_OK;
 }
 
 void AudioPlugin::DacrateChanged(SystemType Type)
 {
     if (!isInitialized()) { return; }
 
-    m_DacrateChanged(Type);
+    AiDacrateChanged(Type);
 }
 
-void AudioPlugin::loadLibrary(const char* libPath)
-{
-    unloadLibrary();
-
-    if (!opLoadLib(&_libHandle, libPath))
-    {
-        LOG_ERROR(AudioPlugin) << libPath << " failed to load";
-        unloadLibrary();
-        return;
-    }
-
-    void (*GetDllInfo)(PLUGIN_INFO* PluginInfo);
-    GetDllInfo = (void(*)(PLUGIN_INFO*))opLibGetFunc(_libHandle, "GetDllInfo");
-
-    if (GetDllInfo == nullptr)
-    {
-        LOG_ERROR(AudioPlugin) << libPath << ": invalid plugin";
-        unloadLibrary();
-        return;
-    }
-
-    GetDllInfo(&_pluginInfo);
-    if (!Plugins::ValidPluginVersion(_pluginInfo))
-    {
-        LOG_ERROR(AudioPlugin) << libPath << ": unsupported plugin version";
-        unloadLibrary();
-        return;
-    }
-
-    void(*InitFunc)(void);
-    m_DacrateChanged = (void(*)(SystemType))  opLibGetFunc(_libHandle, "AiDacrateChanged");
-    LenChanged = (void(*)(void)) opLibGetFunc(_libHandle, "AiLenChanged");
-    Config = (void(*)(void*))opLibGetFunc(_libHandle, "DllConfig");
-    ReadLength = (unsigned int(*)(void))opLibGetFunc(_libHandle, "AiReadLength");
-    InitFunc = (void(*)(void)) opLibGetFunc(_libHandle, "InitiateAudio");
-    RomOpen = (void(*)(void)) opLibGetFunc(_libHandle, "RomOpen");
-    RomClosed = (void(*)(void)) opLibGetFunc(_libHandle, "RomClosed");
-    CloseDLL = (void(*)(void)) opLibGetFunc(_libHandle, "CloseDLL");
-    ProcessAList = (void(*)(void)) opLibGetFunc(_libHandle, "ProcessAList");
-
-    Update = (void(*)(int))opLibGetFunc(_libHandle, "AiUpdate");
-
-    PluginOpened = (void(*)(void))opLibGetFunc(_libHandle, "PluginLoaded");
-
-    if (m_DacrateChanged == nullptr) { unloadLibrary(); return; }
-    if (LenChanged == nullptr) { unloadLibrary(); return; }
-    if (ReadLength == nullptr) { unloadLibrary(); return; }
-    if (InitFunc == nullptr) { unloadLibrary(); return; }
-    if (RomClosed == nullptr) { unloadLibrary(); return; }
-    if (ProcessAList == nullptr) { unloadLibrary(); return; }
-
-    if (_pluginInfo.Version >= 0x0102)
-    {
-        if (PluginOpened == nullptr) { unloadLibrary(); return; }
-        PluginOpened();
-    }
-}
-
-void AudioPlugin::unloadLibrary(void)
+OPStatus AudioPlugin::unloadPlugin()
 {
     if (_usingThread)
     {
@@ -212,21 +181,23 @@ void AudioPlugin::unloadLibrary(void)
         _usingThread = false;
     }
 
-    memset(&_pluginInfo, 0, sizeof(_pluginInfo));
-
-    if (nullptr != _libHandle) {
-        opLibClose(_libHandle);
-        _libHandle = nullptr;
+    if (OP_ERROR == freeLibrary(_libHandle))
+    {
+        LOG_FATAL(AudioPlugin) << "Error unloading plugin";
+        return OP_ERROR;
     }
 
-    m_DacrateChanged = nullptr;
+    memset(&_pluginInfo, 0, sizeof(_pluginInfo));
+    AiDacrateChanged = nullptr;
     LenChanged = nullptr;
     Config = nullptr;
     ReadLength = nullptr;
     Update = nullptr;
     ProcessAList = nullptr;
     RomClosed = nullptr;
-    CloseDLL = nullptr;
+    CloseLib = nullptr;
+
+    return OP_OK;
 }
 
 void AudioPlugin::audioThread(void)

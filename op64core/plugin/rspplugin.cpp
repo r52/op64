@@ -6,40 +6,37 @@
 #include <rcp/rcp.h>
 #include <core/bus.h>
 
-RSPPlugin::RSPPlugin(const char* libPath) :
-Config(nullptr),
-DoRspCycles(nullptr),
-CloseDLL(nullptr),
-RomOpen(nullptr),
-RomClosed(nullptr),
-PluginOpened(nullptr),
-_libHandle(nullptr),
-_initialized(false),
-_romOpened(false),
-_cycleCount(0)
+RSPPlugin::RSPPlugin() :
+    IPlugin(),
+    DoRspCycles(nullptr),
+    _cycleCount(0)
 {
-    memset(&_pluginInfo, 0, sizeof(_pluginInfo));
-    loadLibrary(libPath);
 }
 
 RSPPlugin::~RSPPlugin()
 {
-    close();
-    unloadLibrary();
+    closePlugin();
+    unloadPlugin();
 }
 
-bool RSPPlugin::initialize(Plugins* plugins, void* renderWindow, void* statusBar)
+OPStatus RSPPlugin::initialize(PluginContainer* plugins, void* renderWindow, void* statusBar)
 {
     //Get DLL information
     void (*GetDllInfo)(PLUGIN_INFO* PluginInfo);
-    GetDllInfo = (void(*)(PLUGIN_INFO*))opLibGetFunc(_libHandle, "GetDllInfo");
-    if (GetDllInfo == nullptr) { return false; }
+
+    getPluginFunction(_libHandle, "GetDllInfo", GetDllInfo);
+    if (GetDllInfo == nullptr)
+    {
+        LOG_ERROR(RSPPlugin) << "GetDllInfo not found";
+        return OP_ERROR;
+    }
 
     PLUGIN_INFO PluginInfo;
     GetDllInfo(&PluginInfo);
 
     if (PluginInfo.Version == 1 || PluginInfo.Version == 0x100) {
-        return false;
+        LOG_ERROR(RSPPlugin) << "Unsupported plugin version";
+        return OP_ERROR;
     }
 
     typedef struct {
@@ -80,22 +77,24 @@ bool RSPPlugin::initialize(Plugins* plugins, void* renderWindow, void* statusBar
 
     //Get Function from DLL
     void (*InitiateRSP)(RSP_INFO_1_1 Audio_Info, unsigned int* Cycles);
-    InitiateRSP = (void(*)(RSP_INFO_1_1, unsigned int*))opLibGetFunc(_libHandle, "InitiateRSP");
-    if (InitiateRSP == nullptr) { return false; }
+    getPluginFunction(_libHandle, "InitiateRSP", InitiateRSP);
+    if (InitiateRSP == nullptr)
+    {
+        LOG_ERROR(RSPPlugin) << "InitiateRSP not found";
+        return OP_ERROR;
+    }
 
     RSP_INFO_1_1 Info;
     memset(&Info, 0, sizeof(Info));
 
-    //Send Initilization information to the DLL
+    //Send Initialization information to the DLL
     Info.CheckInterrupts = DummyFunction;
     Info.ProcessDlist = plugins->gfx()->ProcessDList;
     Info.ProcessRdpList = plugins->gfx()->ProcessRDPList;
     Info.ShowCFB = plugins->gfx()->ShowCFB;
     Info.ProcessAlist = plugins->audio()->ProcessAList;
 
-#ifdef _MSC_VER
-    Info.hInst = GetModuleHandle(NULL);
-#endif
+    Info.hInst = opLibGetMainHandle();
     Info.RDRAM = (uint8_t*)Bus::rdram->mem;
     Info.DMEM = (uint8_t*)Bus::rcp->sp.dmem;
     Info.IMEM = (uint8_t*)Bus::rcp->sp.imem;
@@ -125,115 +124,86 @@ bool RSPPlugin::initialize(Plugins* plugins, void* renderWindow, void* statusBar
     InitiateRSP(Info, &_cycleCount);
     _initialized = true;
 
-    return _initialized;
+    return OP_OK;
 }
 
-void RSPPlugin::close(void)
+OPStatus RSPPlugin::loadPlugin(const char* libPath, RSPPlugin*& outplug)
 {
-    if (_romOpened)
+    if (nullptr != outplug)
     {
-        onRomClose();
-    }
-    if (_initialized)
-    {
-        CloseDLL();
-        _initialized = false;
-    }
-}
-
-void RSPPlugin::onRomOpen(void)
-{
-    if (!_romOpened)
-    {
-        if (RomOpen)
-        {
-            RomOpen();
-        }
-        _romOpened = true;
-    }
-}
-
-void RSPPlugin::onRomClose(void)
-{
-    if (_romOpened)
-    {
-        RomClosed();
-        _romOpened = false;
-    }
-}
-
-void RSPPlugin::GameReset(void)
-{
-    if (_romOpened)
-    {
-        onRomClose();
-        onRomOpen();
-    }
-}
-
-void RSPPlugin::loadLibrary(const char* libPath)
-{
-    if (!opLoadLib(&_libHandle, libPath))
-    {
-        LOG_ERROR(RSPPlugin) << libPath << " failed to load";
-        unloadLibrary();
-        return;
+        LOG_DEBUG(RSPPlugin) << "Existing Plugin object";
+        return OP_ERROR;
     }
 
-    void (*GetDllInfo)(PLUGIN_INFO* PluginInfo);
-    GetDllInfo = (void(*)(PLUGIN_INFO*))opLibGetFunc(_libHandle, "GetDllInfo");
-    if (GetDllInfo == nullptr)
-    {
-        LOG_ERROR(RSPPlugin) << libPath << ": invalid plugin";
-        unloadLibrary();
-        return;
-    }
+    RSPPlugin* plugin = new RSPPlugin;
 
-    GetDllInfo(&_pluginInfo);
-    if (!Plugins::ValidPluginVersion(_pluginInfo))
+    if (OP_ERROR == loadLibrary(libPath, plugin->_libHandle, plugin->_pluginInfo))
     {
-        LOG_ERROR(RSPPlugin) << libPath << ": unsupported plugin version";
-        unloadLibrary();
-        return;
+        delete plugin;
+        LOG_ERROR(RSPPlugin) << "Error loading library " << libPath;
+        return OP_ERROR;
     }
 
     //Find entries for functions in DLL
-    void (*InitFunc)(void);
-    DoRspCycles = (unsigned int(*)(unsigned int))opLibGetFunc(_libHandle, "DoRspCycles");
-    InitFunc = (void(*)(void))  opLibGetFunc(_libHandle, "InitiateRSP");
-    RomClosed = (void(*)(void))  opLibGetFunc(_libHandle, "RomClosed");
-    RomOpen = (void(*)(void))  opLibGetFunc(_libHandle, "RomOpen");
-    CloseDLL = (void(*)(void))  opLibGetFunc(_libHandle, "CloseDLL");
-    Config = (void(*)(void*)) opLibGetFunc(_libHandle, "DllConfig");
+    void(*InitFunc)(void);
+
+    getPluginFunction(plugin->_libHandle, "RomClosed", plugin->RomClosed);
+    getPluginFunction(plugin->_libHandle, "RomOpen", plugin->RomOpen);
+    getPluginFunction(plugin->_libHandle, "CloseDLL", plugin->CloseLib);
+    getPluginFunction(plugin->_libHandle, "DllConfig", plugin->Config);
+
+    getPluginFunction(plugin->_libHandle, "DoRspCycles", plugin->DoRspCycles);
+    getPluginFunction(plugin->_libHandle, "InitiateRSP", InitFunc);
 
     //version 102 functions
-    PluginOpened = (void(*)(void))opLibGetFunc(_libHandle, "PluginLoaded");
+    getPluginFunction(plugin->_libHandle, "PluginLoaded", plugin->PluginOpened);
 
     //Make sure dll had all needed functions
-    if (DoRspCycles == nullptr) { unloadLibrary(); return; }
-    if (InitFunc == nullptr) { unloadLibrary(); return; }
-    if (RomClosed == nullptr) { unloadLibrary(); return; }
-    if (CloseDLL == nullptr) { unloadLibrary(); return; }
-
-    if (_pluginInfo.Version >= 0x0102)
-    {
-        if (PluginOpened == nullptr) { unloadLibrary(); return; }
-
-        PluginOpened();
+    if (plugin->DoRspCycles == nullptr || 
+        InitFunc == nullptr ||
+        plugin->RomClosed == nullptr ||
+        plugin->CloseLib == nullptr)
+    { 
+        freeLibrary(plugin->_libHandle);
+        delete plugin;
+        LOG_ERROR(RSPPlugin) << "Invalid plugin: not all required functions are found";
+        return OP_ERROR;
     }
+
+    if (plugin->_pluginInfo.Version >= 0x0102)
+    {
+        if (plugin->PluginOpened == nullptr)
+        { 
+            freeLibrary(plugin->_libHandle);
+            delete plugin;
+            LOG_ERROR(RSPPlugin) << "Invalid plugin: not all required functions are found";
+            return OP_ERROR;
+        }
+
+        plugin->PluginOpened();
+    }
+
+    // Return it
+    outplug = plugin; plugin = nullptr;
+
+    return OP_OK;
 }
 
-void RSPPlugin::unloadLibrary(void)
+OPStatus RSPPlugin::unloadPlugin()
 {
-    if (nullptr != _libHandle) {
-        opLibClose(_libHandle);
-        _libHandle = nullptr;
+    if (OP_ERROR == freeLibrary(_libHandle))
+    {
+        LOG_FATAL(RSPPlugin) << "Error unloading plugin";
+        return OP_ERROR;
     }
 
     memset(&_pluginInfo, 0, sizeof(_pluginInfo));
     DoRspCycles = nullptr;
     RomClosed = nullptr;
     Config = nullptr;
-    CloseDLL = nullptr;
+    CloseLib = nullptr;
     PluginOpened = nullptr;
+
+    return OP_OK;
 }
+

@@ -10,7 +10,7 @@ class QCheckBox;
 class QLineEdit;
 class QComboBox;
 
-class Plugins;
+class PluginContainer;
 
 struct ConfigWidgets
 {

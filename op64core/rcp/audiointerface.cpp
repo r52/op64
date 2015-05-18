@@ -6,7 +6,7 @@
 #include <cpu/icpu.h>
 #include <cpu/cp0.h>
 #include <cpu/interrupthandler.h>
-#include <plugin/plugins.h>
+#include <plugin/plugincontainer.h>
 #include <plugin/audioplugin.h>
 #include <rom/rom.h>
 #include <rcp/rcp.h>

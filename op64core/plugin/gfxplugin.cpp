@@ -9,66 +9,43 @@
 static void gfx_dummy_func(void) {}
 static void DummyMoveScreen(int32_t, int32_t) {}
 
-GfxPlugin::GfxPlugin(const char* libPath) :
-CaptureScreen(nullptr),
-ChangeWindow(nullptr),
-Config(nullptr),
-DrawScreen(nullptr),
-MoveScreen(nullptr),
-ProcessDList(nullptr),
-ProcessRDPList(nullptr),
-ShowCFB(nullptr),
-UpdateScreen(nullptr),
-ViStatusChanged(nullptr),
-ViWidthChanged(nullptr),
-SoftReset(nullptr),
-CloseDLL(nullptr),
-RomOpen(nullptr),
-RomClosed(nullptr),
-PluginOpened(nullptr),
-fbGetInfo(nullptr),
-fbRead(nullptr),
-fbWrite(nullptr),
-_libHandle(nullptr),
-_initialized(false),
-_romOpened(false)
+GfxPlugin::GfxPlugin() :
+    CaptureScreen(nullptr),
+    ChangeWindow(nullptr),
+    DrawScreen(nullptr),
+    MoveScreen(nullptr),
+    ProcessDList(nullptr),
+    ProcessRDPList(nullptr),
+    ShowCFB(nullptr),
+    UpdateScreen(nullptr),
+    ViStatusChanged(nullptr),
+    ViWidthChanged(nullptr),
+    SoftReset(nullptr),
+    fbGetInfo(nullptr),
+    fbRead(nullptr),
+    fbWrite(nullptr)
 {
-    memset(&_pluginInfo, 0, sizeof(_pluginInfo));
-    loadLibrary(libPath);
 }
 
 GfxPlugin::~GfxPlugin()
 {
-    close();
-    unloadLibrary();
+    closePlugin();
+    unloadPlugin();
 }
 
-void GfxPlugin::close(void)
+OPStatus GfxPlugin::unloadPlugin()
 {
-    if (_romOpened)
+    if (OP_ERROR == freeLibrary(_libHandle))
     {
-        onRomClose();
-    }
-
-    if (_initialized)
-    {
-        CloseDLL();
-        _initialized = false;
-    }
-}
-
-void GfxPlugin::unloadLibrary(void)
-{
-    if (nullptr != _libHandle) {
-        opLibClose(_libHandle);
-        _libHandle = nullptr;
+        LOG_FATAL(GfxPlugin) << "Error unloading plugin";
+        return OP_ERROR;
     }
 
     memset(&_pluginInfo, 0, sizeof(_pluginInfo));
 
     //	CaptureScreen = NULL;
     ChangeWindow = nullptr;
-    CloseDLL = nullptr;
+    CloseLib = nullptr;
     //	DllAbout = NULL;
     Config = nullptr;
     RomClosed = nullptr;
@@ -84,118 +61,115 @@ void GfxPlugin::unloadLibrary(void)
     fbGetInfo = nullptr;
     fbRead = nullptr;
     fbWrite = nullptr;
+
+    return OP_OK;
 }
 
-void GfxPlugin::loadLibrary(const char* libPath)
+
+OPStatus GfxPlugin::loadPlugin(const char* libPath, GfxPlugin*& outplug)
 {
-    if (!opLoadLib(&_libHandle, libPath))
+    if (nullptr != outplug)
     {
-        LOG_ERROR(GfxPlugin) << libPath << " failed to load";
-        unloadLibrary();
-        return;
+        LOG_DEBUG(GfxPlugin) << "Existing Plugin object";
+        return OP_ERROR;
     }
 
-    void (*GetDllInfo)(PLUGIN_INFO* PluginInfo);
-    GetDllInfo = (void(*)(PLUGIN_INFO*))opLibGetFunc(_libHandle, "GetDllInfo");
+    GfxPlugin* plugin = new GfxPlugin;
 
-    if (GetDllInfo == nullptr)
+    if (OP_ERROR == loadLibrary(libPath, plugin->_libHandle, plugin->_pluginInfo))
     {
-        LOG_ERROR(GfxPlugin) << libPath << ": invalid plugin";
-        unloadLibrary();
-        return;
+        delete plugin;
+        LOG_ERROR(GfxPlugin) << "Error loading library " << libPath;
+        return OP_ERROR;
     }
 
-    GetDllInfo(&_pluginInfo);
-    if (!Plugins::ValidPluginVersion(_pluginInfo))
+    //Find entries for functions in DLL
+    int(*InitFunc)(void * Gfx_Info);
+
+    getPluginFunction(plugin->_libHandle, "RomClosed", plugin->RomClosed);
+    getPluginFunction(plugin->_libHandle, "RomOpen", plugin->RomOpen);
+    getPluginFunction(plugin->_libHandle, "CloseDLL", plugin->CloseLib);
+    getPluginFunction(plugin->_libHandle, "DllConfig", plugin->Config);
+
+    getPluginFunction(plugin->_libHandle, "InitiateGFX", InitFunc);
+    getPluginFunction(plugin->_libHandle, "ChangeWindow", plugin->ChangeWindow);
+    getPluginFunction(plugin->_libHandle, "DrawScreen", plugin->DrawScreen);
+    getPluginFunction(plugin->_libHandle, "MoveScreen", plugin->MoveScreen);
+    getPluginFunction(plugin->_libHandle, "ProcessDList", plugin->ProcessDList);
+    getPluginFunction(plugin->_libHandle, "UpdateScreen", plugin->UpdateScreen);
+    getPluginFunction(plugin->_libHandle, "ViStatusChanged", plugin->ViStatusChanged);
+    getPluginFunction(plugin->_libHandle, "ViWidthChanged", plugin->ViWidthChanged);
+    getPluginFunction(plugin->_libHandle, "SoftReset", plugin->SoftReset);
+
+    //version 102 functions
+    getPluginFunction(plugin->_libHandle, "PluginLoaded", plugin->PluginOpened);
+
+    if (InitFunc == nullptr ||
+        plugin->ChangeWindow == nullptr ||
+        plugin->ProcessDList == nullptr ||
+        plugin->RomClosed == nullptr ||
+        plugin->RomOpen == nullptr ||
+        plugin->UpdateScreen == nullptr ||
+        plugin->CloseLib == nullptr)
     {
-        LOG_ERROR(GfxPlugin) << libPath << ": unsupported plugin version";
-        unloadLibrary();
-        return;
+        freeLibrary(plugin->_libHandle);
+        delete plugin;
+        LOG_ERROR(GfxPlugin) << "Invalid plugin: not all required functions are found";
+        return OP_ERROR;
     }
 
-    int (*InitFunc)(void * Gfx_Info);
-    InitFunc = (int(*)(void *)) opLibGetFunc(_libHandle, "InitiateGFX");
-    CloseDLL = (void(*)(void)) opLibGetFunc(_libHandle, "CloseDLL");
-    ChangeWindow = (void(*)(void)) opLibGetFunc(_libHandle, "ChangeWindow");
-    Config = (void(*)(void*)) opLibGetFunc(_libHandle, "DllConfig");
-    DrawScreen = (void(*)(void)) opLibGetFunc(_libHandle, "DrawScreen");
-    MoveScreen = (void(*)(int32_t, int32_t))opLibGetFunc(_libHandle, "MoveScreen");
-    ProcessDList = (void(*)(void)) opLibGetFunc(_libHandle, "ProcessDList");
-    RomClosed = (void(*)(void)) opLibGetFunc(_libHandle, "RomClosed");
-    RomOpen = (void(*)(void)) opLibGetFunc(_libHandle, "RomOpen");
-    UpdateScreen = (void(*)(void)) opLibGetFunc(_libHandle, "UpdateScreen");
-    ViStatusChanged = (void(*)(void)) opLibGetFunc(_libHandle, "ViStatusChanged");
-    ViWidthChanged = (void(*)(void)) opLibGetFunc(_libHandle, "ViWidthChanged");
-    SoftReset = (void(*)(void)) opLibGetFunc(_libHandle, "SoftReset");
+    if (plugin->DrawScreen == nullptr) { plugin->DrawScreen = gfx_dummy_func; }
+    if (plugin->MoveScreen == nullptr) { plugin->MoveScreen = DummyMoveScreen; }
+    if (plugin->ViStatusChanged == nullptr) { plugin->ViStatusChanged = gfx_dummy_func; }
+    if (plugin->ViWidthChanged == nullptr) { plugin->ViWidthChanged = gfx_dummy_func; }
+    if (plugin->SoftReset == nullptr) { plugin->SoftReset = gfx_dummy_func; }
 
-    if (ChangeWindow == nullptr)    { unloadLibrary(); return; }
-    if (DrawScreen == nullptr)      { DrawScreen = gfx_dummy_func; }
-    if (InitFunc == nullptr)        { unloadLibrary(); return; }
-    if (MoveScreen == nullptr)      { MoveScreen = DummyMoveScreen; }
-    if (ProcessDList == nullptr)    { unloadLibrary(); return; }
-    if (RomClosed == nullptr)       { unloadLibrary(); return; }
-    if (RomOpen == nullptr)         { unloadLibrary(); return; }
-    if (UpdateScreen == nullptr)    { unloadLibrary(); return; }
-    if (ViStatusChanged == nullptr) { ViStatusChanged = gfx_dummy_func; }
-    if (ViWidthChanged == nullptr)  { ViWidthChanged = gfx_dummy_func; }
-    if (CloseDLL == nullptr)        { unloadLibrary(); return; }
-    if (SoftReset == nullptr)       { SoftReset = gfx_dummy_func; }
+    if (plugin->_pluginInfo.Version >= 0x0103)
+    {
+        getPluginFunction(plugin->_libHandle, "ProcessRDPList", plugin->ProcessRDPList);
+        getPluginFunction(plugin->_libHandle, "CaptureScreen", plugin->CaptureScreen);
+        getPluginFunction(plugin->_libHandle, "ShowCFB", plugin->ShowCFB);
 
-    if (_pluginInfo.Version >= 0x0103){
-        ProcessRDPList = (void(*)(void))opLibGetFunc(_libHandle, "ProcessRDPList");
-        CaptureScreen = (void(*)(const char *))opLibGetFunc(_libHandle, "CaptureScreen");
-        ShowCFB = (void(*)(void))opLibGetFunc(_libHandle, "ShowCFB");
-
-        if (ProcessRDPList == nullptr) { unloadLibrary(); return; }
-        if (CaptureScreen == nullptr)  { unloadLibrary(); return; }
-        if (ShowCFB == nullptr)        { unloadLibrary(); return; }
+        if (plugin->ProcessRDPList == nullptr ||
+            plugin->CaptureScreen == nullptr ||
+            plugin->ShowCFB == nullptr)
+        {
+            freeLibrary(plugin->_libHandle);
+            delete plugin;
+            LOG_ERROR(GfxPlugin) << "Invalid plugin: not all required functions are found";
+            return OP_ERROR;
+        }
     }
 
-    if (_pluginInfo.Version >= 0x0104)
+    if (plugin->_pluginInfo.Version >= 0x0104)
     {
-        if (PluginOpened == nullptr) { unloadLibrary(); return; }
+        if (plugin->PluginOpened == nullptr)
+        {
+            freeLibrary(plugin->_libHandle);
+            delete plugin;
+            LOG_ERROR(GfxPlugin) << "Invalid plugin: not all required functions are found";
+            return OP_ERROR;
+        }
 
-        PluginOpened();
+        plugin->PluginOpened();
     }
 
     // frame buffer extension
-    fbRead = (void(*)(uint32_t)) opLibGetFunc(_libHandle, "FBRead");
-    fbWrite = (void(*)(uint32_t, uint32_t)) opLibGetFunc(_libHandle, "FBWrite");
-    fbGetInfo = (void(*)(void*)) opLibGetFunc(_libHandle, "FBGetFrameBufferInfo");
+    getPluginFunction(plugin->_libHandle, "FBRead", plugin->fbRead);
+    getPluginFunction(plugin->_libHandle, "FBWrite", plugin->fbWrite);
+    getPluginFunction(plugin->_libHandle, "FBGetFrameBufferInfo", plugin->fbGetInfo);
+
+    // Return it
+    outplug = plugin; plugin = nullptr;
+
+    return OP_OK;
 }
 
-void GfxPlugin::onRomOpen(void)
-{
-    if (!_romOpened)
-    {
-        RomOpen();
-        _romOpened = true;
-    }
-}
-
-void GfxPlugin::onRomClose(void)
-{
-    if (_romOpened)
-    {
-        RomClosed();
-        _romOpened = false;
-    }
-}
-
-void GfxPlugin::GameReset(void)
-{
-    if (_romOpened)
-    {
-        onRomClose();
-        onRomOpen();
-    }
-}
-
-bool GfxPlugin::initialize(void* renderWindow, void* statusBar)
+OPStatus GfxPlugin::initialize(PluginContainer* plugins, void* renderWindow, void* statusBar)
 {
     if (_initialized)
     {
-        close();
+        closePlugin();
     }
 
     // TODO future: different spec for linux (mupen spec)
@@ -239,10 +213,12 @@ bool GfxPlugin::initialize(void* renderWindow, void* statusBar)
     } GFX_INFO;
 
     int (*InitiateGFX)(GFX_INFO Gfx_Info);
-    InitiateGFX = (int(*)(GFX_INFO))opLibGetFunc(_libHandle, "InitiateGFX");
+
+    getPluginFunction(_libHandle, "InitiateGFX", InitiateGFX);
     if (InitiateGFX == nullptr)
     {
-        return false;
+        LOG_ERROR(GfxPlugin) << "InitiateGFX not found";
+        return OP_ERROR;
     }
 
     GFX_INFO Info;
@@ -253,7 +229,15 @@ bool GfxPlugin::initialize(void* renderWindow, void* statusBar)
     Info.hWnd = renderWindow;
     Info.hStatusBar = statusBar;
 
-    Info.HEADER = Bus::rom->getImage();
+    if (Bus::rom)
+    {
+        Info.HEADER = Bus::rom->getImage();
+    }
+    else
+    {
+        uint8_t buf[100];
+        Info.HEADER = buf;
+    }
     Info.RDRAM = (uint8_t*)Bus::rdram->mem;
     Info.DMEM = (uint8_t*)Bus::rcp->sp.dmem;
     Info.IMEM = (uint8_t*)Bus::rcp->sp.imem;
@@ -286,5 +270,5 @@ bool GfxPlugin::initialize(void* renderWindow, void* statusBar)
 
     _initialized = (InitiateGFX(Info) != 0);
 
-    return _initialized;
+    return _initialized ? OP_OK : OP_ERROR;
 }

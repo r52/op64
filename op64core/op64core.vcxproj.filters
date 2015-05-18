@@ -216,9 +216,6 @@
     <ClInclude Include="plugin\inputplugin.h">
       <Filter>Header Files\plugins</Filter>
     </ClInclude>
-    <ClInclude Include="plugin\plugins.h">
-      <Filter>Header Files\plugins</Filter>
-    </ClInclude>
     <ClInclude Include="plugin\rspplugin.h">
       <Filter>Header Files\plugins</Filter>
     </ClInclude>
@@ -273,6 +270,15 @@
     <ClInclude Include="rom\sram.h">
       <Filter>Header Files\rom</Filter>
     </ClInclude>
+    <ClInclude Include="plugin\iplugin.h">
+      <Filter>Header Files\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="plugin\plugintypes.h">
+      <Filter>Header Files\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="plugin\plugincontainer.h">
+      <Filter>Header Files\plugins</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cheat\cheatengine.cpp">
@@ -309,9 +315,6 @@
       <Filter>Source Files\plugins</Filter>
     </ClCompile>
     <ClCompile Include="plugin\inputplugin.cpp">
-      <Filter>Source Files\plugins</Filter>
-    </ClCompile>
-    <ClCompile Include="plugin\plugins.cpp">
       <Filter>Source Files\plugins</Filter>
     </ClCompile>
     <ClCompile Include="plugin\rspplugin.cpp">
@@ -397,6 +400,12 @@
     </ClCompile>
     <ClCompile Include="cpu\interpreter.cpp">
       <Filter>Source Files\cpu\interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="plugin\iplugin.cpp">
+      <Filter>Source Files\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="plugin\plugincontainer.cpp">
+      <Filter>Source Files\plugins</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -10,7 +10,7 @@
 
 #include <core/bus.h>
 #include <rom/rom.h>
-#include <plugin/plugins.h>
+#include <plugin/plugincontainer.h>
 #include <plugin/inputplugin.h>
 #include <cpu/icpu.h>
 #include <cpu/cp0.h>

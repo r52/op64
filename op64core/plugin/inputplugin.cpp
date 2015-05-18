@@ -3,31 +3,21 @@
 #include <core/bus.h>
 #include <rom/rom.h>
 
-InputPlugin::InputPlugin(const char* libPath) :
-_libHandle(nullptr),
-_initialized(false),
-_romOpened(false),
-Config(nullptr),
+InputPlugin::InputPlugin() :
 RumbleCommand(nullptr),
 GetKeys(nullptr),
 ReadController(nullptr),
-ControllerCommand(nullptr),
-CloseDLL(nullptr),
-RomOpen(nullptr),
-RomClosed(nullptr),
-PluginOpened(nullptr)
+ControllerCommand(nullptr)
 {
-    memset(&_pluginInfo, 0, sizeof(_pluginInfo));
-    loadLibrary(libPath);
 }
 
 InputPlugin::~InputPlugin()
 {
-    close();
-    unloadLibrary();
+    closePlugin();
+    unloadPlugin();
 }
 
-bool InputPlugin::initialize(void* renderWindow, void* statusBar)
+OPStatus InputPlugin::initialize(PluginContainer* plugins, void* renderWindow, void* statusBar)
 {
     Bus::controllers[0].Present = 0;
     Bus::controllers[0].RawData = 0;
@@ -47,8 +37,13 @@ bool InputPlugin::initialize(void* renderWindow, void* statusBar)
 
     //Get DLL information
     void (*GetDllInfo)(PLUGIN_INFO* PluginInfo);
-    GetDllInfo = (void (*)(PLUGIN_INFO*))opLibGetFunc(_libHandle, "GetDllInfo");
-    if (GetDllInfo == nullptr) { return false; }
+
+    getPluginFunction(_libHandle, "GetDllInfo", GetDllInfo);
+    if (GetDllInfo == nullptr)
+    {
+        LOG_ERROR(InputPlugin) << "GetDllInfo not found";
+        return OP_ERROR;
+    }
 
     PLUGIN_INFO PluginInfo;
     GetDllInfo(&PluginInfo);
@@ -57,8 +52,14 @@ bool InputPlugin::initialize(void* renderWindow, void* statusBar)
     if (PluginInfo.Version == 0x0100) {
         //Get Function from DLL
         void (*InitiateControllers_1_0)(void* hMainWindow, CONTROL Controls[4]);
-        InitiateControllers_1_0 = (void(*)(void*, CONTROL*))opLibGetFunc(_libHandle, "InitiateControllers");
-        if (InitiateControllers_1_0 == nullptr) { return false; }
+
+        getPluginFunction(_libHandle, "InitiateControllers", InitiateControllers_1_0);
+        if (InitiateControllers_1_0 == nullptr)
+        {
+            LOG_ERROR(InputPlugin) << "InitiateControllers v1.0 not found";
+            return OP_ERROR;
+        }
+
         InitiateControllers_1_0(renderWindow, Bus::controllers);
         _initialized = true;
     }
@@ -75,133 +76,115 @@ bool InputPlugin::initialize(void* renderWindow, void* statusBar)
 
         //Get Function from DLL		
         void (*InitiateControllers_1_1)(CONTROL_INFO ControlInfo);
-        InitiateControllers_1_1 = (void(*)(CONTROL_INFO))opLibGetFunc(_libHandle, "InitiateControllers");
-        if (InitiateControllers_1_1 == nullptr) { return false; }
+
+        getPluginFunction(_libHandle, "InitiateControllers", InitiateControllers_1_1);
+        if (InitiateControllers_1_1 == nullptr)
+        {
+            LOG_ERROR(InputPlugin) << "InitiateControllers v1.1 not found";
+            return OP_ERROR;
+        }
 
         CONTROL_INFO ControlInfo;
         ControlInfo.Controls = Bus::controllers;
-        ControlInfo.HEADER = Bus::rom->getImage();
-#ifdef _MSC_VER
-        ControlInfo.hinst = GetModuleHandle(NULL);
-#endif
+        if (Bus::rom)
+        {
+            ControlInfo.HEADER = Bus::rom->getImage();
+        }
+        else
+        {
+            uint8_t buf[100];
+            ControlInfo.HEADER = buf;
+        }
+        ControlInfo.hinst = opLibGetMainHandle();
         ControlInfo.hMainWindow = renderWindow;
         ControlInfo.MemoryBswaped = 1;
         InitiateControllers_1_1(ControlInfo);
         _initialized = true;
     }
 
-    return _initialized;
+    return OP_OK;
 }
 
-void InputPlugin::close(void)
+OPStatus InputPlugin::loadPlugin(const char * libPath, InputPlugin*& outplug)
 {
-    if (_romOpened) {
-        RomClosed();
-        _romOpened = false;
-    }
-    if (_initialized) {
-        CloseDLL();
-        _initialized = false;
-    }
-}
-
-void InputPlugin::onRomOpen(void)
-{
-    if (!_romOpened)
+    if (nullptr != outplug)
     {
-        RomOpen();
-        _romOpened = true;
-    }
-}
-
-void InputPlugin::onRomClose(void)
-{
-    if (_romOpened)
-    {
-        RomClosed();
-        _romOpened = false;
-    }
-}
-
-void InputPlugin::GameReset(void)
-{
-    if (_romOpened)
-    {
-        RomClosed();
-        RomOpen();
-    }
-}
-
-void InputPlugin::loadLibrary(const char* libPath)
-{
-    unloadLibrary();
-
-    if (!opLoadLib(&_libHandle, libPath))
-    {
-        LOG_ERROR(InputPlugin) << libPath << " failed to load";
-        unloadLibrary();
-        return;
+        LOG_DEBUG(InputPlugin) << "Existing Plugin object";
+        return OP_ERROR;
     }
 
-    //Get DLL information
-    void (*GetDllInfo)(PLUGIN_INFO* PluginInfo);
-    GetDllInfo = (void(*)(PLUGIN_INFO*))opLibGetFunc(_libHandle, "GetDllInfo");
-    if (GetDllInfo == nullptr)
-    {
-        LOG_ERROR(InputPlugin) << libPath << ": invalid plugin";
-        unloadLibrary();
-        return;
-    }
+    InputPlugin* plugin = new InputPlugin;
 
-    GetDllInfo(&_pluginInfo);
-    if (!Plugins::ValidPluginVersion(_pluginInfo))
+    if (OP_ERROR == loadLibrary(libPath, plugin->_libHandle, plugin->_pluginInfo))
     {
-        LOG_ERROR(InputPlugin) << libPath << ": unsupported plugin version";
-        unloadLibrary();
-        return;
+        delete plugin;
+        LOG_ERROR(InputPlugin) << "Error loading library " << libPath;
+        return OP_ERROR;
     }
 
     //Find entries for functions in DLL
-    void (*InitFunc)(void);
-    Config = (void(*)(void*))opLibGetFunc(_libHandle, "DllConfig");
-    ControllerCommand = (void(*)(int, uint8_t*))opLibGetFunc(_libHandle, "ControllerCommand");
-    GetKeys = (void(*)(int, BUTTONS*)) opLibGetFunc(_libHandle, "GetKeys");
-    ReadController = (void(*)(int, uint8_t*))opLibGetFunc(_libHandle, "ReadController");
-    InitFunc = (void(*)(void)) opLibGetFunc(_libHandle, "InitiateControllers");
-    RomOpen = (void(*)(void)) opLibGetFunc(_libHandle, "RomOpen");
-    RomClosed = (void(*)(void)) opLibGetFunc(_libHandle, "RomClosed");
-    CloseDLL = (void(*)(void)) opLibGetFunc(_libHandle, "CloseDLL");
-    RumbleCommand = (void(*)(int, int))opLibGetFunc(_libHandle, "RumbleCommand");
+    void(*InitFunc)(void);
+    
+    getPluginFunction(plugin->_libHandle, "RomClosed", plugin->RomClosed);
+    getPluginFunction(plugin->_libHandle, "RomOpen", plugin->RomOpen);
+    getPluginFunction(plugin->_libHandle, "CloseDLL", plugin->CloseLib);
+    getPluginFunction(plugin->_libHandle, "DllConfig", plugin->Config);
 
-    //version 101 functions
-    PluginOpened = (void(*)(void))opLibGetFunc(_libHandle, "PluginLoaded");
+    getPluginFunction(plugin->_libHandle, "ControllerCommand", plugin->ControllerCommand);
+    getPluginFunction(plugin->_libHandle, "InitiateControllers", InitFunc);
+    getPluginFunction(plugin->_libHandle, "ReadController", plugin->ReadController);
+    getPluginFunction(plugin->_libHandle, "GetKeys", plugin->GetKeys);
+    getPluginFunction(plugin->_libHandle, "RumbleCommand", plugin->RumbleCommand);
+
+    //version 102 functions
+    getPluginFunction(plugin->_libHandle, "PluginLoaded", plugin->PluginOpened);
 
     //Make sure dll had all needed functions
-    if (InitFunc == nullptr) { unloadLibrary(); return; }
-    if (CloseDLL == nullptr) { unloadLibrary(); return; }
-
-    if (_pluginInfo.Version >= 0x0102)
+    if (InitFunc == nullptr ||
+        plugin->CloseLib == nullptr)
     {
-        if (PluginOpened == nullptr) { unloadLibrary(); return; }
-
-        PluginOpened();
+        freeLibrary(plugin->_libHandle);
+        delete plugin;
+        LOG_ERROR(InputPlugin) << "Invalid plugin: not all required functions are found";
+        return OP_ERROR;
     }
+
+    if (plugin->_pluginInfo.Version >= 0x0102)
+    {
+        if (plugin->PluginOpened == nullptr)
+        {
+            freeLibrary(plugin->_libHandle);
+            delete plugin;
+            LOG_ERROR(InputPlugin) << "Invalid plugin: not all required functions are found";
+            return OP_ERROR;
+        }
+
+        plugin->PluginOpened();
+    }
+
+    // Return it
+    outplug = plugin; plugin = nullptr;
+
+    return OP_OK;
 }
 
-void InputPlugin::unloadLibrary(void)
+OPStatus InputPlugin::unloadPlugin()
 {
-    memset(&_pluginInfo, 0, sizeof(_pluginInfo));
-
-    if (nullptr != _libHandle) {
-        opLibClose(_libHandle);
-        _libHandle = nullptr;
+    if (OP_ERROR == freeLibrary(_libHandle))
+    {
+        LOG_FATAL(RSPPlugin) << "Error unloading plugin";
+        return OP_ERROR;
     }
 
+    memset(&_pluginInfo, 0, sizeof(_pluginInfo));
     Config = nullptr;
     ControllerCommand = nullptr;
     GetKeys = nullptr;
     ReadController = nullptr;
-    CloseDLL = nullptr;
+    CloseLib = nullptr;
     RomOpen = nullptr;
     RomClosed = nullptr;
+
+    return OP_OK;
 }
+

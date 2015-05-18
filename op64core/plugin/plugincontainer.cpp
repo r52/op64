@@ -3,7 +3,7 @@
 
 #include <oplog.h>
 
-#include "plugins.h"
+#include "plugincontainer.h"
 
 #include "gfxplugin.h"
 #include "audioplugin.h"
@@ -13,7 +13,7 @@
 #include <core/bus.h>
 
 
-Plugins::Plugins() :
+PluginContainer::PluginContainer() :
 _gfx(nullptr),
 _audio(nullptr),
 _rsp(nullptr),
@@ -23,7 +23,7 @@ _statusBar(nullptr)
 {
     loadPlugins();
 
-    _plugChangeCallback = ConfigStore::getInstance().registerCallback(std::bind(&Plugins::pluginsChanged, this));
+    _plugChangeCallback = ConfigStore::getInstance().registerCallback(std::bind(&PluginContainer::pluginsChanged, this));
 
     ConfigStore::getInstance().addChangeCallback(CFG_SECTION_CORE, CFG_GFX_PLUGIN, _plugChangeCallback);
     ConfigStore::getInstance().addChangeCallback(CFG_SECTION_CORE, CFG_AUDIO_PLUGIN, _plugChangeCallback);
@@ -31,7 +31,7 @@ _statusBar(nullptr)
     ConfigStore::getInstance().addChangeCallback(CFG_SECTION_CORE, CFG_INPUT_PLUGIN, _plugChangeCallback);
 }
 
-Plugins::~Plugins()
+PluginContainer::~PluginContainer()
 {
     ConfigStore::getInstance().removeChangeCallback(CFG_SECTION_CORE, CFG_GFX_PLUGIN, _plugChangeCallback);
     ConfigStore::getInstance().removeChangeCallback(CFG_SECTION_CORE, CFG_AUDIO_PLUGIN, _plugChangeCallback);
@@ -44,18 +44,18 @@ Plugins::~Plugins()
     DestroyInputPlugin();
 }
 
-void Plugins::setRenderWindow(void* windowHandle)
+void PluginContainer::setRenderWindow(void* windowHandle)
 {
     _renderWindow = windowHandle;
 }
 
 
-void Plugins::setStatusBar(void* statusBar)
+void PluginContainer::setStatusBar(void* statusBar)
 {
     _statusBar = statusBar;
 }
 
-void Plugins::pluginsChanged(void)
+void PluginContainer::pluginsChanged(void)
 {
     if (!Bus::stop)
     {
@@ -73,76 +73,52 @@ void Plugins::pluginsChanged(void)
     }
 }
 
-void Plugins::loadPlugins(void)
+void PluginContainer::loadPlugins(void)
 {
-    LOG_INFO(Plugins) << "Loading plugins";
+    LOG_INFO(PluginContainer) << "Loading plugins";
 
     if (nullptr == _gfx)
     {
         _gfxPath = ConfigStore::getInstance().getString(CFG_SECTION_CORE, CFG_GFX_PLUGIN);
-        LOG_TRACE(Plugins) << "Graphics Plugin: " << _gfxPath;
-        _gfx = new GfxPlugin(_gfxPath.c_str());
-        ConfigStore::getInstance().set(CFG_SECTION_CORE, CFG_GFX_NAME, _gfx->PluginName().c_str());
+        if (OP_OK == GfxPlugin::loadPlugin(_gfxPath.c_str(), _gfx))
+        {
+            LOG_TRACE(PluginContainer) << "Graphics Plugin: " << _gfxPath;
+            ConfigStore::getInstance().set(CFG_SECTION_CORE, CFG_GFX_NAME, _gfx->pluginName().c_str());
+        }
     }
 
     if (nullptr == _audio)
     {
         _audioPath = ConfigStore::getInstance().getString(CFG_SECTION_CORE, CFG_AUDIO_PLUGIN);
-        LOG_TRACE(Plugins) << "Audio Plugin: " << _audioPath;
-        _audio = new AudioPlugin(_audioPath.c_str());
-        ConfigStore::getInstance().set(CFG_SECTION_CORE, CFG_AUDIO_NAME, _audio->PluginName().c_str());
+        if (OP_OK == AudioPlugin::loadPlugin(_audioPath.c_str(), _audio))
+        {
+            LOG_TRACE(PluginContainer) << "Audio Plugin: " << _audioPath;
+            ConfigStore::getInstance().set(CFG_SECTION_CORE, CFG_AUDIO_NAME, _audio->pluginName().c_str());
+        }
     }
 
     if (nullptr == _rsp)
     {
         _rspPath = ConfigStore::getInstance().getString(CFG_SECTION_CORE, CFG_RSP_PLUGIN);
-        LOG_TRACE(Plugins) << "RSP Plugin: " << _rspPath;
-        _rsp = new RSPPlugin(_rspPath.c_str());
-        ConfigStore::getInstance().set(CFG_SECTION_CORE, CFG_RSP_NAME, _rsp->PluginName().c_str());
+        if (OP_OK == RSPPlugin::loadPlugin(_rspPath.c_str(), _rsp))
+        {
+            LOG_TRACE(PluginContainer) << "RSP Plugin: " << _rspPath;
+            ConfigStore::getInstance().set(CFG_SECTION_CORE, CFG_RSP_NAME, _rsp->pluginName().c_str());
+        }
     }
 
     if (nullptr == _input)
     {
         _inputPath = ConfigStore::getInstance().getString(CFG_SECTION_CORE, CFG_INPUT_PLUGIN);
-        LOG_TRACE(Plugins) << "Input Plugin: " << _inputPath;
-        _input = new InputPlugin(_inputPath.c_str());
-        ConfigStore::getInstance().set(CFG_SECTION_CORE, CFG_INPUT_NAME, _input->PluginName().c_str());
+        if (OP_OK == InputPlugin::loadPlugin(_inputPath.c_str(), _input))
+        {
+            LOG_TRACE(PluginContainer) << "Input Plugin: " << _inputPath;
+            ConfigStore::getInstance().set(CFG_SECTION_CORE, CFG_INPUT_NAME, _input->pluginName().c_str());
+        }
     }
 }
 
-bool Plugins::ValidPluginVersion(PLUGIN_INFO & PluginInfo)
-{
-    switch (PluginInfo.Type)
-    {
-    case PLUGIN_TYPE_RSP:
-        if (!PluginInfo.MemoryBswaped)	  { return false; }
-        if (PluginInfo.Version == 0x0001) { return true; }
-        if (PluginInfo.Version == 0x0100) { return true; }
-        if (PluginInfo.Version == 0x0101) { return true; }
-        if (PluginInfo.Version == 0x0102) { return true; }
-        break;
-    case PLUGIN_TYPE_GFX:
-        if (!PluginInfo.MemoryBswaped)	  { return false; }
-        if (PluginInfo.Version == 0x0102) { return true; }
-        if (PluginInfo.Version == 0x0103) { return true; }
-        if (PluginInfo.Version == 0x0104) { return true; }
-        break;
-    case PLUGIN_TYPE_AUDIO:
-        if (!PluginInfo.MemoryBswaped)	  { return false; }
-        if (PluginInfo.Version == 0x0101) { return true; }
-        if (PluginInfo.Version == 0x0102) { return true; }
-        break;
-    case PLUGIN_TYPE_CONTROLLER:
-        if (PluginInfo.Version == 0x0100) { return true; }
-        if (PluginInfo.Version == 0x0101) { return true; }
-        if (PluginInfo.Version == 0x0102) { return true; }
-        break;
-    }
-
-    return false;
-}
-
-void Plugins::Reset(void)
+void PluginContainer::Reset(void)
 {
     bool gfxChange = (_gfxPath != ConfigStore::getInstance().getString(CFG_SECTION_CORE, CFG_GFX_PLUGIN));
     bool audioChange = (_audioPath != ConfigStore::getInstance().getString(CFG_SECTION_CORE, CFG_AUDIO_PLUGIN));
@@ -172,150 +148,150 @@ void Plugins::Reset(void)
     loadPlugins();
 }
 
-void Plugins::DestroyGfxPlugin(void)
+void PluginContainer::DestroyGfxPlugin(void)
 {
     if (nullptr == _gfx)
     {
         return;
     }
 
-    LOG_INFO(Plugins) << "Destroying Graphics plugin";
+    LOG_INFO(PluginContainer) << "Destroying Graphics plugin";
 
     delete _gfx; _gfx = nullptr;
     DestroyRspPlugin();
 }
 
-void Plugins::DestroyAudioPlugin(void)
+void PluginContainer::DestroyAudioPlugin(void)
 {
     if (nullptr == _audio)
     {
         return;
     }
 
-    LOG_INFO(Plugins) << "Destroying Audio plugin";
+    LOG_INFO(PluginContainer) << "Destroying Audio plugin";
 
-    _audio->close();
+    _audio->closePlugin();
     delete _audio;  _audio = nullptr;
     DestroyRspPlugin();
 }
 
-void Plugins::DestroyRspPlugin(void)
+void PluginContainer::DestroyRspPlugin(void)
 {
     if (nullptr == _rsp)
     {
         return;
     }
 
-    LOG_INFO(Plugins) << "Destroying RSP plugin";
+    LOG_INFO(PluginContainer) << "Destroying RSP plugin";
 
-    _rsp->close();
+    _rsp->closePlugin();
     delete _rsp; _rsp = nullptr;
 }
 
-void Plugins::DestroyInputPlugin(void)
+void PluginContainer::DestroyInputPlugin(void)
 {
     if (nullptr == _input)
     {
         return;
     }
 
-    LOG_INFO(Plugins) << "Destroying Input plugin";
+    LOG_INFO(PluginContainer) << "Destroying Input plugin";
 
-    _input->close();
+    _input->closePlugin();
     delete _input; _input = nullptr;
 }
 
-void Plugins::GameReset(void)
+void PluginContainer::GameReset(void)
 {
     if (_gfx)   {
-        _gfx->GameReset();
+        _gfx->gameReset();
     }
     if (_audio)   {
-        _audio->GameReset();
+        _audio->gameReset();
     }
     if (_rsp)   {
-        _rsp->GameReset();
+        _rsp->gameReset();
     }
     if (_input) {
-        _input->GameReset();
+        _input->gameReset();
     }
 }
 
-void Plugins::RomOpened(void)
+void PluginContainer::RomOpened(void)
 {
-    LOG_INFO(Plugins) << "ROM opened";
+    LOG_INFO(PluginContainer) << "ROM opened";
     _gfx->onRomOpen();
     _rsp->onRomOpen();
     _audio->onRomOpen();
     _input->onRomOpen();
 }
 
-void Plugins::RomClosed(void)
+void PluginContainer::RomClosed(void)
 {
-    LOG_INFO(Plugins) << "ROM closed";
+    LOG_INFO(PluginContainer) << "ROM closed";
     _gfx->onRomClose();
     _rsp->onRomClose();
     _audio->onRomClose();
     _input->onRomClose();
 }
 
-bool Plugins::initialize(void)
+bool PluginContainer::initialize(void)
 {
-    LOG_INFO(Plugins) << "Initializing...";
+    LOG_INFO(PluginContainer) << "Initializing...";
 
     if (_gfx == nullptr)
     {
-        LOG_ERROR(Plugins) << "No graphics plugin loaded";
+        LOG_ERROR(PluginContainer) << "No graphics plugin loaded";
         return false;
     }
 
     if (_audio == nullptr)
     {
-        LOG_ERROR(Plugins) << "No audio plugin loaded";
+        LOG_ERROR(PluginContainer) << "No audio plugin loaded";
         return false;
     }
     if (_rsp == nullptr)
     {
-        LOG_ERROR(Plugins) << "No rsp plugin loaded";
+        LOG_ERROR(PluginContainer) << "No rsp plugin loaded";
         return false;
     }
 
     if (_input == nullptr)
     {
-        LOG_ERROR(Plugins) << "No input plugin loaded";
+        LOG_ERROR(PluginContainer) << "No input plugin loaded";
         return false;
     }
 
-    if (!_gfx->initialize(_renderWindow, _statusBar))
+    if (!_gfx->initialize(this, _renderWindow, _statusBar))
     {
-        LOG_ERROR(Plugins) << "Graphics plugin failed to initialize";
+        LOG_ERROR(PluginContainer) << "Graphics plugin failed to initialize";
         return false;
     }
 
-    if (!_audio->initialize(_renderWindow, _statusBar))
+    if (!_audio->initialize(this, _renderWindow, _statusBar))
     {
-        LOG_ERROR(Plugins) << "Audio plugin failed to initialize";
+        LOG_ERROR(PluginContainer) << "Audio plugin failed to initialize";
         return false;
     }
 
-    if (!_input->initialize(_renderWindow, _statusBar))
+    if (!_input->initialize(this, _renderWindow, _statusBar))
     {
-        LOG_ERROR(Plugins) << "Input plugin failed to initialize";
+        LOG_ERROR(PluginContainer) << "Input plugin failed to initialize";
         return false;
     }
 
     if (!_rsp->initialize(this, _renderWindow, _statusBar))
     {
-        LOG_ERROR(Plugins) << "RSP plugin failed to initialize";
+        LOG_ERROR(PluginContainer) << "RSP plugin failed to initialize";
         return false;
     }
 
-    LOG_INFO(Plugins) << "Successfully initialized";
+    LOG_INFO(PluginContainer) << "Successfully initialized";
 
     return true;
 }
 
-void Plugins::ConfigPlugin(void* parentWindow, PLUGIN_TYPE Type)
+void PluginContainer::ConfigPlugin(void* parentWindow, PLUGIN_TYPE Type)
 {
     switch (Type) {
     case PLUGIN_TYPE_RSP:
@@ -330,7 +306,7 @@ void Plugins::ConfigPlugin(void* parentWindow, PLUGIN_TYPE Type)
     case PLUGIN_TYPE_GFX:
         if (_gfx == nullptr || _gfx->Config == nullptr) { break; }
         if (!_gfx->isInitialized()) {
-            if (!_gfx->initialize(nullptr, nullptr)) {
+            if (!_gfx->initialize(this, nullptr, nullptr)) {
                 break;
             }
         }
@@ -339,7 +315,7 @@ void Plugins::ConfigPlugin(void* parentWindow, PLUGIN_TYPE Type)
     case PLUGIN_TYPE_AUDIO:
         if (_audio == nullptr || _audio->Config == nullptr) { break; }
         if (!_audio->isInitialized()) {
-            if (!_audio->initialize(nullptr, nullptr)) {
+            if (!_audio->initialize(this, nullptr, nullptr)) {
                 break;
             }
         }
@@ -348,7 +324,7 @@ void Plugins::ConfigPlugin(void* parentWindow, PLUGIN_TYPE Type)
     case PLUGIN_TYPE_CONTROLLER:
         if (_input == nullptr || _input->Config == nullptr) { break; }
         if (!_input->isInitialized()) {
-            if (!_input->initialize(nullptr, nullptr)) {
+            if (!_input->initialize(this, nullptr, nullptr)) {
                 break;
             }
         }
@@ -358,7 +334,7 @@ void Plugins::ConfigPlugin(void* parentWindow, PLUGIN_TYPE Type)
     }
 }
 
-void Plugins::StopEmulation(void)
+void PluginContainer::StopEmulation(void)
 {
     DestroyGfxPlugin();
     DestroyAudioPlugin();

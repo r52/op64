@@ -12,7 +12,7 @@
 #include <pif/pif.h>
 #include <rom/rom.h>
 #include <rom/flashram.h>
-#include <plugin/plugins.h>
+#include <plugin/plugincontainer.h>
 #include <plugin/gfxplugin.h>
 #include <plugin/audioplugin.h>
 #include <plugin/rspplugin.h>

@@ -15,7 +15,7 @@ union Instruction;
 union Register64;
 class InterruptHandler;
 class PIF;
-class Plugins;
+class PluginContainer;
 class SysTiming;
 class CheatEngine;
 class RCP;
@@ -30,7 +30,7 @@ namespace Bus
     // unmanaged devices
     extern ICPU* cpu;
     extern IMemory* mem;
-    extern Plugins* plugins;
+    extern PluginContainer* plugins;
 
     // managed devices
     extern SysTiming* systimer;
@@ -76,7 +76,7 @@ namespace Bus
     bool connectRom(Rom* dev);
     bool connectMemory(IMemory* dev);
     bool connectCPU(ICPU* dev);
-    bool connectPlugins(Plugins* dev);
+    bool connectPlugins(PluginContainer* dev);
 
     bool initializeDevices(void);
 

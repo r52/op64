@@ -7,7 +7,7 @@
 
 #include <cstdint>
 
-class Plugins;
+class PluginContainer;
 class ConfigDialog;
 class Emulator;
 class RenderWidget;

@@ -13,4 +13,5 @@ typedef void* LibHandle;
 
 bool opLoadLib(LibHandle* handle, const char* libpath);
 void* opLibGetFunc(LibHandle lib, const char* procname);
+void* opLibGetMainHandle(void);
 bool opLibClose(LibHandle lib);

@@ -94,6 +94,15 @@ void* opLibGetFunc(LibHandle lib, const char* procname)
 #endif
 }
 
+void* opLibGetMainHandle(void)
+{
+#ifdef _MSC_VER
+    return GetModuleHandle(NULL);
+#else
+    return dlopen(NULL);
+#endif
+}
+
 bool opLibClose(LibHandle lib)
 {
 #ifdef _MSC_VER

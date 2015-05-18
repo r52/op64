@@ -103,7 +103,9 @@
     <ClInclude Include="plugin\audioplugin.h" />
     <ClInclude Include="plugin\gfxplugin.h" />
     <ClInclude Include="plugin\inputplugin.h" />
-    <ClInclude Include="plugin\plugins.h" />
+    <ClInclude Include="plugin\iplugin.h" />
+    <ClInclude Include="plugin\plugincontainer.h" />
+    <ClInclude Include="plugin\plugintypes.h" />
     <ClInclude Include="plugin\rspplugin.h" />
     <ClInclude Include="rcp\audiointerface.h" />
     <ClInclude Include="rcp\dpcinterface.h" />
@@ -151,7 +153,8 @@
     <ClCompile Include="plugin\audioplugin.cpp" />
     <ClCompile Include="plugin\gfxplugin.cpp" />
     <ClCompile Include="plugin\inputplugin.cpp" />
-    <ClCompile Include="plugin\plugins.cpp" />
+    <ClCompile Include="plugin\iplugin.cpp" />
+    <ClCompile Include="plugin\plugincontainer.cpp" />
     <ClCompile Include="plugin\rspplugin.cpp" />
     <ClCompile Include="rcp\audiointerface.cpp" />
     <ClCompile Include="rcp\dpcinterface.cpp" />

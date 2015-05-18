@@ -7,7 +7,7 @@
 #include <mem/imemory.h>
 #include <rom/rom.h>
 #include <pif/pif.h>
-#include <plugin/plugins.h>
+#include <plugin/plugincontainer.h>
 #include <core/systiming.h>
 #include <cheat/cheatengine.h>
 #include <rcp/rcp.h>
@@ -18,7 +18,7 @@ namespace Bus
     // unmanaged devices
     ICPU* cpu = nullptr;
     IMemory* mem = nullptr;
-    Plugins* plugins = nullptr;
+    PluginContainer* plugins = nullptr;
 
     // managed devices
     SysTiming* systimer = nullptr;
@@ -97,7 +97,7 @@ namespace Bus
         return true;
     }
 
-    bool connectPlugins(Plugins* dev)
+    bool connectPlugins(PluginContainer* dev)
     {
         if (nullptr != plugins)
         {

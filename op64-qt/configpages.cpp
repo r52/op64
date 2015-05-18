@@ -8,7 +8,7 @@
 #include "configdialog.h"
 
 #include <ui/configstore.h>
-#include <plugin/plugins.h>
+#include <plugin/plugincontainer.h>
 
 #ifdef _MSC_VER
 #define LIB_FILTER "*.dll"

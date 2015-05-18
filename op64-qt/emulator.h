@@ -16,7 +16,7 @@ enum EmuState : uint8_t
 
 Q_DECLARE_METATYPE(EmuState);
 
-class Plugins;
+class PluginContainer;
 class ICPU;
 class IMemory;
 
@@ -30,7 +30,7 @@ public:
 
     // execution
     bool loadRom(const char* filename);
-    bool initializeHardware(Plugins* plugins, ICPU* cpu, IMemory* mem);
+    bool initializeHardware(PluginContainer* plugins, ICPU* cpu, IMemory* mem);
     bool execute(void);
     bool uninitializeHardware(void);
     bool isRomLoaded(void);
@@ -71,7 +71,7 @@ private:
     Emulator(Emulator const&);
     void operator=(Emulator const&);
 
-    void setupBus(Plugins* plugins, ICPU* cpu, IMemory* mem);
+    void setupBus(PluginContainer* plugins, ICPU* cpu, IMemory* mem);
 
     EmuState _state;
 
@@ -80,7 +80,7 @@ private:
     WId _renderwindow;
 
     // devices
-    Plugins* _plugins;
+    PluginContainer* _plugins;
     ICPU* _cpu;
     IMemory* _mem;
 };

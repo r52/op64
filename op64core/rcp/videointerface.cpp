@@ -6,7 +6,7 @@
 #include <core/bus.h>
 #include <cpu/icpu.h>
 #include <cpu/cp0.h>
-#include <plugin/plugins.h>
+#include <plugin/plugincontainer.h>
 #include <plugin/gfxplugin.h>
 #include <cpu/interrupthandler.h>
 

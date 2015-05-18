@@ -4,7 +4,7 @@
 
 #include <rom/rom.h>
 #include <core/bus.h>
-#include <plugin/plugins.h>
+#include <plugin/plugincontainer.h>
 #include <plugin/gfxplugin.h>
 #include <cpu/interpreter.h>
 #include <mem/mpmemory.h>
@@ -12,7 +12,7 @@
 
 Emulator::Emulator(WId mainwindow) :
 _state(DEAD),
-_plugins(new Plugins),
+_plugins(new PluginContainer),
 _cpu(new Interpreter),
 _mem(new MPMemory),
 _mainwindow(mainwindow)
@@ -69,7 +69,7 @@ bool Emulator::loadRom(const char* filename)
     return false;
 }
 
-bool Emulator::initializeHardware(Plugins* plugins, ICPU* cpu, IMemory* mem)
+bool Emulator::initializeHardware(PluginContainer* plugins, ICPU* cpu, IMemory* mem)
 {
     if (getState() != ROM_LOADED)
     {
@@ -132,7 +132,7 @@ void Emulator::stopEmulator(void)
     Bus::stop = true;
 }
 
-void Emulator::setupBus(Plugins* plugins, ICPU* cpu, IMemory* mem)
+void Emulator::setupBus(PluginContainer* plugins, ICPU* cpu, IMemory* mem)
 {
     using namespace Bus;
 

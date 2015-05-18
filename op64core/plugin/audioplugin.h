@@ -3,25 +3,18 @@
 #include <thread>
 #include <atomic>
 
-#include <oplib.h>
-
-#include "plugins.h"
+#include "iplugin.h"
 
 #include <rom/rom.h>
 
-class AudioPlugin
+class AudioPlugin : public IPlugin
 {
 public:
-    AudioPlugin(const char* libPath);
-    ~AudioPlugin();
+    virtual ~AudioPlugin();
 
-    bool initialize(void* renderWindow, void* statusBar);
-    inline bool isInitialized(void) { return _initialized; }
-    void close(void);
-    void GameReset(void);
-    void onRomOpen(void);
-    void onRomClose(void);
-    std::string PluginName(void) const { return _pluginInfo.Name; }
+    virtual OPStatus initialize(PluginContainer* plugins, void* renderWindow, void* statusBar);
+    static OPStatus loadPlugin(const char* libPath, AudioPlugin*& outplug);
+
     
     void DacrateChanged(SystemType Type);
 
@@ -30,29 +23,23 @@ public:
     unsigned int(*ReadLength)(void);
     void(*ProcessAList)(void);
 
+protected:
+    virtual OPStatus unloadPlugin();
+
 private:
     AudioPlugin();
+
+    // Not implemented
     AudioPlugin(const AudioPlugin&);
     AudioPlugin& operator=(const AudioPlugin&);
-
-    void loadLibrary(const char* libPath);
-    void unloadLibrary(void);
 
     void audioThread(void);
 
 private:
     std::atomic_bool _audioThreadStop;
     std::thread _audioThread;
-    LibHandle _libHandle;
-    bool _initialized;
-    bool _romOpened;
     bool _usingThread;
-    PLUGIN_INFO _pluginInfo;
 
-    void(*CloseDLL)(void);
-    void(*RomOpen)(void);
-    void(*RomClosed)(void);
     void(*Update)(int Wait);
-    void(*PluginOpened)(void);
-    void(*m_DacrateChanged)(SystemType Type);
+    void(*AiDacrateChanged)(SystemType Type);
 };
