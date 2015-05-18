@@ -55,7 +55,7 @@ QOP64Window::~QOP64Window()
 
 void QOP64Window::openRom(void)
 {
-    _romFile = QFileDialog::getOpenFileName(this, tr("Open ROM"), QString(), tr("N64 ROMS (*.v64 *.n64 *.z64"));
+    _romFile = QFileDialog::getOpenFileName(this, tr("Open ROM"), QString(), tr("N64 ROMS (*.v64 *.n64 *.z64"), 0, QFileDialog::DontUseNativeDialog);
 
     if (!_romFile.isEmpty())
     {
