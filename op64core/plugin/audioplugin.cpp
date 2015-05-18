@@ -3,6 +3,7 @@
 #include <core/bus.h>
 #include <rcp/rcp.h>
 
+std::atomic_bool AudioPlugin::_audioThreadRun{ false };
 
 AudioPlugin::AudioPlugin() :
     _usingThread(false),
@@ -10,7 +11,6 @@ AudioPlugin::AudioPlugin() :
     ReadLength(nullptr),
     ProcessAList(nullptr),
     Update(nullptr),
-    _audioThreadStop(false),
     AiDacrateChanged(nullptr)
 {
 }
@@ -86,9 +86,8 @@ OPStatus AudioPlugin::initialize(PluginContainer* plugins, void* renderWindow, v
 
     if (Update) {
         _usingThread = true;
-        _audioThreadStop = false;
-        _audioThread = std::thread(&AudioPlugin::audioThread, this);
-        _audioThread.detach();
+        _audioThreadRun = true;
+        _audioThread = std::thread(AudioPlugin::audioThread, this);
     }
 
     if (Bus::rcp->ai.reg[AI_DACRATE_REG] != 0) {
@@ -177,7 +176,12 @@ OPStatus AudioPlugin::unloadPlugin()
 {
     if (_usingThread)
     {
-        _audioThreadStop = true;
+        _audioThreadRun = false;
+#ifdef _MSC_VER
+        // Force pre-empt WaitMessage calls
+        PostThreadMessage(GetThreadId(_audioThread.native_handle()), WM_QUIT, 0, 0);
+#endif
+        _audioThread.join();
         _usingThread = false;
     }
 
@@ -200,10 +204,10 @@ OPStatus AudioPlugin::unloadPlugin()
     return OP_OK;
 }
 
-void AudioPlugin::audioThread(void)
+void AudioPlugin::audioThread(AudioPlugin* plug)
 {
-    while (!_audioThreadStop)
+    while (_audioThreadRun)
     {
-        this->Update(true);
+        plug->Update(true);
     }
 }

@@ -33,10 +33,10 @@ private:
     AudioPlugin(const AudioPlugin&);
     AudioPlugin& operator=(const AudioPlugin&);
 
-    void audioThread(void);
+    static void audioThread(AudioPlugin* plug);
 
 private:
-    std::atomic_bool _audioThreadStop;
+    static std::atomic_bool _audioThreadRun;
     std::thread _audioThread;
     bool _usingThread;
 
