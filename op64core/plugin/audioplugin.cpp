@@ -169,7 +169,7 @@ void AudioPlugin::DacrateChanged(SystemType Type)
 {
     if (!isInitialized()) { return; }
 
-    AiDacrateChanged(Type);
+    AiDacrateChanged(static_cast<int>(Type));
 }
 
 OPStatus AudioPlugin::unloadPlugin()
@@ -208,6 +208,6 @@ void AudioPlugin::audioThread(AudioPlugin* plug)
 {
     while (_audioThreadRun)
     {
-        plug->Update(true);
+        plug->Update(1);
     }
 }

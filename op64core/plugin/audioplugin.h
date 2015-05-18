@@ -41,5 +41,5 @@ private:
     bool _usingThread;
 
     void(*Update)(int Wait);
-    void(*AiDacrateChanged)(SystemType Type);
+    void(*AiDacrateChanged)(int Type);
 };
