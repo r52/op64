@@ -61,7 +61,7 @@ namespace Bus
     // vi state
     extern uint32_t next_vi;
     extern uint32_t vi_delay;
-    extern int32_t vi_field;
+    extern uint32_t vi_field;
 
     // interrupt state
     extern bool interrupt_unsafe_state;

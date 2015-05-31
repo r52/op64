@@ -49,7 +49,7 @@ namespace Bus
     // vi state
     uint32_t next_vi = 0;
     uint32_t vi_delay = 0;
-    int32_t vi_field = 0;
+    uint32_t vi_field = 0;
 
     // interrupt state
     bool interrupt_unsafe_state = false;

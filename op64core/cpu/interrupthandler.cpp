@@ -199,14 +199,11 @@ void InterruptHandler::generateInterrupt(void)
             }
         }
 
+        Bus::vi_field ^= (Bus::rcp->vi.reg[VI_STATUS_REG] >> 6) & 0x1;
+
         Bus::vi_delay = (93750000 / (Bus::rom->getViLimit() * 2));
 
         Bus::next_vi += Bus::vi_delay;
-
-        if (Bus::rcp->vi.reg[VI_STATUS_REG] & 0x40)
-            Bus::vi_field = 1 - Bus::vi_field;
-        else 
-            Bus::vi_field = 0;
 
         popInterruptEvent();
         addInterruptEventCount(VI_INT, Bus::next_vi);
