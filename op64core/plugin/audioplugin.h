@@ -35,6 +35,9 @@ private:
 
     static void audioThread(AudioPlugin* plug);
 
+    void stopUpdateThread(void);
+    void startUpdateThread(void);
+
 private:
     static std::atomic_bool _audioThreadRun;
     std::thread _audioThread;

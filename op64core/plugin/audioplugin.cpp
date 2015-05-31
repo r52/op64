@@ -85,9 +85,7 @@ OPStatus AudioPlugin::initialize(PluginContainer* plugins, void* renderWindow, v
     _initialized = InitiateAudio(Info) != 0;
 
     if (Update) {
-        _usingThread = true;
-        _audioThreadRun = true;
-        _audioThread = std::thread(AudioPlugin::audioThread, this);
+        startUpdateThread();
     }
 
     if (Bus::rcp->ai.reg[AI_DACRATE_REG] != 0) {
@@ -174,16 +172,7 @@ void AudioPlugin::DacrateChanged(SystemType Type)
 
 OPStatus AudioPlugin::unloadPlugin()
 {
-    if (_usingThread)
-    {
-        _audioThreadRun = false;
-#ifdef _MSC_VER
-        // Force pre-empt WaitMessage calls
-        PostThreadMessage(GetThreadId(_audioThread.native_handle()), WM_QUIT, 0, 0);
-#endif
-        _audioThread.join();
-        _usingThread = false;
-    }
+    stopUpdateThread();
 
     if (OP_ERROR == freeLibrary(_libHandle))
     {
@@ -209,5 +198,29 @@ void AudioPlugin::audioThread(AudioPlugin* plug)
     while (_audioThreadRun)
     {
         plug->Update(1);
+    }
+}
+
+void AudioPlugin::stopUpdateThread(void)
+{
+    if (_usingThread)
+    {
+        _audioThreadRun = false;
+#ifdef _MSC_VER
+        // Force pre-empt WaitMessage calls for azimer 0.55
+        PostThreadMessage(GetThreadId(_audioThread.native_handle()), WM_QUIT, 0, 0);
+#endif
+        _audioThread.join();
+        _usingThread = false;
+    }
+}
+
+void AudioPlugin::startUpdateThread(void)
+{
+    if (!_usingThread)
+    {
+        _usingThread = true;
+        _audioThreadRun = true;
+        _audioThread = std::thread(AudioPlugin::audioThread, this);
     }
 }
