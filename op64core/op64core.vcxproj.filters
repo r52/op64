@@ -180,9 +180,6 @@
     <ClInclude Include="cpu\cp1.h">
       <Filter>Header Files\cpu</Filter>
     </ClInclude>
-    <ClInclude Include="cpu\dma.h">
-      <Filter>Header Files\cpu</Filter>
-    </ClInclude>
     <ClInclude Include="cpu\fpu.h">
       <Filter>Header Files\cpu</Filter>
     </ClInclude>
@@ -375,9 +372,6 @@
       <Filter>Source Files\cpu</Filter>
     </ClCompile>
     <ClCompile Include="cpu\cp1.cpp">
-      <Filter>Source Files\cpu</Filter>
-    </ClCompile>
-    <ClCompile Include="cpu\dma.cpp">
       <Filter>Source Files\cpu</Filter>
     </ClCompile>
     <ClCompile Include="cpu\icpu.cpp">

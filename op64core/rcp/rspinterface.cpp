@@ -8,10 +8,58 @@
 #include <plugin/gfxplugin.h>
 #include <plugin/rspplugin.h>
 #include <cpu/interrupthandler.h>
-#include <cpu/dma.h>
 #include <cpu/icpu.h>
 #include <cpu/cp0.h>
 #include <mem/mpmemory.h>
+
+
+void RSPInterface::DMARead(void)
+{
+    uint32_t len_reg = Bus::rcp->sp.reg[SP_WR_LEN_REG];
+
+    uint32_t length = ((len_reg & 0xfff) | 7) + 1;
+    uint32_t count = ((len_reg >> 12) & 0xff) + 1;
+    uint32_t skip = ((len_reg >> 20) & 0xfff);
+
+    uint32_t memaddr = Bus::rcp->sp.reg[SP_MEM_ADDR_REG] & 0xfff;
+    uint32_t dramaddr = Bus::rcp->sp.reg[SP_DRAM_ADDR_REG] & 0xffffff;
+
+    uint8_t* spmem = ((Bus::rcp->sp.reg[SP_MEM_ADDR_REG] & 0x1000) != 0) ? (uint8_t*) Bus::rcp->sp.imem : (uint8_t*) Bus::rcp->sp.dmem;
+    uint8_t* dram = (uint8_t*)Bus::rdram->mem;
+
+    for (uint32_t j = 0; j < count; j++) {
+        for (uint32_t i = 0; i < length; i++) {
+            dram[BES(dramaddr)] = spmem[BES(memaddr)];
+            memaddr++;
+            dramaddr++;
+        }
+        dramaddr += skip;
+    }
+}
+
+void RSPInterface::DMAWrite(void)
+{
+    uint32_t len_reg = Bus::rcp->sp.reg[SP_RD_LEN_REG];
+
+    uint32_t length = ((len_reg & 0xfff) | 7) + 1;
+    uint32_t count = ((len_reg >> 12) & 0xff) + 1;
+    uint32_t skip = ((len_reg >> 20) & 0xfff);
+
+    uint32_t memaddr = Bus::rcp->sp.reg[SP_MEM_ADDR_REG] & 0xfff;
+    uint32_t dramaddr = Bus::rcp->sp.reg[SP_DRAM_ADDR_REG] & 0xffffff;
+
+    uint8_t* spmem = ((Bus::rcp->sp.reg[SP_MEM_ADDR_REG] & 0x1000) != 0) ? (uint8_t*) Bus::rcp->sp.imem : (uint8_t*) Bus::rcp->sp.dmem;
+    uint8_t* dram = (uint8_t*) Bus::rdram->mem;
+
+    for (uint32_t j = 0; j < count; j++) {
+        for (uint32_t i = 0; i < length; i++) {
+            spmem[BES(memaddr)] = dram[BES(dramaddr)];
+            memaddr++;
+            dramaddr++;
+        }
+        dramaddr += skip;
+    }
+}
 
 OPStatus RSPInterface::read(uint32_t address, uint32_t* data)
 {
@@ -103,10 +151,10 @@ OPStatus RSPInterface::writeReg(uint32_t address, uint32_t data, uint32_t mask)
     switch (regnum)
     {
     case SP_RD_LEN_REG:
-        DMA::writeSP();
+        DMAWrite();
         break;
     case SP_WR_LEN_REG:
-        DMA::readSP();
+        DMARead();
         break;
     case SP_SEMAPHORE_REG:
         reg[SP_SEMAPHORE_REG] = 0;

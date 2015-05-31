@@ -88,7 +88,6 @@
     <ClInclude Include="core\systiming.h" />
     <ClInclude Include="cpu\cp0.h" />
     <ClInclude Include="cpu\cp1.h" />
-    <ClInclude Include="cpu\dma.h" />
     <ClInclude Include="cpu\fpu.h" />
     <ClInclude Include="cpu\icpu.h" />
     <ClInclude Include="cpu\interpreter.h" />
@@ -136,7 +135,6 @@
     <ClCompile Include="core\systiming.cpp" />
     <ClCompile Include="cpu\cp0.cpp" />
     <ClCompile Include="cpu\cp1.cpp" />
-    <ClCompile Include="cpu\dma.cpp" />
     <ClCompile Include="cpu\icpu.cpp" />
     <ClCompile Include="cpu\interpreter.cpp" />
     <ClCompile Include="cpu\interpreter_cop0.cpp" />

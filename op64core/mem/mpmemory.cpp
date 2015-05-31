@@ -8,7 +8,6 @@
 #include <cpu/icpu.h>
 #include <cpu/interrupthandler.h>
 #include <cpu/cp0.h>
-#include <cpu/dma.h>
 #include <pif/pif.h>
 #include <rom/rom.h>
 #include <rom/flashram.h>

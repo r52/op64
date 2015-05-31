@@ -24,6 +24,9 @@ private:
 
     void updateReg(uint32_t w);
 
+    void DMARead();
+    void DMAWrite();
+
 public:
     uint32_t mem[SP_MEM_SIZE / 4];    // allocate exactly 2048 * (4 byte uint32) = 8192 bytes (8KB) of SP MEM
     uint32_t* const dmem = mem;
