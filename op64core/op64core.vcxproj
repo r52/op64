@@ -88,6 +88,7 @@
     <ClInclude Include="core\systiming.h" />
     <ClInclude Include="cpu\cp0.h" />
     <ClInclude Include="cpu\cp1.h" />
+    <ClInclude Include="cpu\cputypes.h" />
     <ClInclude Include="cpu\fpu.h" />
     <ClInclude Include="cpu\icpu.h" />
     <ClInclude Include="cpu\interpreter.h" />
@@ -123,7 +124,7 @@
     <ClInclude Include="rom\flashram.h" />
     <ClInclude Include="rom\rom.h" />
     <ClInclude Include="rom\sram.h" />
-    <ClInclude Include="tlb.h" />
+    <ClInclude Include="tlb\tlb.h" />
     <ClInclude Include="ui\configdefs.h" />
     <ClInclude Include="ui\configstore.h" />
     <ClInclude Include="ui\corecontrol.h" />

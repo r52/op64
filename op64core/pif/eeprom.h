@@ -6,7 +6,7 @@
 class EEPROM
 {
 public:
-    EEPROM();
+    EEPROM() = default;
     ~EEPROM();
 
 public:

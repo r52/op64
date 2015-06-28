@@ -163,21 +163,21 @@ public:
     }
 
 private:
-    Rom(void);
+    Rom(void) = default;
     static bool isValidRom(const uint8_t* image);
     void swapRom(uint8_t* rom, uint_fast32_t size);
     void calculateCIC(void);
     void setGameHacks(uint16_t cartid);
 
 private:
-    uint8_t* _image;
-    uint_fast32_t _imagesize;
-    uint_fast8_t _imagetype;
-    uint_fast8_t _savetype;
-    SystemType _systemtype;
-    uint32_t _cicchip;
-    uint32_t _vilimit;
-    uint32_t _aidacrate;
+    uint8_t* _image = nullptr;
+    uint_fast32_t _imagesize = 0;
+    uint_fast8_t _imagetype = 0;
+    uint_fast8_t _savetype = SAVETYPE_AUTO;
+    SystemType _systemtype = SYSTEM_NTSC;
+    uint32_t _cicchip = CIC_UNKNOWN;
+    uint32_t _vilimit = 0;
+    uint32_t _aidacrate = 0;
     uint8_t _count_per_op = COUNT_PER_OP_DEFAULT;
     uint32_t _gamehacks = GAME_HACK_NONE;
 

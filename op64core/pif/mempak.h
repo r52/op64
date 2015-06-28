@@ -6,10 +6,10 @@
 class MemPak
 {
 public:
-    static uint8_t calculateCRC(uint8_t* src);
-
-    MemPak();
+    MemPak() = default;
     ~MemPak();
+
+    static uint8_t calculateCRC(uint8_t* src);
 
     void read(int control, int address, uint8_t* buf);
     void write(int control, int address, uint8_t* buf);

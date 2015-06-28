@@ -29,7 +29,7 @@
 class Interpreter : public ICPU
 {
 public:
-    Interpreter(void);
+    Interpreter(void) = default;
     ~Interpreter(void);
 
     virtual uint32_t getCPUType(void)
@@ -71,7 +71,7 @@ private:
     uint32_t* _cp0_reg;     // pointer to cp0 regs
 
     // cpu states
-    bool _check_nop;
+    bool _check_nop = false;
     bool _non_ieee_mode = true; // for testing
 
 protected:

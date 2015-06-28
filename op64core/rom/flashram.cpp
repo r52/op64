@@ -9,13 +9,6 @@
 
 static char emptyBlock[128] = { 0xffu };
 
-FlashRam::FlashRam() :
-_mode(NOPES_MODE),
-_status(0),
-_writepointer(nullptr),
-_offset(0)
-{
-}
 
 FlashRam::~FlashRam()
 {

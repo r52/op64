@@ -46,16 +46,6 @@ static bool address_equal_to_16bit(uint32_t address, uint16_t value)
     return value_read == value;
 }
 
-CheatEngine::CheatEngine()
-{
-
-}
-
-CheatEngine::~CheatEngine()
-{
-
-}
-
 CheatCodeList CheatEngine::toCheatCodeList(const std::string& strcodelist)
 {
     std::vector<std::string> strcodes = split(strcodelist, ',');

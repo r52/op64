@@ -164,10 +164,6 @@ void EEPROM::write(uint8_t* buf, int line)
     _eepfile.flush();
 }
 
-EEPROM::EEPROM()
-{
-}
-
 EEPROM::~EEPROM()
 {
     if (_eepfile.is_open())

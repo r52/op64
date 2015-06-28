@@ -13,9 +13,6 @@ class CheatEngine
 public:
     static CheatCodeList toCheatCodeList(const std::string& strcodelist);
 
-    CheatEngine();
-    ~CheatEngine();
-
     void addRomHacks(CheatList romhacks);
     void applyCheats(CheatEntry entry);
 

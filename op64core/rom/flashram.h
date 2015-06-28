@@ -18,7 +18,7 @@ class FlashRam : public RCPInterface
     };
 
 public:
-    FlashRam();
+    FlashRam() = default;
     ~FlashRam();
 
     void dmaToFlash(uint8_t* src, int32_t offset, int32_t len);
@@ -34,9 +34,9 @@ private:
     void loadFlashRam(void);
 
 private:
-    FlashRamMode _mode;
-    uint64_t _status;
-    uint8_t* _writepointer;
-    uint32_t _offset;
+    FlashRamMode _mode = NOPES_MODE;
+    uint64_t _status = 0;
+    uint8_t* _writepointer = nullptr;
+    uint32_t _offset = 0;
     boost::filesystem::fstream _flashramfile;
 };

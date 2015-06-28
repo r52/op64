@@ -6,7 +6,7 @@
 class SRAM
 {
 public:
-    SRAM(void);
+    SRAM(void) = default;
     ~SRAM(void);
 
     void dmaToSRAM(uint8_t* src, int32_t offset, int32_t len);

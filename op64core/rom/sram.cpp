@@ -53,10 +53,6 @@ void SRAM::dmaFromSRAM(uint8_t* dest, int32_t offset, int32_t len)
     _sramfile.read((char*)dest, len);
 }
 
-SRAM::SRAM(void)
-{
-}
-
 SRAM::~SRAM(void)
 {
     if (_sramfile.is_open())

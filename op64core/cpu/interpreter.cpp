@@ -67,11 +67,6 @@ const int SDR_SHIFT[8] = { 56, 48, 40, 32, 24, 16, 8, 0 };
 const int LDL_SHIFT[8] = { 0, 8, 16, 24, 32, 40, 48, 56 };
 const int LDR_SHIFT[8] = { 56, 48, 40, 32, 24, 16, 8, 0 };
 
-Interpreter::Interpreter(void) :
-_check_nop(false)
-{
-}
-
 
 Interpreter::~Interpreter(void)
 {

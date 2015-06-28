@@ -5,12 +5,6 @@
 #include <ui/configstore.h>
 
 
-MemPak::MemPak()
-{
-
-}
-
-
 MemPak::~MemPak()
 {
     if (_mempakfile.is_open())

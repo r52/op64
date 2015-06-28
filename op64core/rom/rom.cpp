@@ -72,15 +72,6 @@ static uint32_t rom_system_type_to_ai_dac_rate(SystemType system_type)
     }
 }
 
-Rom::Rom(void) :
-_image(nullptr),
-_imagesize(0),
-_imagetype(0),
-_systemtype(SYSTEM_NTSC),
-_savetype(SAVETYPE_AUTO)
-{
-}
-
 Rom::~Rom(void)
 {
     if (nullptr != _image)

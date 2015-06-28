@@ -152,8 +152,3 @@ bool RomDB::get(std::string rom_md5, RomSettings& copy)
 
     return false;
 }
-
-RomDB::~RomDB(void)
-{
-
-}

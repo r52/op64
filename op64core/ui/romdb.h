@@ -30,7 +30,7 @@ public:
 
 private:
     RomDB(void);
-    ~RomDB(void);
+    ~RomDB(void) = default;
 
     // Not implemented
     RomDB(const RomDB&);

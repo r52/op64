@@ -43,25 +43,10 @@ static nanoseconds getGameClockFrame(TimingMode mode, uint64_t frames)
     }
 }
 
-SysTiming::SysTiming() :
-_framesElapsed(0),
-_mode(TIMING_NTSC),
-_limitmode(LIMIT_BY_VI)
-{
-}
-
 SysTiming::SysTiming(uint32_t vilimit) :
-_framesElapsed(0),
-_limitmode(LIMIT_BY_VI)
-{
-    _mode = (vilimit == 60) ? TIMING_NTSC : TIMING_PAL;
-}
-
-
-SysTiming::~SysTiming()
+    _mode((vilimit == 60) ? TIMING_NTSC : TIMING_PAL)
 {
 }
-
 
 uint64_t SysTiming::doVILimit()
 {

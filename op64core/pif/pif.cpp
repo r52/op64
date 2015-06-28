@@ -18,12 +18,6 @@
 #include <rcp/rcpcommon.h>
 
 
-PIF::PIF(void) :
-_eeprom(nullptr),
-_mempak(nullptr)
-{
-}
-
 PIF::~PIF(void)
 {
     uninitialize();

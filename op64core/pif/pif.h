@@ -10,7 +10,7 @@ class MemPak;
 class PIF : public RCPInterface
 {
 public:
-    PIF(void);
+    PIF(void) = default;
     ~PIF(void);
 
     void initialize(void);
@@ -30,6 +30,6 @@ public:
     uint8_t ram[PIF_RAM_SIZE];
 
 private:
-    EEPROM* _eeprom;
-    MemPak* _mempak;
+    EEPROM* _eeprom = nullptr;
+    MemPak* _mempak = nullptr;
 };
