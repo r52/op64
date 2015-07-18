@@ -3,7 +3,6 @@
 
 #include "interpreter.h"
 #include "cp0.h"
-#include "cp1.h"
 #include "interrupthandler.h"
 
 #include <core/bus.h>
@@ -82,8 +81,8 @@ void Interpreter::MTC0(void)
     case CP0_STATUS_REG:
         if (((uint32_t)_reg[_cur_instr.rt].u & 0x04000000) != (_cp0_reg[CP0_STATUS_REG] & 0x04000000))
         {
-            _cp1->shuffleFPRData(_cp0_reg[CP0_STATUS_REG], (uint32_t)_reg[_cur_instr.rt].u);
-            _cp1->setFPRPointers((uint32_t)_reg[_cur_instr.rt].u);
+            cp1.shuffleFPRData(*this, _cp0_reg[CP0_STATUS_REG], (uint32_t)_reg[_cur_instr.rt].u);
+            cp1.setFPRPointers(*this, (uint32_t)_reg[_cur_instr.rt].u);
         }
         _cp0_reg[CP0_STATUS_REG] = (uint32_t)_reg[_cur_instr.rt].u;
         _cp0->updateCount(_PC);

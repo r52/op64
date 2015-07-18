@@ -3,7 +3,6 @@
 
 #include "interpreter.h"
 #include "cp0.h"
-#include "cp1.h"
 #include "fpu.h"
 
 #include <core/bus.h>

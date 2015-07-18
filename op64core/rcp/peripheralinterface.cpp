@@ -125,7 +125,7 @@ void PeripheralInterface::DMAWrite(void)
         return;
     }
 
-    vec_for(i = 0; i < longueur; i++)
+    for(i = 0; i < longueur; i++)
     {
         ((uint8_t*)rdram->mem)[BES(rcp->pi.reg[PI_DRAM_ADDR_REG] + i)] =
             rom->getImage()[BES(((rcp->pi.reg[PI_CART_ADDR_REG] - 0x10000000) & 0x3FFFFFF) + i)];

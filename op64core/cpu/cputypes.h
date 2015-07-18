@@ -12,6 +12,14 @@ enum CPUCoreTypes : uint8_t
     CPU_JIT
 };
 
+enum RoundingMode_t : int32_t
+{
+    ROUND_MODE = 0x33F,
+    FLOOR_MODE = 0x73F,
+    CEIL_MODE = 0xB3F,
+    TRUNC_MODE = 0xF3F
+};
+
 /************************************************************************/
 /* Instruction holder                                                   */
 /************************************************************************/

@@ -622,7 +622,7 @@ void MPMemory::unprotectFramebuffer(void)
     if (Bus::plugins->gfx()->fbGetInfo && Bus::plugins->gfx()->fbRead && Bus::plugins->gfx()->fbWrite &&
         fbInfo[0].addr)
     {
-        vec_for(uint32_t i = 0; i < 6; i++)
+        for(uint32_t i = 0; i < 6; i++)
         {
             if (fbInfo[i].addr)
             {
@@ -650,7 +650,7 @@ void MPMemory::protectFramebuffer(void)
     if (Bus::plugins->gfx()->fbGetInfo && Bus::plugins->gfx()->fbRead && Bus::plugins->gfx()->fbWrite
         && fbInfo[0].addr)
     {
-        vec_for(uint32_t i = 0; i < 6; i++)
+        for(uint32_t i = 0; i < 6; i++)
         {
             if (fbInfo[i].addr)
             {

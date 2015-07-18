@@ -1,12 +1,5 @@
 #include "oppreproc.h"
 
-
-#if defined(__cilk)
-#pragma message ("Cilk Plus detected. Using Cilk Plus vectorizations")
-#else
-#pragma message ("Cilk Plus not detected. Not using vector optimizations")
-#endif
-
 #define COMPILER_MESSAGE "Compiling with "
 
 #pragma message (COMPILER_MESSAGE COMPILER)

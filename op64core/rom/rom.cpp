@@ -117,7 +117,7 @@ void Rom::swapRom(uint8_t* rom, uint_fast32_t size)
         // .v64
     case 0x37:
         _imagetype = V64IMAGE;
-        vec_for(uint32_t i = 0; i < size; i += 2)
+        for(uint32_t i = 0; i < size; i += 2)
         {
             std::swap(rom[i], rom[i + 1]);
         }
@@ -125,7 +125,7 @@ void Rom::swapRom(uint8_t* rom, uint_fast32_t size)
         // .n64
     case 0x40:
         _imagetype = N64IMAGE;
-        vec_for(uint32_t i = 0; i < size; i += 4)
+        for(uint32_t i = 0; i < size; i += 4)
         {
             std::swap(rom[i], rom[i + 3]);
             std::swap(rom[i + 1], rom[i + 2]);
@@ -238,7 +238,7 @@ bool Rom::loadRom(const char* name, Rom*& outRom)
 
         // Swap it again because little endian cpu
         uint32_t* roml = (uint32_t*)rom->_image;
-        vec_for(uint32_t i = 0; i < (rom->_imagesize / 4); i++)
+        for(uint32_t i = 0; i < (rom->_imagesize / 4); i++)
         {
             roml[i] = byteswap_u32(roml[i]);
         }

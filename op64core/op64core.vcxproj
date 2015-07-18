@@ -87,7 +87,6 @@
     <ClInclude Include="core\inputtypes.h" />
     <ClInclude Include="core\systiming.h" />
     <ClInclude Include="cpu\cp0.h" />
-    <ClInclude Include="cpu\cp1.h" />
     <ClInclude Include="cpu\cputypes.h" />
     <ClInclude Include="cpu\fpu.h" />
     <ClInclude Include="cpu\icpu.h" />

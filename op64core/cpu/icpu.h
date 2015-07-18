@@ -39,12 +39,6 @@ public:
         return _cp0;
     };
 
-    // COP1
-    inline CP1* getCp1(void)
-    {
-        return _cp1;
-    };
-
     // delay slot rw
     inline bool inDelaySlot(void)
     {
@@ -61,8 +55,6 @@ public:
 
 protected:
     ICPU(void);
-
-protected:
 
     //===========================================================================
     // regular instructions
@@ -500,6 +492,13 @@ protected:
         &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV, &ICPU::SV
     }};
 
+    class CP1
+    {
+    public:
+        void shuffleFPRData(ICPU& cpu, int oldStatus, int newStatus);
+        void setFPRPointers(ICPU& cpu, int newStatus);
+    };
+
 
 protected:
     // PC
@@ -522,7 +521,7 @@ protected:
 
     // COPs
     CP0* _cp0;
-    CP1* _cp1;
+    CP1 cp1;
 
     // LL bit
     bool _llbit;

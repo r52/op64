@@ -5,7 +5,6 @@
 
 #include "interpreter.h"
 #include "cp0.h"
-#include "cp1.h"
 #include "interrupthandler.h"
 
 #include <rom/rom.h>
@@ -110,7 +109,7 @@ void Interpreter::hardReset(void)
 
     _cp0_reg[CP0_RANDOM_REG] = 0x1F;
     _cp0_reg[CP0_STATUS_REG] = 0x34000000;
-    _cp1->setFPRPointers(_cp0_reg[CP0_STATUS_REG]);
+    cp1.setFPRPointers(*this, _cp0_reg[CP0_STATUS_REG]);
     _cp0_reg[CP0_CONFIG_REG] = 0x0006E463;
     _cp0_reg[CP0_PREVID_REG] = 0xb00;
     _cp0_reg[CP0_COUNT_REG] = 0x5000;

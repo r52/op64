@@ -28,14 +28,7 @@
 #define _s_sprintf(buf, len, ...) sprintf(buf, __VA_ARGS__)
 #endif
 
-#if defined(__cilk)
-#include <cilk/cilk.h>
-#define fill_array(arr, start, len, obj) arr[start:len] = obj
-#define vec_for cilk_for
-#else
 #define fill_array(arr, start, len, obj) std::fill(arr + start, arr + start + len, obj)
-#define vec_for for
-#endif
 
 // Check for c++11
 #if ( defined(__GNUC__) && GCC_VERSION >= 40700 ) || \

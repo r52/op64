@@ -174,9 +174,6 @@
     <ClInclude Include="cpu\cp0.h">
       <Filter>Header Files\cpu</Filter>
     </ClInclude>
-    <ClInclude Include="cpu\cp1.h">
-      <Filter>Header Files\cpu</Filter>
-    </ClInclude>
     <ClInclude Include="cpu\fpu.h">
       <Filter>Header Files\cpu</Filter>
     </ClInclude>
