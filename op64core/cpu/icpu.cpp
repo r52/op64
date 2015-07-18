@@ -8,7 +8,6 @@
 ICPU::ICPU(void) :
 _PC(0),
 _cur_instr({ 0 }),
-_cp0(new CP0()),
 _delay_slot(false)
 {
     using namespace Bus;
@@ -20,11 +19,6 @@ _delay_slot(false)
 
 ICPU::~ICPU(void)
 {
-    if (nullptr != _cp0)
-    {
-        delete _cp0; _cp0 = nullptr;
-    }
-
     using namespace Bus;
     PC = nullptr;
 

@@ -4,7 +4,8 @@
 
 #include <tlb/tlb.h>
 
-enum {
+enum CP0Regs : uint8_t
+{
     CP0_INDEX_REG = 0,
     CP0_RANDOM_REG,
     CP0_ENTRYLO0_REG,

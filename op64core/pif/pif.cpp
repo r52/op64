@@ -366,7 +366,7 @@ OPStatus PIF::write(uint32_t address, uint32_t data, uint32_t mask)
         if (ram[0x3f] == 0x08)
         {
             ram[0x3f] = 0;
-            Bus::cpu->getCp0()->updateCount(*Bus::PC);
+            Bus::cpu->getCP0().updateCount(*Bus::PC);
             Bus::interrupt->addInterruptEvent(SI_INT, 0x900);
         }
         else

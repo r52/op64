@@ -48,7 +48,7 @@ void PeripheralInterface::DMARead(void)
     }
 
     rcp->pi.reg[PI_STATUS_REG] |= 1;
-    Bus::cpu->getCp0()->updateCount(*PC);
+    Bus::cpu->getCP0().updateCount(*PC);
     Bus::interrupt->addInterruptEvent(PI_INT, 0x1000/*rcp->pi.register.pi_rd_len_reg*/);
 }
 
@@ -93,7 +93,7 @@ void PeripheralInterface::DMAWrite(void)
         }
 
         rcp->pi.reg[PI_STATUS_REG] |= 1;
-        Bus::cpu->getCp0()->updateCount(*PC);
+        Bus::cpu->getCP0().updateCount(*PC);
         Bus::interrupt->addInterruptEvent(PI_INT, /*rcp->pi.register.pi_wr_len_reg*/0x1000);
 
         return;
@@ -102,7 +102,7 @@ void PeripheralInterface::DMAWrite(void)
     if (rcp->pi.reg[PI_CART_ADDR_REG] >= 0x1fc00000) // for paper mario
     {
         rcp->pi.reg[PI_STATUS_REG] |= 1;
-        Bus::cpu->getCp0()->updateCount(*PC);
+        Bus::cpu->getCP0().updateCount(*PC);
         Bus::interrupt->addInterruptEvent(PI_INT, 0x1000);
 
         return;
@@ -119,7 +119,7 @@ void PeripheralInterface::DMAWrite(void)
     if (i > rom->getSize() || rcp->pi.reg[PI_DRAM_ADDR_REG] > 0x7FFFFF)
     {
         rcp->pi.reg[PI_STATUS_REG] |= 3;
-        Bus::cpu->getCp0()->updateCount(*PC);
+        Bus::cpu->getCP0().updateCount(*PC);
         Bus::interrupt->addInterruptEvent(PI_INT, longueur / 8);
 
         return;
@@ -150,7 +150,7 @@ void PeripheralInterface::DMAWrite(void)
     }
 
     rcp->pi.reg[PI_STATUS_REG] |= 3;
-    Bus::cpu->getCp0()->updateCount(*PC);
+    Bus::cpu->getCP0().updateCount(*PC);
     Bus::interrupt->addInterruptEvent(PI_INT, longueur / 8);
 }
 

@@ -14,7 +14,7 @@ void Interpreter::MFC0(void)
     switch (_cur_instr.rd)
     {
     case CP0_COUNT_REG:
-        _cp0->updateCount(_PC);
+        _cp0.updateCount(_PC);
     default:
         _reg[_cur_instr.rt].s = signextend<int32_t, int64_t>(_cp0_reg[_cur_instr.rd]);
         break;
@@ -57,7 +57,7 @@ void Interpreter::MTC0(void)
     case CP0_BADVADDR_REG:
         break;
     case CP0_COUNT_REG:
-        _cp0->updateCount(_PC);
+        _cp0.updateCount(_PC);
 
         Bus::interrupt_unsafe_state = true;
         if (Bus::next_interrupt <= _cp0_reg[CP0_COUNT_REG])
@@ -72,7 +72,7 @@ void Interpreter::MTC0(void)
         _cp0_reg[CP0_ENTRYHI_REG] = (uint32_t)_reg[_cur_instr.rt].u;
         break;
     case CP0_COMPARE_REG:
-        _cp0->updateCount(_PC);
+        _cp0.updateCount(_PC);
         Bus::interrupt->deleteEvent(COMPARE_INT);
         Bus::interrupt->addInterruptEventCount(COMPARE_INT, (uint32_t)_reg[_cur_instr.rt].u);
         _cp0_reg[CP0_COMPARE_REG] = (uint32_t)_reg[_cur_instr.rt].u;
@@ -81,11 +81,11 @@ void Interpreter::MTC0(void)
     case CP0_STATUS_REG:
         if (((uint32_t)_reg[_cur_instr.rt].u & 0x04000000) != (_cp0_reg[CP0_STATUS_REG] & 0x04000000))
         {
-            cp1.shuffleFPRData(*this, _cp0_reg[CP0_STATUS_REG], (uint32_t)_reg[_cur_instr.rt].u);
-            cp1.setFPRPointers(*this, (uint32_t)_reg[_cur_instr.rt].u);
+            _cp1.shuffleFPRData(*this, _cp0_reg[CP0_STATUS_REG], (uint32_t)_reg[_cur_instr.rt].u);
+            _cp1.setFPRPointers(*this, (uint32_t)_reg[_cur_instr.rt].u);
         }
         _cp0_reg[CP0_STATUS_REG] = (uint32_t)_reg[_cur_instr.rt].u;
-        _cp0->updateCount(_PC);
+        _cp0.updateCount(_PC);
         ++_PC;
         Bus::interrupt->checkInterrupt();
 
@@ -141,13 +141,13 @@ void Interpreter::TLBR(void)
     unsigned index = _cp0_reg[CP0_INDEX_REG] & 0x3F;
     uint64_t entry_hi;
 
-    uint32_t page_mask = (_cp0->page_mask[index] << 1) & 0x01FFE000U;
-    uint32_t pfn0 = _cp0->pfn[index][0];
-    uint32_t pfn1 = _cp0->pfn[index][1];
-    uint8_t state0 = _cp0->state[index][0];
-    uint8_t state1 = _cp0->state[index][1];
+    uint32_t page_mask = (_cp0.page_mask[index] << 1) & 0x01FFE000U;
+    uint32_t pfn0 = _cp0.pfn[index][0];
+    uint32_t pfn1 = _cp0.pfn[index][1];
+    uint8_t state0 = _cp0.state[index][0];
+    uint8_t state1 = _cp0.state[index][1];
 
-    TLB::tlb_read(_cp0->tlb, index, &entry_hi);
+    TLB::tlb_read(_cp0.tlb, index, &entry_hi);
     _cp0_reg[CP0_ENTRYHI_REG] = entry_hi;
     _cp0_reg[CP0_ENTRYLO0_REG] = (pfn0 >> 6) | state0;
     _cp0_reg[CP0_ENTRYLO1_REG] = (pfn1 >> 6) | state1;
@@ -164,13 +164,13 @@ void Interpreter::TLBWI(void)
     uint32_t page_mask = _cp0_reg[CP0_PAGEMASK_REG] & 0x0000000001FFE000ULL;
     unsigned index = _cp0_reg[CP0_INDEX_REG] & 0x3F;
 
-    TLB::tlb_write(_cp0->tlb, index, entry_hi, entry_lo_0, entry_lo_1, page_mask);
+    TLB::tlb_write(_cp0.tlb, index, entry_hi, entry_lo_0, entry_lo_1, page_mask);
 
-    _cp0->page_mask[index] = (page_mask | 0x1FFF) >> 1;
-    _cp0->pfn[index][0] = (entry_lo_0 << 6) & ~0xFFFU;
-    _cp0->pfn[index][1] = (entry_lo_1 << 6) & ~0xFFFU;
-    _cp0->state[index][0] = entry_lo_0 & 0x3F;
-    _cp0->state[index][1] = entry_lo_1 & 0x3F;
+    _cp0.page_mask[index] = (page_mask | 0x1FFF) >> 1;
+    _cp0.pfn[index][0] = (entry_lo_0 << 6) & ~0xFFFU;
+    _cp0.pfn[index][1] = (entry_lo_1 << 6) & ~0xFFFU;
+    _cp0.state[index][0] = entry_lo_0 & 0x3F;
+    _cp0.state[index][1] = entry_lo_1 & 0x3F;
 
     ++_PC;
 }
@@ -184,13 +184,13 @@ void Interpreter::TLBWR(void)
     unsigned index = _cp0_reg[CP0_WIRED_REG] & 0x3F;
 
     index = rand() % (32 - index) + index;
-    TLB::tlb_write(_cp0->tlb, index, entry_hi, entry_lo_0, entry_lo_1, page_mask);
+    TLB::tlb_write(_cp0.tlb, index, entry_hi, entry_lo_0, entry_lo_1, page_mask);
 
-    _cp0->page_mask[index] = (page_mask | 0x1FFF) >> 1;
-    _cp0->pfn[index][0] = (entry_lo_0 << 6) & ~0xFFFU;
-    _cp0->pfn[index][1] = (entry_lo_1 << 6) & ~0xFFFU;
-    _cp0->state[index][0] = entry_lo_0 & 0x3F;
-    _cp0->state[index][1] = entry_lo_1 & 0x3F;
+    _cp0.page_mask[index] = (page_mask | 0x1FFF) >> 1;
+    _cp0.pfn[index][0] = (entry_lo_0 << 6) & ~0xFFFU;
+    _cp0.pfn[index][1] = (entry_lo_1 << 6) & ~0xFFFU;
+    _cp0.state[index][0] = entry_lo_0 & 0x3F;
+    _cp0.state[index][1] = entry_lo_1 & 0x3F;
 
     ++_PC;
 }
@@ -202,7 +202,7 @@ void Interpreter::TLBP(void)
 
     _cp0_reg[CP0_INDEX_REG] |= 0x80000000;
 
-    if (!TLB::tlb_probe(_cp0->tlb, entry_hi, entry_hi & 0xFF, &index))
+    if (!TLB::tlb_probe(_cp0.tlb, entry_hi, entry_hi & 0xFF, &index))
     {
         _cp0_reg[CP0_INDEX_REG] = index;
     }
@@ -212,7 +212,7 @@ void Interpreter::TLBP(void)
 
 void Interpreter::ERET(void)
 {
-    _cp0->updateCount(_PC);
+    _cp0.updateCount(_PC);
     if (_cp0_reg[CP0_STATUS_REG] & 0x4)
     {
         _cp0_reg[CP0_STATUS_REG] &= ~0x4;

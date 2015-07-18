@@ -18,7 +18,7 @@ OPStatus AudioInterface::read(uint32_t address, uint32_t* data)
 
     if (regnum == AI_LEN_REG)
     {
-        Bus::cpu->getCp0()->updateCount(*Bus::PC);
+        Bus::cpu->getCP0().updateCount(*Bus::PC);
         if (fifo[0].delay != 0 && Bus::interrupt->findEvent(AI_INT) != 0 && (Bus::interrupt->findEvent(AI_INT) - Bus::cp0_reg[CP0_COUNT_REG]) < 0x80000000)
         {
             *data = ((Bus::interrupt->findEvent(AI_INT) - Bus::cp0_reg[CP0_COUNT_REG])*(int64_t)fifo[0].length) / fifo[0].delay;
@@ -64,7 +64,7 @@ OPStatus AudioInterface::write(uint32_t address, uint32_t data, uint32_t mask)
         {
             fifo[0].delay = delay;
             fifo[0].length = reg[AI_LEN_REG];
-            Bus::cpu->getCp0()->updateCount(*Bus::PC);
+            Bus::cpu->getCP0().updateCount(*Bus::PC);
             Bus::interrupt->addInterruptEvent(AI_INT, delay);
             reg[AI_STATUS_REG] |= 0x40000000;
         }

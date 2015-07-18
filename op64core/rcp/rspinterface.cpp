@@ -193,7 +193,7 @@ void RSPInterface::prepareRSP(void)
         Bus::plugins->rsp()->DoRspCycles(0xffffffff);
         stat[SP_PC_REG] |= save_pc;
 
-        Bus::cpu->getCp0()->updateCount(*Bus::PC);
+        Bus::cpu->getCP0().updateCount(*Bus::PC);
 
         if (Bus::rcp->mi.reg[MI_INTR_REG] & 0x1)
         {
@@ -218,7 +218,7 @@ void RSPInterface::prepareRSP(void)
         Bus::plugins->rsp()->DoRspCycles(0xFFFFFFFF);
         stat[SP_PC_REG] |= save_pc;
 
-        Bus::cpu->getCp0()->updateCount(*Bus::PC);
+        Bus::cpu->getCP0().updateCount(*Bus::PC);
 
         if (Bus::rcp->mi.reg[MI_INTR_REG] & 0x1)
         {
@@ -236,7 +236,7 @@ void RSPInterface::prepareRSP(void)
         Bus::plugins->rsp()->DoRspCycles(0xFFFFFFFF);
         stat[SP_PC_REG] |= save_pc;
 
-        Bus::cpu->getCp0()->updateCount(*Bus::PC);
+        Bus::cpu->getCP0().updateCount(*Bus::PC);
 
         if (Bus::rcp->mi.reg[MI_INTR_REG] & 0x1)
         {

@@ -99,7 +99,7 @@ void Interpreter::hardReset(void)
         _fgr[i] = 0;
     }
 
-    TLB::tlb_init(_cp0->tlb);
+    TLB::tlb_init(_cp0.tlb);
 
     _llbit = 0;
     _hi.u = 0;
@@ -109,7 +109,7 @@ void Interpreter::hardReset(void)
 
     _cp0_reg[CP0_RANDOM_REG] = 0x1F;
     _cp0_reg[CP0_STATUS_REG] = 0x34000000;
-    cp1.setFPRPointers(*this, _cp0_reg[CP0_STATUS_REG]);
+    _cp1.setFPRPointers(*this, _cp0_reg[CP0_STATUS_REG]);
     _cp0_reg[CP0_CONFIG_REG] = 0x0006E463;
     _cp0_reg[CP0_PREVID_REG] = 0xb00;
     _cp0_reg[CP0_COUNT_REG] = 0x5000;
@@ -695,7 +695,7 @@ void Interpreter::LL(void)
 
 void Interpreter::LWC1(void)
 {
-    if (_cp0->COP1Unusable())
+    if (_cp0.COP1Unusable())
         return;
 
     uint32_t address = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
@@ -718,7 +718,7 @@ void Interpreter::LLD(void)
 
 void Interpreter::LDC1(void)
 {
-    if (_cp0->COP1Unusable())
+    if (_cp0.COP1Unusable())
         return;
 
     uint32_t address = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
@@ -747,7 +747,7 @@ void Interpreter::SC(void)
 
 void Interpreter::SWC1(void)
 {
-    if (_cp0->COP1Unusable())
+    if (_cp0.COP1Unusable())
         return;
 
     Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), *((int32_t*)_s_reg[_cur_instr.ft]), SIZE_WORD);
@@ -762,7 +762,7 @@ void Interpreter::SCD(void)
 
 void Interpreter::SDC1(void)
 {
-    if (_cp0->COP1Unusable())
+    if (_cp0.COP1Unusable())
         return;
 
     Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), *((int64_t*)_d_reg[_cur_instr.ft]), SIZE_DWORD);
@@ -780,12 +780,12 @@ void Interpreter::SD(void)
 void Interpreter::genericIdle(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1)
 {
     int32_t skip;
-    if (cop1 && _cp0->COP1Unusable())
+    if (cop1 && _cp0.COP1Unusable())
         return;
 
     if (take_jump)
     {
-        _cp0->updateCount(_PC);
+        _cp0.updateCount(_PC);
         skip = Bus::next_interrupt - _cp0_reg[CP0_COUNT_REG];
         if (skip > 3)
         {
@@ -804,7 +804,7 @@ void Interpreter::genericIdle(uint32_t destination, bool take_jump, Register64* 
 
 void Interpreter::genericJump(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1)
 {
-    if (cop1 && _cp0->COP1Unusable())
+    if (cop1 && _cp0.COP1Unusable())
         return;
 
     if (link != &_reg[0])
@@ -821,7 +821,7 @@ void Interpreter::genericJump(uint32_t destination, bool take_jump, Register64* 
         prefetch();
         (this->*instruction_table[_cur_instr.op])();
 
-        _cp0->updateCount(_PC);
+        _cp0.updateCount(_PC);
         _delay_slot = false;
         if (take_jump && !Bus::skip_jump)
         {
@@ -831,7 +831,7 @@ void Interpreter::genericJump(uint32_t destination, bool take_jump, Register64* 
     else
     {
         _PC += 2;
-        _cp0->updateCount(_PC);
+        _cp0.updateCount(_PC);
     }
 
     Bus::last_jump_addr = (uint32_t)_PC;
@@ -853,7 +853,7 @@ void Interpreter::generalException(void)
 {
     unsigned offset = 0x180;
 
-    _cp0->updateCount(_PC);
+    _cp0.updateCount(_PC);
     _cp0_reg[CP0_STATUS_REG] |= 2;
 
     if (_delay_slot)
@@ -891,7 +891,7 @@ void Interpreter::TLBRefillException(unsigned int address, TLBProbeMode mode, bo
 
     if (mode != TLB_FAST_READ)
     {
-        _cp0->updateCount(_PC);
+        _cp0.updateCount(_PC);
     }
 
     if (mode == TLB_WRITE)

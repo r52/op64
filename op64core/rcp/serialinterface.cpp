@@ -28,7 +28,7 @@ void SerialInterface::DMARead(void)
         rdram->mem[(rcp->si.reg[SI_DRAM_ADDR_REG] + i) / 4] = byteswap_u32(*(uint32_t*)&pif->ram[i]);
     }
 
-    Bus::cpu->getCp0()->updateCount(*Bus::PC);
+    Bus::cpu->getCP0().updateCount(*Bus::PC);
 
     if (ConfigStore::getInstance().getBool(CFG_SECTION_CORE, CFG_DELAY_SI)) {
         Bus::interrupt->addInterruptEvent(SI_INT, /*0x100*/0x900);
@@ -55,7 +55,7 @@ void SerialInterface::DMAWrite(void)
     }
 
     Bus::pif->pifWrite();
-    Bus::cpu->getCp0()->updateCount(*Bus::PC);
+    Bus::cpu->getCP0().updateCount(*Bus::PC);
 
     if (ConfigStore::getInstance().getBool(CFG_SECTION_CORE, CFG_DELAY_SI)) {
         Bus::interrupt->addInterruptEvent(SI_INT, /*0x100*/0x900);

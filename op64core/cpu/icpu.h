@@ -5,9 +5,7 @@
 
 #include <cpu/cputypes.h>
 
-class CP0;
-class CP1;
-enum TLBProbeMode : uint8_t;
+#include "cp0.h"
 
 
 /************************************************************************/
@@ -34,7 +32,7 @@ public:
     virtual void generalException(void) = 0;
     virtual void TLBRefillException(unsigned int address, TLBProbeMode mode, bool miss) = 0;
 
-    inline CP0* getCp0(void)
+    inline CP0& getCP0(void)
     {
         return _cp0;
     };
@@ -520,8 +518,8 @@ protected:
     uint64_t _fgr[32];
 
     // COPs
-    CP0* _cp0;
-    CP1 cp1;
+    CP0 _cp0;
+    CP1 _cp1;
 
     // LL bit
     bool _llbit;

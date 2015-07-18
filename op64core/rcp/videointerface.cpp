@@ -16,7 +16,7 @@ OPStatus VideoInterface::read(uint32_t address, uint32_t* data)
 
     if (regnum == VI_CURRENT_REG)
     {
-        Bus::cpu->getCp0()->updateCount(*Bus::PC);
+        Bus::cpu->getCP0().updateCount(*Bus::PC);
         if (reg[VI_V_SYNC_REG])
         {
             reg[VI_CURRENT_REG] = (Bus::vi_delay - (Bus::next_vi - Bus::cp0_reg[CP0_COUNT_REG])) / (Bus::vi_delay / reg[VI_V_SYNC_REG]);

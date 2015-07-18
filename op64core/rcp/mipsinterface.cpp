@@ -30,7 +30,7 @@ OPStatus MIPSInterface::write(uint32_t address, uint32_t data, uint32_t mask)
         update_mi_intr_mask(data & mask);
 
         Bus::interrupt->checkInterrupt();
-        Bus::cpu->getCp0()->updateCount(*Bus::PC);
+        Bus::cpu->getCP0().updateCount(*Bus::PC);
 
         if (Bus::next_interrupt <= Bus::cp0_reg[CP0_COUNT_REG])
             Bus::interrupt->generateInterrupt();

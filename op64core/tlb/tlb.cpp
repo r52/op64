@@ -101,19 +101,19 @@ uint32_t TLB::virtual_to_physical_address(uint32_t address, TLBProbeMode mode)
     }
 
     unsigned asid = Bus::cp0_reg[CP0_ENTRYHI_REG] & 0xFF;
-    CP0* cp0 = Bus::cpu->getCp0();
+    CP0& cp0 = Bus::cpu->getCP0();
     unsigned index;
-    bool tlb_miss = tlb_probe(cp0->tlb, address, asid, &index);
-    uint32_t page_mask = cp0->page_mask[index];
+    bool tlb_miss = tlb_probe(cp0.tlb, address, asid, &index);
+    uint32_t page_mask = cp0.page_mask[index];
     unsigned select = ((page_mask + 1) & address) != 0;
 
-    if (tlb_miss || !(cp0->state[index][select] & 2))
+    if (tlb_miss || !(cp0.state[index][select] & 2))
     {
         Bus::cpu->TLBRefillException(address, mode, tlb_miss);
         return 0x00000000;
     }
 
-    return (0x80000000 + ((cp0->pfn[index][select]) | (address & page_mask)));
+    return (0x80000000 + ((cp0.pfn[index][select]) | (address & page_mask)));
 }
 
 /* Ported cen64 tlb implementation */
