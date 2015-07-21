@@ -247,7 +247,7 @@ void QOP64Window::showAboutDialog(void)
         "Qt version: " QT_VERSION_STR "<br/>"
         "Boost version: " + QString::number(BOOST_VERSION / 100000) + "." + QString::number(BOOST_VERSION / 100 % 1000) + "." + QString::number(BOOST_VERSION % 100) + "<br/>"
         "<br/>"
-        "(c) 2014<br/>"
+        "(c) 2015<br/>"
         "Licensed under GPLv2<br/>"
         "Source code available at <a href='https://github.com/r52/op64'>GitHub</a>";
 

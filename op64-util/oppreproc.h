@@ -53,7 +53,7 @@
 #elif defined(__GNUC__)
 #define COMPILER "g++ " __STR__(__VERSION__)
 #elif defined(_MSC_VER)
-#define COMPILER "MSVC " __STR__(_MSC_VER)
+#define COMPILER __STR__(__VERSION__)
 #endif
 
 #define CACHE_LINE_SIZE 64
