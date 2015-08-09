@@ -2,6 +2,7 @@
 
 #include <string>
 #include <map>
+#include <shared_mutex>
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <unordered_set>
@@ -27,23 +28,29 @@ public:
 
     bool getBool(std::string section, std::string key)
     {
+        std::shared_lock<std::shared_timed_mutex> lock(ptsem);
         return pt.get(section + "." + key, false);
     }
 
     uint32_t getInt(std::string section, std::string key)
     {
+        std::shared_lock<std::shared_timed_mutex> lock(ptsem);
         return pt.get(section + "." + key, 0);
     }
 
     std::string getString(std::string section, std::string key)
     {
+        std::shared_lock<std::shared_timed_mutex> lock(ptsem);
         return pt.get(section + "." + key, "");
     }
 
     template <class T>
     void set(std::string section, std::string key, T value)
     {
-        pt.put(section + "." + key, value);
+        {
+            std::lock_guard<std::shared_timed_mutex> lock(ptsem);
+            pt.put(section + "." + key, value);
+        }
 
         CallbackList& list = _callbackMap[section + "." + key];
 
@@ -125,6 +132,9 @@ private:
     std::map<std::string, CallbackList> _callbackMap;
 
     boost::property_tree::ptree pt;
+
+    // Make this untimed when released
+    std::shared_timed_mutex ptsem;
 
     std::string _configFile = "op64.cfg";
 };
