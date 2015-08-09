@@ -2,6 +2,7 @@
 #include <boost/filesystem.hpp>
 
 #include <oplog.h>
+#include <globalstrings.h>
 
 #include "plugincontainer.h"
 
@@ -11,6 +12,8 @@
 #include "inputplugin.h"
 
 #include <core/bus.h>
+
+using namespace GlobalStrings;
 
 
 PluginContainer::PluginContainer() :

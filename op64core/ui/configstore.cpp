@@ -1,12 +1,15 @@
 #include "configstore.h"
+
+#include <globalstrings.h>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
 #include <boost/property_tree/ini_parser.hpp>
 
+
 void ConfigStore::loadConfig(void)
 {
-    boost::filesystem::path _configpath(CFG_FILENAME);
+    boost::filesystem::path _configpath(GlobalStrings::CFG_FILENAME);
 
     bool fileExists = exists(_configpath);
 
@@ -16,7 +19,7 @@ void ConfigStore::loadConfig(void)
         _configstream.close();
     }
 
-    boost::property_tree::ini_parser::read_ini(CFG_FILENAME, pt);
+    boost::property_tree::ini_parser::read_ini(GlobalStrings::CFG_FILENAME, pt);
 
     if (!fileExists)
     {
@@ -27,7 +30,7 @@ void ConfigStore::loadConfig(void)
 
 void ConfigStore::saveConfig(void)
 {
-    boost::property_tree::ini_parser::write_ini(CFG_FILENAME, pt);
+    boost::property_tree::ini_parser::write_ini(GlobalStrings::CFG_FILENAME, pt);
 }
 
 ConfigStore::ConfigStore(void)
@@ -42,7 +45,8 @@ ConfigStore::~ConfigStore(void)
 
 void ConfigStore::setupDefaults(void)
 {
-    set(CFG_SECTION_CORE, CFG_DELAY_SI, CFG_DELAY_SI_DEFAULT);
+    using namespace GlobalStrings;
+    set(CFG_SECTION_CORE, CFG_DELAY_SI, false);
     set(CFG_SECTION_CORE, CFG_SAVE_PATH, CFG_SAVE_PATH_DEFAULT);
     set(CFG_SECTION_CORE, CFG_GFX_PATH, CFG_GFX_PATH_DEFAULT);
     set(CFG_SECTION_CORE, CFG_AUDIO_PATH, CFG_AUDIO_PATH_DEFAULT);

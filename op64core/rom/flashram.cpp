@@ -2,6 +2,7 @@
 
 #include "flashram.h"
 
+#include <globalstrings.h>
 #include <core/bus.h>
 #include <ui/configstore.h>
 #include <rom/rom.h>
@@ -22,7 +23,7 @@ void FlashRam::loadFlashRam(void)
 {
     using namespace boost::filesystem;
 
-    path flashpath(ConfigStore::getInstance().getString(CFG_SECTION_CORE, "SavePath") + Bus::rom->getRomFilenameNoExtension() + ".fla");
+    path flashpath(ConfigStore::getInstance().getString(GlobalStrings::CFG_SECTION_CORE, "SavePath") + Bus::rom->getRomFilenameNoExtension() + ".fla");
 
     if (!exists(flashpath.parent_path()))
     {

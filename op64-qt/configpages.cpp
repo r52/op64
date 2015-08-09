@@ -7,6 +7,7 @@
 #include "configpages.h"
 #include "configdialog.h"
 
+#include <globalstrings.h>
 #include <ui/configstore.h>
 #include <plugin/plugincontainer.h>
 
@@ -16,6 +17,7 @@
 #define LIB_FILTER "*.so"
 #endif
 
+using namespace GlobalStrings;
 
 EmulatorPage::EmulatorPage(ConfigWidgets* widgets, QWidget *parent)
     : _widgets(widgets), QWidget(parent)

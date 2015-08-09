@@ -3,6 +3,7 @@
 
 #include "serialinterface.h"
 
+#include <globalstrings.h>
 #include <rcp/rcp.h>
 #include <core/bus.h>
 #include <cpu/icpu.h>
@@ -11,6 +12,7 @@
 #include <pif/pif.h>
 #include <ui/configstore.h>
 
+using namespace GlobalStrings;
 
 void SerialInterface::DMARead(void)
 {

@@ -153,9 +153,6 @@
     <ClInclude Include="core\systiming.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="ui\configdefs.h">
-      <Filter>Header Files\ui</Filter>
-    </ClInclude>
     <ClInclude Include="ui\configstore.h">
       <Filter>Header Files\ui</Filter>
     </ClInclude>
@@ -275,6 +272,9 @@
     </ClInclude>
     <ClInclude Include="tlb\tlb.h">
       <Filter>Header Files\tlb</Filter>
+    </ClInclude>
+    <ClInclude Include="globalstrings.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -400,6 +400,9 @@
     </ClCompile>
     <ClCompile Include="plugin\plugincontainer.cpp">
       <Filter>Source Files\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="globalstrings.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -92,6 +92,7 @@
     <ClInclude Include="cpu\icpu.h" />
     <ClInclude Include="cpu\interpreter.h" />
     <ClInclude Include="cpu\interrupthandler.h" />
+    <ClInclude Include="globalstrings.h" />
     <ClInclude Include="mem\imemory.h" />
     <ClInclude Include="mem\mpmemory.h" />
     <ClInclude Include="op64.h" />
@@ -124,7 +125,6 @@
     <ClInclude Include="rom\rom.h" />
     <ClInclude Include="rom\sram.h" />
     <ClInclude Include="tlb\tlb.h" />
-    <ClInclude Include="ui\configdefs.h" />
     <ClInclude Include="ui\configstore.h" />
     <ClInclude Include="ui\corecontrol.h" />
     <ClInclude Include="ui\romdb.h" />
@@ -142,6 +142,7 @@
     <ClCompile Include="cpu\interpreter_regimm.cpp" />
     <ClCompile Include="cpu\interpreter_special.cpp" />
     <ClCompile Include="cpu\interrupthandler.cpp" />
+    <ClCompile Include="globalstrings.cpp" />
     <ClCompile Include="mem\imemory.cpp" />
     <ClCompile Include="mem\mpmemory.cpp" />
     <ClCompile Include="pif\eeprom.cpp" />

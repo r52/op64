@@ -18,6 +18,7 @@
 #include "logwindow.h"
 
 //op64core
+#include <globalstrings.h>
 #include <ui/configstore.h>
 #include <ui/romdb.h>
 #include <core/bus.h>
@@ -75,6 +76,8 @@ void QOP64Window::openRom(void)
 
 void QOP64Window::setupDirectories(void)
 {
+    using namespace GlobalStrings;
+
     // setup folders
     std::string gfx = ConfigStore::getInstance().getString(CFG_SECTION_CORE, CFG_GFX_PATH);
     std::string audio = ConfigStore::getInstance().getString(CFG_SECTION_CORE, CFG_AUDIO_PATH);

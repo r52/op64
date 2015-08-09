@@ -2,6 +2,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include <globalstrings.h>
 #include <ui/configstore.h>
 #include <core/bus.h>
 #include <rom/rom.h>
@@ -10,7 +11,7 @@ void SRAM::loadSRAM(void)
 {
     using namespace boost::filesystem;
 
-    path srampath(ConfigStore::getInstance().getString(CFG_SECTION_CORE, "SavePath") + Bus::rom->getRomFilenameNoExtension() + ".sra");
+    path srampath(ConfigStore::getInstance().getString(GlobalStrings::CFG_SECTION_CORE, "SavePath") + Bus::rom->getRomFilenameNoExtension() + ".sra");
 
     if (!exists(srampath.parent_path()))
     {

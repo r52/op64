@@ -1,5 +1,6 @@
 #include "mempak.h"
 
+#include <globalstrings.h>
 #include <core/bus.h>
 #include <rom/rom.h>
 #include <ui/configstore.h>
@@ -92,7 +93,7 @@ void MemPak::loadMempak(void)
 
     using namespace boost::filesystem;
 
-    path mpakpath(ConfigStore::getInstance().getString(CFG_SECTION_CORE, "SavePath") + Bus::rom->getRomFilenameNoExtension() + ".mpk");
+    path mpakpath(ConfigStore::getInstance().getString(GlobalStrings::CFG_SECTION_CORE, "SavePath") + Bus::rom->getRomFilenameNoExtension() + ".mpk");
 
     if (!exists(mpakpath.parent_path()))
     {

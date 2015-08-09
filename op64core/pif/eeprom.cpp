@@ -3,6 +3,7 @@
 
 #include "eeprom.h"
 
+#include <globalstrings.h>
 #include <core/bus.h>
 #include <rom/rom.h>
 #include <ui/configstore.h>
@@ -115,7 +116,7 @@ void EEPROM::loadEEPROM(void)
 {
     using namespace boost::filesystem;
 
-    path eeppath(ConfigStore::getInstance().getString(CFG_SECTION_CORE, "SavePath") + Bus::rom->getRomFilenameNoExtension() + ".eep");
+    path eeppath(ConfigStore::getInstance().getString(GlobalStrings::CFG_SECTION_CORE, "SavePath") + Bus::rom->getRomFilenameNoExtension() + ".eep");
 
     if (!exists(eeppath.parent_path()))
     {

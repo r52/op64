@@ -3,7 +3,10 @@
 #include "configdialog.h"
 #include "configpages.h"
 
+#include <globalstrings.h>
 #include <ui/configstore.h>
+
+using namespace GlobalStrings;
 
 ConfigDialog::ConfigDialog(QWidget* parent)
     : QDialog(parent)
