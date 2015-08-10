@@ -177,7 +177,12 @@ void QOP64Window::setupGUI(void)
     restoreState(settings.value("state").toByteArray(), CFG_GUI_VERSION);
 
     _logWindow = new LogWindow();
-    setGeometry(QRect(this->geometry().topRight().x(), this->geometry().topRight().y(), 640, 480));
+    _logWindow->setWindowTitle(tr("op64 Log"));
+    _logWindow->setGeometry(QRect(this->geometry().topRight().x(), this->geometry().topRight().y(), 640, 480));
+    _logWindow->setMinimumSize(QSize(640, 480));
+
+    _logWindow->setLineWrapMode(QTextEdit::NoWrap);
+    _logWindow->setReadOnly(true);
 
     bool showlog = settings.value(CFG_GUI_SHOW_LOG, false).toBool();
     ui.actionShow_Log->setChecked(showlog);
