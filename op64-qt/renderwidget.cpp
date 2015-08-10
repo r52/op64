@@ -48,7 +48,7 @@ void RenderWidget::closeEvent(QCloseEvent * event)
 void RenderWidget::displayVI()
 {
     static QString title("%1 | %2 VI/s");
-    QMetaObject::invokeMethod(this, "setWindowTitle", Q_ARG(QString, title.arg(romName).arg(QString::number(CoreControl::fps.load(), 'f', 2))));
+    setWindowTitle(title.arg(romName).arg(QString::number(CoreControl::fps.load(), 'f', 2)));
 }
 
 RenderWidget::~RenderWidget()
