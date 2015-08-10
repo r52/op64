@@ -194,7 +194,7 @@ void InterruptHandler::generateInterrupt(void)
 
         Bus::vi_field ^= (Bus::rcp->vi.reg[VI_STATUS_REG] >> 6) & 0x1;
 
-        Bus::vi_delay = (93750000 / (Bus::rom->getViLimit() * 2));
+        Bus::vi_delay = (Bus::rcp->vi.reg[VI_V_SYNC_REG] == 0) ? 500000 : (Bus::rcp->vi.reg[VI_V_SYNC_REG] + 1) * CoreControl::VIRefreshRate;
 
         Bus::next_vi += Bus::vi_delay;
 

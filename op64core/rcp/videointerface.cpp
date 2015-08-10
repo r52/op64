@@ -9,6 +9,7 @@
 #include <plugin/plugincontainer.h>
 #include <plugin/gfxplugin.h>
 #include <cpu/interrupthandler.h>
+#include <ui/corecontrol.h>
 
 OPStatus VideoInterface::read(uint32_t address, uint32_t* data)
 {
@@ -17,15 +18,9 @@ OPStatus VideoInterface::read(uint32_t address, uint32_t* data)
     if (regnum == VI_CURRENT_REG)
     {
         Bus::cpu->getCP0().updateCount(*Bus::PC);
-        if (reg[VI_V_SYNC_REG])
-        {
-            reg[VI_CURRENT_REG] = (Bus::vi_delay - (Bus::next_vi - Bus::cp0_reg[CP0_COUNT_REG])) / (Bus::vi_delay / reg[VI_V_SYNC_REG]);
-            reg[VI_CURRENT_REG] = (reg[VI_CURRENT_REG] & (~1)) | Bus::vi_field;
-        }
-        else
-        {
-            reg[VI_CURRENT_REG] = 0;
-        }
+        reg[VI_CURRENT_REG] = (Bus::vi_delay - (Bus::next_vi - Bus::cp0_reg[CP0_COUNT_REG])) / CoreControl::VIRefreshRate;
+        reg[VI_CURRENT_REG] = (reg[VI_CURRENT_REG] & (~1)) | Bus::vi_field;
+
     }
 
     *data = reg[regnum];

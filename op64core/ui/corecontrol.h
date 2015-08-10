@@ -7,4 +7,5 @@ class CoreControl
 {
 public:
     static std::atomic<double> fps;
+    static uint32_t VIRefreshRate;
 };
