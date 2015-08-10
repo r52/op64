@@ -190,14 +190,7 @@ void InterruptHandler::generateInterrupt(void)
 
         Bus::plugins->gfx()->UpdateScreen();
 
-        uint64_t frameRate;
-        if (frameRate = Bus::systimer->doVILimit())
-        {
-            if (CoreControl::displayVI)
-            {
-                CoreControl::displayVI(frameRate);
-            }
-        }
+        Bus::systimer->doVILimit();
 
         Bus::vi_field ^= (Bus::rcp->vi.reg[VI_STATUS_REG] >> 6) & 0x1;
 

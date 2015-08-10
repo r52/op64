@@ -21,8 +21,8 @@ public slots:
 protected:
     virtual void closeEvent(QCloseEvent * event);
 
-private:
-    void displayVI(uint64_t framerate);
+private slots:
+    void displayVI();
 
 private:
     Emulator* _emu;

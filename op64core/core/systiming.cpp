@@ -3,6 +3,7 @@
 
 #include "systiming.h"
 #include "bus.h"
+#include <ui/corecontrol.h>
 
 using namespace std::chrono;
 using namespace std::literals::chrono_literals;
@@ -48,7 +49,7 @@ SysTiming::SysTiming(uint32_t vilimit) :
 {
 }
 
-uint64_t SysTiming::doVILimit()
+void SysTiming::doVILimit()
 {
     ++_framesElapsed;
 
@@ -63,16 +64,13 @@ uint64_t SysTiming::doVILimit()
         }
     }
 
-    if ((high_resolution_clock::now() - _lastKeyVITime) >= milliseconds{ 1000 })
+    auto elapsedTime = high_resolution_clock::now() - _lastKeyVITime;
+    if (elapsedTime >= 1s)
     {
-        uint64_t frames = _framesElapsed;
+        CoreControl::fps = (double)_framesElapsed / std::chrono::duration_cast<std::chrono::duration<double>>(elapsedTime).count();
         _framesElapsed = 0;
         _lastKeyVITime = high_resolution_clock::now();
-
-        return frames;
     }
-
-    return 0;
 }
 
 void SysTiming::startTimers()

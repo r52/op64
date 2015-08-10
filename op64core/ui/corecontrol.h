@@ -1,10 +1,10 @@
 #pragma once
 
 #include <cstdint>
-#include <functional>
+#include <atomic>
 
 class CoreControl
 {
 public:
-    static std::function<void(uint64_t)> displayVI;
+    static std::atomic<double> fps;
 };

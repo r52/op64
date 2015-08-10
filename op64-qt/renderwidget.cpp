@@ -1,3 +1,4 @@
+#include <QTimer>
 #include <QEventLoop>
 #include <QCloseEvent>
 #include <QShortcut>
@@ -19,7 +20,9 @@ QWidget(parent)
     setAttribute(Qt::WA_NoSystemBackground);
     setAttribute(Qt::WA_OpaquePaintEvent);
 
-    CoreControl::displayVI = std::bind(&RenderWidget::displayVI, this, std::placeholders::_1);
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(displayVI()));
+    timer->start(1000);
 
     romName = QString::fromLocal8Bit((char*)Bus::rom->getHeader()->Name, 20);
     romName = romName.trimmed();
@@ -42,9 +45,10 @@ void RenderWidget::closeEvent(QCloseEvent * event)
     event->accept();
 }
 
-void RenderWidget::displayVI(uint64_t framerate)
+void RenderWidget::displayVI()
 {
-    QMetaObject::invokeMethod(this, "setWindowTitle", Q_ARG(QString, QString("%1 | %2 VI/s").arg(romName).arg(framerate)));
+    static QString title("%1 | %2 VI/s");
+    QMetaObject::invokeMethod(this, "setWindowTitle", Q_ARG(QString, title.arg(romName).arg(QString::number(CoreControl::fps.load(), 'f', 2))));
 }
 
 RenderWidget::~RenderWidget()

@@ -24,7 +24,7 @@ public:
 
     void startTimers();
 
-    uint64_t doVILimit();
+    void doVILimit();
 
     void setLimitMode(LimitMode mode)
     {

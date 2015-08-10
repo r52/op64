@@ -1,3 +1,3 @@
 #include "corecontrol.h"
 
-std::function<void(uint64_t)> CoreControl::displayVI;
+std::atomic<double> CoreControl::fps = 0.0;
