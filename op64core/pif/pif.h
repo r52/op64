@@ -1,11 +1,12 @@
 #pragma once
 
+#include <memory>
 #include <rcp/rcpinterface.h>
 
-#define PIF_RAM_SIZE 0x40
+#include "eeprom.h"
+#include "mempak.h"
 
-class EEPROM;
-class MemPak;
+#define PIF_RAM_SIZE 0x40
 
 class PIF : public RCPInterface
 {
@@ -30,6 +31,6 @@ public:
     uint8_t ram[PIF_RAM_SIZE];
 
 private:
-    EEPROM* _eeprom = nullptr;
-    MemPak* _mempak = nullptr;
+    std::unique_ptr<EEPROM> _eeprom;
+    std::unique_ptr<MemPak> _mempak;
 };

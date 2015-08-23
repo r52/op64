@@ -5,8 +5,6 @@
 
 #include "pif.h"
 #include "n64_cic_nus_6105.h"
-#include "eeprom.h"
-#include "mempak.h"
 
 #include <core/bus.h>
 #include <rom/rom.h>
@@ -35,20 +33,20 @@ void PIF::initialize(void)
 
     uninitialize();
 
-    _eeprom = new EEPROM;
-    _mempak = new MemPak;
+    _eeprom = std::make_unique<EEPROM>();
+    _mempak = std::make_unique<MemPak>();
 }
 
 void PIF::uninitialize(void)
 {
-    if (_eeprom != nullptr)
+    if (_eeprom)
     {
-        delete _eeprom; _eeprom = nullptr;
+        _eeprom.reset();
     }
 
-    if (_mempak != nullptr)
+    if (_mempak)
     {
-        delete _mempak; _mempak = nullptr;
+        _mempak.reset();
     }
 }
 
