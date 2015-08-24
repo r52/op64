@@ -24,8 +24,6 @@ RenderWidget::RenderWidget(QString title, Emulator* emu, QWidget* parent /*= 0*/
     connect(timer, SIGNAL(timeout()), this, SLOT(displayVI()));
     timer->start(1000);
 
-    //romName = QString::fromLocal8Bit((char*)Bus::rom->getHeader()->Name, 20);
-    //romName = romName.trimmed();
     romName = title;
     setWindowTitle(romName);
 
