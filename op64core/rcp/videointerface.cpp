@@ -11,15 +11,15 @@
 #include <cpu/interrupthandler.h>
 #include <ui/corecontrol.h>
 
-OPStatus VideoInterface::read(uint32_t address, uint32_t* data)
+OPStatus VideoInterface::read(Bus* bus, uint32_t address, uint32_t* data)
 {
     uint32_t regnum = VI_REG(address);
 
     if (regnum == VI_CURRENT_REG)
     {
-        Bus::cpu->getCP0().updateCount(*Bus::PC);
-        reg[VI_CURRENT_REG] = (Bus::vi_delay - (Bus::next_vi - Bus::cp0_reg[CP0_COUNT_REG])) / CoreControl::VIRefreshRate;
-        reg[VI_CURRENT_REG] = (reg[VI_CURRENT_REG] & (~1)) | Bus::vi_field;
+        bus->cpu->getCP0().updateCount(Bus::state.PC, bus->rom->getCountPerOp());
+        reg[VI_CURRENT_REG] = (Bus::state.vi_delay - (Bus::state.next_vi - Bus::state.cp0_reg[CP0_COUNT_REG])) / CoreControl::VIRefreshRate;
+        reg[VI_CURRENT_REG] = (reg[VI_CURRENT_REG] & (~1)) | Bus::state.vi_field;
 
     }
 
@@ -28,7 +28,7 @@ OPStatus VideoInterface::read(uint32_t address, uint32_t* data)
     return OP_OK;
 }
 
-OPStatus VideoInterface::write(uint32_t address, uint32_t data, uint32_t mask)
+OPStatus VideoInterface::write(Bus* bus, uint32_t address, uint32_t data, uint32_t mask)
 {
     uint32_t regnum = VI_REG(address);
 
@@ -38,9 +38,9 @@ OPStatus VideoInterface::write(uint32_t address, uint32_t data, uint32_t mask)
         if ((reg[VI_STATUS_REG] & mask) != (data & mask))
         {
             masked_write(&reg[VI_STATUS_REG], data, mask);
-            if (Bus::plugins->gfx()->ViStatusChanged != nullptr)
+            if (bus->plugins->gfx()->ViStatusChanged != nullptr)
             {
-                Bus::plugins->gfx()->ViStatusChanged();
+                bus->plugins->gfx()->ViStatusChanged();
             }
         }
         return OP_OK;
@@ -49,16 +49,16 @@ OPStatus VideoInterface::write(uint32_t address, uint32_t data, uint32_t mask)
         if ((reg[VI_WIDTH_REG] & mask) != (data & mask))
         {
             masked_write(&reg[VI_WIDTH_REG], data, mask);
-            if (Bus::plugins->gfx()->ViWidthChanged != nullptr)
+            if (bus->plugins->gfx()->ViWidthChanged != nullptr)
             {
-                Bus::plugins->gfx()->ViWidthChanged();
+                bus->plugins->gfx()->ViWidthChanged();
             }
         }
         return OP_OK;
 
     case VI_CURRENT_REG:
-        Bus::rcp->mi.reg[MI_INTR_REG] &= ~0x8;
-        Bus::interrupt->checkInterrupt();
+        Bus::rcp.mi.reg[MI_INTR_REG] &= ~0x8;
+        bus->interrupt->checkInterrupt();
         return OP_OK;
     }
 

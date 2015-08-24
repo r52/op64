@@ -1,88 +1,70 @@
 #pragma once
 
 #include <atomic>
+#include <memory>
 
 #include <op64.h>
 
-#include "inputtypes.h"
+#include <core/state.h>
+#include <cpu/interrupthandler.h>
+#include <rom/rom.h>
+#include <pif/pif.h>
+#include <core/systiming.h>
+#include <cheat/cheatengine.h>
+#include <rcp/rcp.h>
+#include <rom/sram.h>
+#include <rom/flashram.h>
 
-// forward decls to avoid include creep
-class IMemory;
-class Rom;
 class ICPU;
-class ProgramCounter;
-union Instruction;
-union Register64;
-class InterruptHandler;
-class PIF;
+class IMemory;
 class PluginContainer;
-class SysTiming;
-class CheatEngine;
-class RCP;
 
-class RDRAMController;
-
-class SRAM;
-class FlashRam;
-
-namespace Bus
+class Bus final
 {
-    // unmanaged devices
-    extern ICPU* cpu;
-    extern IMemory* mem;
-    extern PluginContainer* plugins;
+    enum BusState
+    {
+        BUS_DEAD,
+        BUS_DEV_CONNECTED,
+        BUS_DEV_INITIALIZED,
+    };
 
-    // managed devices
-    extern SysTiming* systimer;
-    extern CheatEngine* cheat;
-    extern Rom* rom;
-    extern InterruptHandler* interrupt;
-    extern PIF* pif;
-    extern SRAM* sram;
-    extern FlashRam* flashram;
+public:
+    Bus(Rom* r);
+    ~Bus();
 
-    // controllers
-    extern RCP* rcp;
-    extern RDRAMController* rdram;
+    Bus(const Bus&) = delete;
+    Bus& operator= (const Bus&) = delete;
 
-    // regs
-    extern uint32_t* cp0_reg;
-
-    // controller data
-    extern CONTROL controllers[4];
-
-    // cpu state
-    extern ProgramCounter* PC;
-    extern uint32_t last_jump_addr;
-    extern uint32_t next_interrupt;
-    extern uint32_t skip_jump;
-    extern std::atomic<bool> stop;
-
-    // vi state
-    extern uint32_t next_vi;
-    extern uint32_t vi_delay;
-    extern uint32_t vi_field;
-
-    // interrupt state
-    extern bool interrupt_unsafe_state;
-
-    // core control
-    extern std::atomic<bool> doHardReset;
-    extern std::atomic<bool> limitVI;
-
-    OPStatus BusStartup(void);
-    OPStatus BusShutdown(void);
-
-    bool connectRom(Rom* dev);
-    bool connectMemory(IMemory* dev);
-    bool connectCPU(ICPU* dev);
-    bool connectPlugins(PluginContainer* dev);
-
+    bool connectDevices(ICPU* c, IMemory* m, PluginContainer* p);
     bool initializeDevices(void);
 
     void executeMachine(void);
 
-    bool disconnectDevices(void);
-
     void doSoftReset(void);
+
+private:
+    void freeEverything(void);
+
+public:
+    // Unowned stuff
+    ICPU* cpu = nullptr;
+    IMemory* mem = nullptr;
+    PluginContainer* plugins = nullptr;
+
+    // Owned stuff
+    std::unique_ptr<SysTiming> systimer;
+    std::unique_ptr<CheatEngine> cheat;
+    std::unique_ptr<Rom> rom;
+    std::unique_ptr<InterruptHandler> interrupt;
+    std::unique_ptr<PIF> pif;
+    std::unique_ptr<SRAM> sram;
+    std::unique_ptr<FlashRam> flashram;
+
+    // RCP/RAM/State needs to be persistent :(
+    static RCP rcp;
+    static RDRAMController rdram;
+    static ProgramState state;
+
+private:
+    BusState _state = BUS_DEAD;
 };

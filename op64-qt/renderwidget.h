@@ -10,7 +10,7 @@ class RenderWidget : public QWidget
     Q_OBJECT;
 
 public:
-    RenderWidget(Emulator* emu, QWidget* parent = 0);
+    RenderWidget(QString title, Emulator* emu, QWidget* parent = 0);
     ~RenderWidget();
 
     virtual QPaintEngine* paintEngine() const { return 0; }

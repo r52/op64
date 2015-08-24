@@ -13,6 +13,8 @@
 
 #include <core/bus.h>
 
+#include <ui/corecontrol.h>
+
 using namespace GlobalStrings;
 
 
@@ -60,7 +62,7 @@ void PluginContainer::setStatusBar(void* statusBar)
 
 void PluginContainer::pluginsChanged(void)
 {
-    if (!Bus::stop)
+    if (!CoreControl::stop)
     {
         return;
     }
@@ -238,7 +240,12 @@ void PluginContainer::RomClosed(void)
     _input->onRomClose();
 }
 
-bool PluginContainer::initialize(void)
+void PluginContainer::uninitialize(Bus* bus)
+{
+
+}
+
+bool PluginContainer::initialize(Bus* bus)
 {
     LOG_INFO(PluginContainer) << "Initializing...";
 
@@ -265,25 +272,25 @@ bool PluginContainer::initialize(void)
         return false;
     }
 
-    if (!_gfx->initialize(this, _renderWindow, _statusBar))
+    if (!_gfx->initialize(bus, this, _renderWindow, _statusBar))
     {
         LOG_ERROR(PluginContainer) << "Graphics plugin failed to initialize";
         return false;
     }
 
-    if (!_audio->initialize(this, _renderWindow, _statusBar))
+    if (!_audio->initialize(bus, this, _renderWindow, _statusBar))
     {
         LOG_ERROR(PluginContainer) << "Audio plugin failed to initialize";
         return false;
     }
 
-    if (!_input->initialize(this, _renderWindow, _statusBar))
+    if (!_input->initialize(bus, this, _renderWindow, _statusBar))
     {
         LOG_ERROR(PluginContainer) << "Input plugin failed to initialize";
         return false;
     }
 
-    if (!_rsp->initialize(this, _renderWindow, _statusBar))
+    if (!_rsp->initialize(bus, this, _renderWindow, _statusBar))
     {
         LOG_ERROR(PluginContainer) << "RSP plugin failed to initialize";
         return false;
@@ -300,7 +307,7 @@ void PluginContainer::ConfigPlugin(void* parentWindow, PLUGIN_TYPE Type)
     case PLUGIN_TYPE_RSP:
         if (nullptr == _rsp || nullptr == _rsp->Config) { break; }
         if (!_rsp->isInitialized()) {
-            if (!_rsp->initialize(this, nullptr, nullptr)) {
+            if (!_rsp->initialize(nullptr, this, nullptr, nullptr)) {
                 break;
             }
         }
@@ -309,7 +316,7 @@ void PluginContainer::ConfigPlugin(void* parentWindow, PLUGIN_TYPE Type)
     case PLUGIN_TYPE_GFX:
         if (_gfx == nullptr || _gfx->Config == nullptr) { break; }
         if (!_gfx->isInitialized()) {
-            if (!_gfx->initialize(this, nullptr, nullptr)) {
+            if (!_gfx->initialize(nullptr, this, nullptr, nullptr)) {
                 break;
             }
         }
@@ -318,7 +325,7 @@ void PluginContainer::ConfigPlugin(void* parentWindow, PLUGIN_TYPE Type)
     case PLUGIN_TYPE_AUDIO:
         if (_audio == nullptr || _audio->Config == nullptr) { break; }
         if (!_audio->isInitialized()) {
-            if (!_audio->initialize(this, nullptr, nullptr)) {
+            if (!_audio->initialize(nullptr, this, nullptr, nullptr)) {
                 break;
             }
         }
@@ -327,7 +334,7 @@ void PluginContainer::ConfigPlugin(void* parentWindow, PLUGIN_TYPE Type)
     case PLUGIN_TYPE_CONTROLLER:
         if (_input == nullptr || _input->Config == nullptr) { break; }
         if (!_input->isInitialized()) {
-            if (!_input->initialize(this, nullptr, nullptr)) {
+            if (!_input->initialize(nullptr, this, nullptr, nullptr)) {
                 break;
             }
         }
@@ -345,8 +352,4 @@ void PluginContainer::StopEmulation(void)
     DestroyInputPlugin();
 
     loadPlugins();
-}
-
-void DummyFunction(void)
-{
 }

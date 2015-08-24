@@ -12,7 +12,7 @@ class AudioPlugin : public IPlugin
 public:
     virtual ~AudioPlugin();
 
-    virtual OPStatus initialize(PluginContainer* plugins, void* renderWindow, void* statusBar);
+    virtual OPStatus initialize(Bus* bus, PluginContainer* plugins, void* renderWindow, void* statusBar);
     static OPStatus loadPlugin(const char* libPath, AudioPlugin*& outplug);
 
     
@@ -30,8 +30,8 @@ private:
     AudioPlugin();
 
     // Not implemented
-    AudioPlugin(const AudioPlugin&);
-    AudioPlugin& operator=(const AudioPlugin&);
+    AudioPlugin(const AudioPlugin&) = delete;
+    AudioPlugin& operator=(const AudioPlugin&) = delete;
 
     static void audioThread(AudioPlugin* plug);
 

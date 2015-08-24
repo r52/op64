@@ -3,14 +3,16 @@
 #include <string>
 #include <oplib.h>
 
-#include "plugincontainer.h"
 #include "plugintypes.h"
+
+class Bus;
+class PluginContainer;
 
 class IPlugin
 {
 public:
     virtual ~IPlugin();
-    virtual OPStatus initialize(PluginContainer* plugins, void* renderWindow, void* statusBar) = 0;
+    virtual OPStatus initialize(Bus* bus, PluginContainer* plugins, void* renderWindow, void* statusBar) = 0;
     virtual inline bool isInitialized(void) final { return _initialized; }
     virtual void closePlugin(void) final;
     virtual void onRomOpen(void) final;
@@ -50,3 +52,5 @@ protected:
     void(*RomClosed)(void);
     void(*PluginOpened)(void);
 };
+
+void DummyFunction(void);

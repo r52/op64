@@ -1,13 +1,13 @@
 #include "dpsinterface.h"
 #include "oputil.h"
 
-OPStatus DPSInterface::read(uint32_t address, uint32_t* data)
+OPStatus DPSInterface::read(Bus* bus, uint32_t address, uint32_t* data)
 {
     *data = reg[DPS_REG(address)];
     return OP_OK;
 }
 
-OPStatus DPSInterface::write(uint32_t address, uint32_t data, uint32_t mask)
+OPStatus DPSInterface::write(Bus* bus, uint32_t address, uint32_t data, uint32_t mask)
 {
     uint32_t regnum = DPS_REG(address);
 

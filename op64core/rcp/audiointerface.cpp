@@ -12,16 +12,16 @@
 #include <rcp/rcp.h>
 
 
-OPStatus AudioInterface::read(uint32_t address, uint32_t* data)
+OPStatus AudioInterface::read(Bus* bus, uint32_t address, uint32_t* data)
 {
     uint32_t regnum = AI_REG(address);
 
     if (regnum == AI_LEN_REG)
     {
-        Bus::cpu->getCP0().updateCount(*Bus::PC);
-        if (fifo[0].delay != 0 && Bus::interrupt->findEvent(AI_INT) != 0 && (Bus::interrupt->findEvent(AI_INT) - Bus::cp0_reg[CP0_COUNT_REG]) < 0x80000000)
+        bus->cpu->getCP0().updateCount(Bus::state.PC, bus->rom->getCountPerOp());
+        if (fifo[0].delay != 0 && bus->interrupt->findEvent(AI_INT) != 0 && (bus->interrupt->findEvent(AI_INT) - Bus::state.cp0_reg[CP0_COUNT_REG]) < 0x80000000)
         {
-            *data = ((Bus::interrupt->findEvent(AI_INT) - Bus::cp0_reg[CP0_COUNT_REG])*(int64_t)fifo[0].length) / fifo[0].delay;
+            *data = ((bus->interrupt->findEvent(AI_INT) - Bus::state.cp0_reg[CP0_COUNT_REG])*(int64_t)fifo[0].length) / fifo[0].delay;
         }
         else
         {
@@ -36,7 +36,7 @@ OPStatus AudioInterface::read(uint32_t address, uint32_t* data)
     return OP_OK;
 }
 
-OPStatus AudioInterface::write(uint32_t address, uint32_t data, uint32_t mask)
+OPStatus AudioInterface::write(Bus* bus, uint32_t address, uint32_t data, uint32_t mask)
 {
     uint32_t regnum = AI_REG(address);
 
@@ -45,14 +45,14 @@ OPStatus AudioInterface::write(uint32_t address, uint32_t data, uint32_t mask)
     {
     case AI_LEN_REG:
         masked_write(&reg[AI_LEN_REG], data, mask);
-        if (Bus::plugins->audio()->LenChanged != nullptr)
+        if (bus->plugins->audio()->LenChanged != nullptr)
         {
-            Bus::plugins->audio()->LenChanged();
+            bus->plugins->audio()->LenChanged();
         }
 
-        freq = Bus::rom->getAiDACRate() / (reg[AI_DACRATE_REG] + 1);
+        freq = bus->rom->getAiDACRate() / (reg[AI_DACRATE_REG] + 1);
         if (freq)
-            delay = (unsigned int)(((uint64_t)reg[AI_LEN_REG] * Bus::vi_delay * Bus::rom->getViLimit()) / (freq * 4));
+            delay = (unsigned int)(((uint64_t)reg[AI_LEN_REG] * Bus::state.vi_delay * bus->rom->getViLimit()) / (freq * 4));
 
         if (reg[AI_STATUS_REG] & 0x40000000) // busy
         {
@@ -64,22 +64,22 @@ OPStatus AudioInterface::write(uint32_t address, uint32_t data, uint32_t mask)
         {
             fifo[0].delay = delay;
             fifo[0].length = reg[AI_LEN_REG];
-            Bus::cpu->getCP0().updateCount(*Bus::PC);
-            Bus::interrupt->addInterruptEvent(AI_INT, delay);
+            bus->cpu->getCP0().updateCount(Bus::state.PC, bus->rom->getCountPerOp());
+            bus->interrupt->addInterruptEvent(AI_INT, delay);
             reg[AI_STATUS_REG] |= 0x40000000;
         }
         return OP_OK;
 
     case AI_STATUS_REG:
-        Bus::rcp->mi.reg[MI_INTR_REG] &= ~0x4;
-        Bus::interrupt->checkInterrupt();
+        Bus::rcp.mi.reg[MI_INTR_REG] &= ~0x4;
+        bus->interrupt->checkInterrupt();
         return OP_OK;
 
     case AI_DACRATE_REG:
         if ((reg[AI_DACRATE_REG] & mask) != (data & mask))
         {
             masked_write(&reg[AI_DACRATE_REG], data, mask);
-            Bus::plugins->audio()->DacrateChanged(Bus::rom->getSystemType());
+            bus->plugins->audio()->DacrateChanged(bus->rom->getSystemType());
         }
         return OP_OK;
     }

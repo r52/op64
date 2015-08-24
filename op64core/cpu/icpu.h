@@ -7,6 +7,7 @@
 
 #include "cp0.h"
 
+class Bus;
 
 /************************************************************************/
 /* CPU interface                                                        */
@@ -18,10 +19,11 @@ class ICPU
     typedef std::array<instruction_ptr, 64> InstructionTable;
 
 public:
-    virtual ~ICPU(void);
+    virtual ~ICPU(void) = default;
     virtual uint32_t getCPUType(void) = 0;
 
-    virtual void initialize(void) = 0;
+    virtual bool initialize(Bus* bus) = 0;
+    virtual void uninitialize(Bus* bus) = 0;
     virtual void execute(void) = 0;
     virtual void hardReset(void) = 0;
     virtual void softReset(void) = 0;
@@ -499,8 +501,8 @@ protected:
 
 
 protected:
-    // PC
-    ProgramCounter _PC;
+    // ref to bus (not owned)
+    Bus* _bus = nullptr;
 
     // current instruction data
     Instruction _cur_instr;

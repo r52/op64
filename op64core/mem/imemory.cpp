@@ -1,5 +1,7 @@
 #include "imemory.h"
 
+#include <oplog.h>
+
 #include <pif/pif.h>
 #include <rom/sram.h>
 #include <rom/flashram.h>
@@ -7,48 +9,33 @@
 
 IMemory::~IMemory()
 {
-    uninitialize();
+    uninitialize(_bus);
 }
 
-void IMemory::initialize(void)
+bool IMemory::initialize(Bus* bus)
 {
-    using namespace Bus;
-
-    // Sanity checks
-
-    if (nullptr != sram)
+    if (nullptr == bus)
     {
-        delete sram; sram = nullptr;
+        LOG_ERROR(IMemory) << "Invalid Bus";
+        return false;
     }
 
-    if (nullptr != flashram)
-    {
-        delete flashram; flashram = nullptr;
-    }
+    _bus = bus;
+    bus->sram.reset(new SRAM);
+    bus->flashram.reset(new FlashRam);
+    bus->pif.reset(new PIF);
 
-    sram = new SRAM();
-    flashram = new FlashRam();
-
-    pif->initialize();
+    return bus->pif->initialize();
 }
 
-void IMemory::uninitialize(void)
+void IMemory::uninitialize(Bus* bus)
 {
-    using namespace Bus;
-
-    if (nullptr != pif)
+    if (bus)
     {
-        pif->uninitialize();
-    }
-
-    if (nullptr != sram)
-    {
-        delete sram; sram = nullptr;
-    }
-
-    if (nullptr != flashram)
-    {
-        delete flashram; flashram = nullptr;
+        bus->pif.reset();
+        bus->sram.reset();
+        bus->flashram.reset();
+        _bus = nullptr;
     }
 }
 

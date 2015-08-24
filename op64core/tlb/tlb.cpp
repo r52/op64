@@ -73,13 +73,13 @@ __align(static const int8_t one_hot_lut[256], CACHE_LINE_SIZE) = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 };
 
-uint32_t TLB::virtual_to_physical_address(uint32_t address, TLBProbeMode mode)
+uint32_t TLB::virtual_to_physical_address(Bus* bus, uint32_t address, TLBProbeMode mode)
 {
-    if (address >= 0x7f000000 && address < 0x80000000 && (Bus::rom->getGameHacks() & GAME_HACK_GOLDENEYE))
+    if (address >= 0x7f000000 && address < 0x80000000 && (bus->rom->getGameHacks() & GAME_HACK_GOLDENEYE))
     {
         //GoldenEye 007 hack allows for use of TLB.
         //Recoded by okaygo to support all US, J, and E ROMS.
-        switch (Bus::rom->getHeader()->Country_code & 0xFF)
+        switch (bus->rom->getHeader()->Country_code & 0xFF)
         {
         case 0x45:
             // U
@@ -100,8 +100,8 @@ uint32_t TLB::virtual_to_physical_address(uint32_t address, TLBProbeMode mode)
         }
     }
 
-    unsigned asid = Bus::cp0_reg[CP0_ENTRYHI_REG] & 0xFF;
-    CP0& cp0 = Bus::cpu->getCP0();
+    unsigned asid = Bus::state.cp0_reg[CP0_ENTRYHI_REG] & 0xFF;
+    CP0& cp0 = bus->cpu->getCP0();
     unsigned index;
     bool tlb_miss = tlb_probe(cp0.tlb, address, asid, &index);
     uint32_t page_mask = cp0.page_mask[index];
@@ -109,7 +109,7 @@ uint32_t TLB::virtual_to_physical_address(uint32_t address, TLBProbeMode mode)
 
     if (tlb_miss || !(cp0.state[index][select] & 2))
     {
-        Bus::cpu->TLBRefillException(address, mode, tlb_miss);
+        bus->cpu->TLBRefillException(address, mode, tlb_miss);
         return 0x00000000;
     }
 

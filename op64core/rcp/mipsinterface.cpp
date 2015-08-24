@@ -5,14 +5,14 @@
 #include <cpu/icpu.h>
 #include <cpu/interrupthandler.h>
 
-OPStatus MIPSInterface::read(uint32_t address, uint32_t* data)
+OPStatus MIPSInterface::read(Bus* bus, uint32_t address, uint32_t* data)
 {
     *data = reg[MI_REG(address)];
 
     return OP_OK;
 }
 
-OPStatus MIPSInterface::write(uint32_t address, uint32_t data, uint32_t mask)
+OPStatus MIPSInterface::write(Bus* bus, uint32_t address, uint32_t data, uint32_t mask)
 {
     uint32_t regnum = MI_REG(address);
 
@@ -23,17 +23,17 @@ OPStatus MIPSInterface::write(uint32_t address, uint32_t data, uint32_t mask)
         {
             /* clear DP interrupt */
             reg[MI_INTR_REG] &= ~0x20;
-            Bus::interrupt->checkInterrupt();
+            bus->interrupt->checkInterrupt();
         }
         break;
     case MI_INTR_MASK_REG:
         update_mi_intr_mask(data & mask);
 
-        Bus::interrupt->checkInterrupt();
-        Bus::cpu->getCP0().updateCount(*Bus::PC);
+        bus->interrupt->checkInterrupt();
+        bus->cpu->getCP0().updateCount(Bus::state.PC, bus->rom->getCountPerOp());
 
-        if (Bus::next_interrupt <= Bus::cp0_reg[CP0_COUNT_REG])
-            Bus::interrupt->generateInterrupt();
+        if (Bus::state.next_interrupt <= Bus::state.cp0_reg[CP0_COUNT_REG])
+            bus->interrupt->generateInterrupt();
 
         break;
     }

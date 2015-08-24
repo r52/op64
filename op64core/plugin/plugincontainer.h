@@ -9,13 +9,16 @@ class AudioPlugin;
 class RSPPlugin;
 class InputPlugin;
 
+class Bus;
+
 class PluginContainer
 {
 public:
     PluginContainer();
     ~PluginContainer();
 
-    bool initialize(void);
+    bool initialize(Bus* bus);
+    void uninitialize(Bus* bus);
     void RomOpened(void);
     void RomClosed(void);
     void ConfigPlugin(void* parentWindow, PLUGIN_TYPE Type);
@@ -57,5 +60,3 @@ private:
     std::string _rspPath;
     std::string _inputPath;
 };
-
-void DummyFunction(void);

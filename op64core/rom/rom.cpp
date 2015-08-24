@@ -79,8 +79,6 @@ Rom::~Rom(void)
         delete[] _image;
         _image = nullptr;
     }
-
-    Bus::rom = nullptr;
 }
 
 bool Rom::isValidRom(const uint8_t* image)
@@ -307,7 +305,7 @@ void Rom::setGameHacks(uint16_t cartid)
     }
 }
 
-OPStatus Rom::read(uint32_t address, uint32_t* data)
+OPStatus Rom::read(Bus* bus, uint32_t address, uint32_t* data)
 {
     uint32_t addr = ROM_ADDRESS(address);
 
@@ -324,7 +322,7 @@ OPStatus Rom::read(uint32_t address, uint32_t* data)
     return OP_OK;
 }
 
-OPStatus Rom::write(uint32_t address, uint32_t data, uint32_t mask)
+OPStatus Rom::write(Bus* bus, uint32_t address, uint32_t data, uint32_t mask)
 {
     _rom_lastwrite = data & mask;
 

@@ -8,13 +8,13 @@
 #include <plugin/gfxplugin.h>
 #include <cpu/interrupthandler.h>
 
-OPStatus DPCInterface::read(uint32_t address, uint32_t* data)
+OPStatus DPCInterface::read(Bus* bus, uint32_t address, uint32_t* data)
 {
     *data = reg[DPC_REG(address)];
     return OP_OK;
 }
 
-OPStatus DPCInterface::write(uint32_t address, uint32_t data, uint32_t mask)
+OPStatus DPCInterface::write(Bus* bus, uint32_t address, uint32_t data, uint32_t mask)
 {
     uint32_t regnum = DPC_REG(address);
 
@@ -22,7 +22,7 @@ OPStatus DPCInterface::write(uint32_t address, uint32_t data, uint32_t mask)
     {
     case DPC_STATUS_REG:
         if (updateDPC(data & mask))
-            Bus::rcp->sp.prepareRSP();
+            Bus::rcp.sp.prepareRSP(bus);
     case DPC_CURRENT_REG:
     case DPC_CLOCK_REG:
     case DPC_BUFBUSY_REG:
@@ -39,9 +39,9 @@ OPStatus DPCInterface::write(uint32_t address, uint32_t data, uint32_t mask)
         reg[DPC_CURRENT_REG] = reg[DPC_START_REG];
         break;
     case DPC_END_REG:
-        Bus::plugins->gfx()->ProcessRDPList();
-        Bus::rcp->mi.reg[MI_INTR_REG] |= 0x20;
-        Bus::interrupt->checkInterrupt();
+        bus->plugins->gfx()->ProcessRDPList();
+        Bus::rcp.mi.reg[MI_INTR_REG] |= 0x20;
+        bus->interrupt->checkInterrupt();
         break;
     }
 
@@ -63,7 +63,7 @@ bool DPCInterface::updateDPC(uint32_t w)
         reg[DPC_STATUS_REG] &= ~0x2;
 
         // see do_SP_task for more info
-        if (!(Bus::rcp->sp.reg[SP_STATUS_REG] & 0x3)) // !halt && !broke
+        if (!(Bus::rcp.sp.reg[SP_STATUS_REG] & 0x3)) // !halt && !broke
         {
             do_sp_task_on_unfreeze = true;
         }

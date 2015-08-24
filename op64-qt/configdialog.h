@@ -10,8 +10,6 @@ class QCheckBox;
 class QLineEdit;
 class QComboBox;
 
-class PluginContainer;
-
 struct ConfigWidgets
 {
     QCheckBox* delaySICheckBox;

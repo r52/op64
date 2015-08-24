@@ -12,8 +12,8 @@ struct ai_dma
 class AudioInterface : public RCPInterface, public RegisterInterface
 {
 public:
-    virtual OPStatus read(uint32_t address, uint32_t* data) override;
-    virtual OPStatus write(uint32_t address, uint32_t data, uint32_t mask) override;
+    virtual OPStatus read(Bus* bus, uint32_t address, uint32_t* data) override;
+    virtual OPStatus write(Bus* bus, uint32_t address, uint32_t data, uint32_t mask) override;
 
 public:
     ai_dma fifo[2];

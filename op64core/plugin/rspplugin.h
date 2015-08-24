@@ -8,7 +8,7 @@ class RSPPlugin : public IPlugin
 public:
     virtual ~RSPPlugin();
 
-    virtual OPStatus initialize(PluginContainer* plugins, void* renderWindow, void* statusBar);
+    virtual OPStatus initialize(Bus* bus, PluginContainer* plugins, void* renderWindow, void* statusBar);
     static OPStatus loadPlugin(const char* libPath, RSPPlugin*& outplug);
 
     unsigned int(*DoRspCycles)(unsigned int);

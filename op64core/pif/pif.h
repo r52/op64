@@ -3,10 +3,12 @@
 #include <memory>
 #include <rcp/rcpinterface.h>
 
-#include "eeprom.h"
-#include "mempak.h"
+#include <pif/mempak.h>
+#include <pif/eeprom.h>
 
 #define PIF_RAM_SIZE 0x40
+
+class Bus;
 
 class PIF : public RCPInterface
 {
@@ -14,18 +16,18 @@ public:
     PIF(void) = default;
     ~PIF(void);
 
-    void initialize(void);
+    bool initialize(void);
     void uninitialize(void);
-    void pifRead(void);
-    void pifWrite(void);
+    void pifRead(Bus* bus);
+    void pifWrite(Bus* bus);
 
     // Interface
-    virtual OPStatus read(uint32_t address, uint32_t* data) override;
-    virtual OPStatus write(uint32_t address, uint32_t data, uint32_t mask) override;
+    virtual OPStatus read(Bus* bus, uint32_t address, uint32_t* data) override;
+    virtual OPStatus write(Bus* bus, uint32_t address, uint32_t data, uint32_t mask) override;
 
 private:
-    void readController(int32_t controller, uint8_t* cmd);
-    void controllerCommand(int32_t controller, uint8_t* cmd);
+    void readController(Bus* bus, int32_t controller, uint8_t* cmd);
+    void controllerCommand(Bus* bus, int32_t controller, uint8_t* cmd);
 
 public:
     uint8_t ram[PIF_RAM_SIZE];

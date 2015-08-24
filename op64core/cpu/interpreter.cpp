@@ -3,9 +3,9 @@
 
 #include <oputil.h>
 
-#include "interpreter.h"
-#include "cp0.h"
-#include "interrupthandler.h"
+#include <cpu/interpreter.h>
+#include <cpu/cp0.h>
+#include <cpu/interrupthandler.h>
 
 #include <rom/rom.h>
 #include <tlb/tlb.h>
@@ -67,15 +67,16 @@ const int LDL_SHIFT[8] = { 0, 8, 16, 24, 32, 40, 48, 56 };
 const int LDR_SHIFT[8] = { 56, 48, 40, 32, 24, 16, 8, 0 };
 
 
-Interpreter::~Interpreter(void)
-{
-    _cp0_reg = nullptr;
-}
 
-
-void Interpreter::initialize(void)
+bool Interpreter::initialize(Bus* bus)
 {
     LOG_INFO(Interpreter) << "Initializing...";
+
+    if (nullptr == bus)
+    {
+        LOG_ERROR(Interpreter) << "Invalid Bus";
+        return false;
+    }
 
     // Disable fpu exceptions
     _MM_SET_EXCEPTION_MASK(_MM_MASK_MASK);
@@ -85,9 +86,19 @@ void Interpreter::initialize(void)
         _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
     }
 
-    _cp0_reg = Bus::cp0_reg;
+    _bus = bus;
+    bus->interrupt.reset(new InterruptHandler);
+
     hardReset();
     softReset();
+
+    return true;
+}
+
+void Interpreter::uninitialize(Bus* bus)
+{
+    bus->interrupt.reset();
+    _bus = nullptr;
 }
 
 void Interpreter::hardReset(void)
@@ -95,7 +106,7 @@ void Interpreter::hardReset(void)
     for (uint32_t i = 0; i < 32; i++)
     {
         _reg[i].u = 0;
-        _cp0_reg[i] = 0;
+        Bus::state.cp0_reg[i] = 0;
         _fgr[i] = 0;
     }
 
@@ -107,17 +118,17 @@ void Interpreter::hardReset(void)
     _FCR0 = 0x511;
     _FCR31 = 0;
 
-    _cp0_reg[CP0_RANDOM_REG] = 0x1F;
-    _cp0_reg[CP0_STATUS_REG] = 0x34000000;
-    _cp1.setFPRPointers(*this, _cp0_reg[CP0_STATUS_REG]);
-    _cp0_reg[CP0_CONFIG_REG] = 0x0006E463;
-    _cp0_reg[CP0_PREVID_REG] = 0xb00;
-    _cp0_reg[CP0_COUNT_REG] = 0x5000;
-    _cp0_reg[CP0_CAUSE_REG] = 0x0000005C;
-    _cp0_reg[CP0_CONTEXT_REG] = 0x007FFFF0;
-    _cp0_reg[CP0_EPC_REG] = 0xFFFFFFFF;
-    _cp0_reg[CP0_BADVADDR_REG] = 0xFFFFFFFF;
-    _cp0_reg[CP0_ERROREPC_REG] = 0xFFFFFFFF;
+    Bus::state.cp0_reg[CP0_RANDOM_REG] = 0x1F;
+    Bus::state.cp0_reg[CP0_STATUS_REG] = 0x34000000;
+    _cp1.setFPRPointers(*this, Bus::state.cp0_reg[CP0_STATUS_REG]);
+    Bus::state.cp0_reg[CP0_CONFIG_REG] = 0x0006E463;
+    Bus::state.cp0_reg[CP0_PREVID_REG] = 0xb00;
+    Bus::state.cp0_reg[CP0_COUNT_REG] = 0x5000;
+    Bus::state.cp0_reg[CP0_CAUSE_REG] = 0x0000005C;
+    Bus::state.cp0_reg[CP0_CONTEXT_REG] = 0x007FFFF0;
+    Bus::state.cp0_reg[CP0_EPC_REG] = 0xFFFFFFFF;
+    Bus::state.cp0_reg[CP0_BADVADDR_REG] = 0xFFFFFFFF;
+    Bus::state.cp0_reg[CP0_ERROREPC_REG] = 0xFFFFFFFF;
 
     rounding_mode = ROUND_MODE;
 }
@@ -163,38 +174,38 @@ static uint32_t get_cic_seed(uint32_t chip)
 
 void Interpreter::softReset(void)
 {
-    _cp0_reg[CP0_STATUS_REG] = 0x34000000;
-    _cp0_reg[CP0_CONFIG_REG] = 0x0006E463;
+    Bus::state.cp0_reg[CP0_STATUS_REG] = 0x34000000;
+    Bus::state.cp0_reg[CP0_CONFIG_REG] = 0x0006E463;
 
-    Bus::rcp->sp.reg[SP_STATUS_REG] = 1;
-    Bus::rcp->sp.stat[SP_PC_REG] = 0;
+    Bus::rcp.sp.reg[SP_STATUS_REG] = 1;
+    Bus::rcp.sp.stat[SP_PC_REG] = 0;
 
-    uint32_t bsd_dom1_config = *(uint32_t*)Bus::rom->getImage();
-    Bus::rcp->pi.reg[PI_BSD_DOM1_LAT_REG] = bsd_dom1_config & 0xff;
-    Bus::rcp->pi.reg[PI_BSD_DOM1_PWD_REG] = (bsd_dom1_config >> 8) & 0xff;
-    Bus::rcp->pi.reg[PI_BSD_DOM1_PGS_REG] = (bsd_dom1_config >> 16) & 0x0f;
-    Bus::rcp->pi.reg[PI_BSD_DOM1_RLS_REG] = (bsd_dom1_config >> 20) & 0x03;
-    Bus::rcp->pi.reg[PI_STATUS_REG] = 0;
+    uint32_t bsd_dom1_config = *(uint32_t*)_bus->rom->getImage();
+    Bus::rcp.pi.reg[PI_BSD_DOM1_LAT_REG] = bsd_dom1_config & 0xff;
+    Bus::rcp.pi.reg[PI_BSD_DOM1_PWD_REG] = (bsd_dom1_config >> 8) & 0xff;
+    Bus::rcp.pi.reg[PI_BSD_DOM1_PGS_REG] = (bsd_dom1_config >> 16) & 0x0f;
+    Bus::rcp.pi.reg[PI_BSD_DOM1_RLS_REG] = (bsd_dom1_config >> 20) & 0x03;
+    Bus::rcp.pi.reg[PI_STATUS_REG] = 0;
 
-    Bus::rcp->ai.reg[AI_DRAM_ADDR_REG] = 0;
-    Bus::rcp->ai.reg[AI_LEN_REG] = 0;
+    Bus::rcp.ai.reg[AI_DRAM_ADDR_REG] = 0;
+    Bus::rcp.ai.reg[AI_LEN_REG] = 0;
 
-    Bus::rcp->vi.reg[VI_INTR_REG] = 1023;
-    Bus::rcp->vi.reg[VI_CURRENT_REG] = 0;
-    Bus::rcp->vi.reg[VI_H_START_REG] = 0;
+    Bus::rcp.vi.reg[VI_INTR_REG] = 1023;
+    Bus::rcp.vi.reg[VI_CURRENT_REG] = 0;
+    Bus::rcp.vi.reg[VI_H_START_REG] = 0;
 
-    Bus::rcp->mi.reg[MI_INTR_REG] &= ~(0x10 | 0x8 | 0x4 | 0x1);
+    Bus::rcp.mi.reg[MI_INTR_REG] &= ~(0x10 | 0x8 | 0x4 | 0x1);
 
     // copy boot code
-    memcpy((uint8_t*)Bus::rcp->sp.dmem + 0x40, Bus::rom->getImage() + 0x40, 0xFC0);
+    memcpy((uint8_t*)Bus::rcp.sp.dmem + 0x40, _bus->rom->getImage() + 0x40, 0xFC0);
 
     _reg[19].u = 0; // 0:Cart, 1:DD
-    _reg[20].u = get_system_type_reg(Bus::rom->getSystemType());    // 0:PAL, 1:NTSC, 2:MPAL
+    _reg[20].u = get_system_type_reg(_bus->rom->getSystemType());    // 0:PAL, 1:NTSC, 2:MPAL
     _reg[21].u = 0; // 0:ColdReset, 1:NMI
-    _reg[22].u = get_cic_seed(Bus::rom->getCICChip());
+    _reg[22].u = get_cic_seed(_bus->rom->getCICChip());
     _reg[23].u = 0;
 
-    uint32_t* sp_imem = Bus::rcp->sp.imem;
+    uint32_t* sp_imem = Bus::rcp.sp.imem;
 
     // required by CIC x105
     sp_imem[0] = 0x3C0DBFC0;
@@ -216,14 +227,14 @@ void Interpreter::execute(void)
 {
     LOG_INFO(Interpreter) << "Running...";
     _delay_slot = false;
-    Bus::stop = false;
-    Bus::skip_jump = 0;
+    CoreControl::stop = false;
+    Bus::state.skip_jump = 0;
 
-    _PC = Bus::last_jump_addr = 0xa4000040;
-    Bus::next_interrupt = 624999;
-    Bus::interrupt->initialize();
+    Bus::state.PC = Bus::state.last_jump_addr = 0xa4000040;
+    Bus::state.next_interrupt = 624999;
+    _bus->interrupt->initialize(_bus);
 
-    while (!Bus::stop)
+    while (!CoreControl::stop)
     {
         prefetch();
 
@@ -235,7 +246,7 @@ void Interpreter::J(void)
 {
     // DECLARE_JUMP(J,   (PC->f.j.inst_index<<2) | ((PCADDR+4) & 0xF0000000), 1, &reg[0],  0, 0)
     DO_JUMP(
-        ((_cur_instr.target << 2) | (((uint32_t)_PC + 4) & 0xF0000000)),
+        ((_cur_instr.target << 2) | (((uint32_t)Bus::state.PC + 4) & 0xF0000000)),
         true,
         &_reg[0],
         false,
@@ -247,7 +258,7 @@ void Interpreter::JAL(void)
 {
     // DECLARE_JUMP(JAL, (PC->f.j.inst_index<<2) | ((PCADDR+4) & 0xF0000000), 1, &reg[31], 0, 0)
     DO_JUMP(
-        ((_cur_instr.target << 2) | (((uint32_t)_PC + 4) & 0xF0000000)),
+        ((_cur_instr.target << 2) | (((uint32_t)Bus::state.PC + 4) & 0xF0000000)),
         true,
         &_reg[31],
         false,
@@ -259,7 +270,7 @@ void Interpreter::BEQ(void)
 {
     //DECLARE_JUMP(BEQ, PCADDR + (iimmediate + 1) * 4, irs == irt, &reg[0], 0, 0)
     DO_JUMP(
-        ((uint32_t)_PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
+        ((uint32_t)Bus::state.PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
         _reg[_cur_instr.rs].s == _reg[_cur_instr.rt].s,
         &_reg[0],
         false,
@@ -271,7 +282,7 @@ void Interpreter::BNE(void)
 {
     // DECLARE_JUMP(BNE, PCADDR + (iimmediate+1)*4, irs != irt, &reg[0], 0, 0)
     DO_JUMP(
-        ((uint32_t)_PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
+        ((uint32_t)Bus::state.PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
         _reg[_cur_instr.rs].s != _reg[_cur_instr.rt].s,
         &_reg[0],
         false,
@@ -283,7 +294,7 @@ void Interpreter::BLEZ(void)
 {
     //DECLARE_JUMP(BLEZ,    PCADDR + (iimmediate+1)*4, irs <= 0,   &reg[0], 0, 0)
     DO_JUMP(
-        ((uint32_t)_PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
+        ((uint32_t)Bus::state.PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
         _reg[_cur_instr.rs].s <= 0,
         &_reg[0],
         false,
@@ -295,7 +306,7 @@ void Interpreter::BGTZ(void)
 {
     // DECLARE_JUMP(BGTZ, PCADDR + (iimmediate + 1) * 4, irs > 0, &reg[0], 0, 0)
     DO_JUMP(
-        ((uint32_t)_PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
+        ((uint32_t)Bus::state.PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
         _reg[_cur_instr.rs].s > 0,
         &_reg[0],
         false,
@@ -310,7 +321,7 @@ void Interpreter::ADDI(void)
         _reg[_cur_instr.rt].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rs].s + signextend<int16_t, int32_t>(_cur_instr.immediate));
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::ADDIU(void)
@@ -320,7 +331,7 @@ void Interpreter::ADDIU(void)
         _reg[_cur_instr.rt].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rs].s + signextend<int16_t, int32_t>(_cur_instr.immediate));
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SLTI(void)
@@ -334,7 +345,7 @@ void Interpreter::SLTI(void)
         _reg[_cur_instr.rt].s = 0;
     }
     
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SLTIU(void)
@@ -348,28 +359,28 @@ void Interpreter::SLTIU(void)
         _reg[_cur_instr.rt].s = 0;
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::ANDI(void)
 {
     _reg[_cur_instr.rt].s = _reg[_cur_instr.rs].s & _cur_instr.immediate;
     
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::ORI(void)
 {
     _reg[_cur_instr.rt].s = _reg[_cur_instr.rs].s | _cur_instr.immediate;
     
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::XORI(void)
 {
     _reg[_cur_instr.rt].s = _reg[_cur_instr.rs].s ^ _cur_instr.immediate;
     
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::LUI(void)
@@ -379,12 +390,12 @@ void Interpreter::LUI(void)
         _reg[_cur_instr.rt].s = signextend<int32_t, int64_t>((int16_t)_cur_instr.immediate << 16);
     }
     
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SV(void)
 {
-    Bus::stop = true;
+    CoreControl::stop = true;
     LOG_ERROR(Interpreter) << "OP: " << std::hex << _cur_instr.code << "; Opcode " << _cur_instr.op << " reserved. Stopping...";
 }
 
@@ -392,7 +403,7 @@ void Interpreter::BEQL(void)
 {
     //DECLARE_JUMP(BEQL, PCADDR + (iimmediate + 1) * 4, irs == irt, &reg[0], 1, 0)
     DO_JUMP(
-        ((uint32_t)_PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
+        ((uint32_t)Bus::state.PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
         _reg[_cur_instr.rs].s == _reg[_cur_instr.rt].s,
         &_reg[0],
         true,
@@ -404,7 +415,7 @@ void Interpreter::BNEL(void)
 {
     //DECLARE_JUMP(BNEL, PCADDR + (iimmediate + 1) * 4, irs != irt, &reg[0], 1, 0)
     DO_JUMP(
-        ((uint32_t)_PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
+        ((uint32_t)Bus::state.PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
         _reg[_cur_instr.rs].s != _reg[_cur_instr.rt].s,
         &_reg[0],
         true,
@@ -416,7 +427,7 @@ void Interpreter::BLEZL(void)
 {
     //DECLARE_JUMP(BLEZL,   PCADDR + (iimmediate+1)*4, irs <= 0,   &reg[0], 1, 0)
     DO_JUMP(
-        ((uint32_t)_PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
+        ((uint32_t)Bus::state.PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
         _reg[_cur_instr.rs].s <= 0,
         &_reg[0],
         true,
@@ -428,7 +439,7 @@ void Interpreter::BGTZL(void)
 {
     // DECLARE_JUMP(BGTZL,   PCADDR + (iimmediate+1)*4, irs > 0,    &reg[0], 1, 0)
     DO_JUMP(
-        ((uint32_t)_PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
+        ((uint32_t)Bus::state.PC) + 4 + (signextend<int16_t, int32_t>(_cur_instr.immediate) << 2),
         _reg[_cur_instr.rs].s > 0,
         &_reg[0],
         true,
@@ -443,7 +454,7 @@ void Interpreter::DADDI(void)
         _reg[_cur_instr.rt].s = _reg[_cur_instr.rs].s + signextend<int16_t, int64_t>(_cur_instr.immediate);
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DADDIU(void)
@@ -453,7 +464,7 @@ void Interpreter::DADDIU(void)
         _reg[_cur_instr.rt].s = _reg[_cur_instr.rs].s + signextend<int16_t, int64_t>(_cur_instr.immediate);
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::LDL(void)
@@ -463,7 +474,7 @@ void Interpreter::LDL(void)
     uint64_t value = 0;
     uint32_t offset = addr & 7;
 
-    Bus::mem->readmem(masked_addr, &value, SIZE_DWORD);
+    _bus->mem->readmem(masked_addr, &value, SIZE_DWORD);
 
     if (masked_addr)
     {
@@ -471,7 +482,7 @@ void Interpreter::LDL(void)
         _reg[_cur_instr.rt].s += (value << LDL_SHIFT[offset]);
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::LDR(void)
@@ -481,7 +492,7 @@ void Interpreter::LDR(void)
     uint64_t value = 0;
     uint32_t offset = addr & 7;
 
-    Bus::mem->readmem(masked_addr, &value, SIZE_DWORD);
+    _bus->mem->readmem(masked_addr, &value, SIZE_DWORD);
 
     if (masked_addr)
     {
@@ -489,7 +500,7 @@ void Interpreter::LDR(void)
         _reg[_cur_instr.rt].s += (value >> LDR_SHIFT[offset]);
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::LB(void)
@@ -498,7 +509,7 @@ void Interpreter::LB(void)
     {
         uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
 
-        Bus::mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_BYTE);
+        _bus->mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_BYTE);
 
         if (addr)
         {
@@ -506,7 +517,7 @@ void Interpreter::LB(void)
         }
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::LH(void)
@@ -515,7 +526,7 @@ void Interpreter::LH(void)
     {
         uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
 
-        Bus::mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_HWORD);
+        _bus->mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_HWORD);
 
         if (addr)
         {
@@ -523,7 +534,7 @@ void Interpreter::LH(void)
         }
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::LWL(void)
@@ -533,7 +544,7 @@ void Interpreter::LWL(void)
     uint64_t value = 0;
     uint32_t offset = addr & 3;
 
-    Bus::mem->readmem(masked_addr, &value, SIZE_WORD);
+    _bus->mem->readmem(masked_addr, &value, SIZE_WORD);
 
     if (masked_addr)
     {
@@ -541,7 +552,7 @@ void Interpreter::LWL(void)
         _reg[_cur_instr.rt].s += (int32_t)(value << LWL_SHIFT[offset]);
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::LW(void)
@@ -550,7 +561,7 @@ void Interpreter::LW(void)
     {
         uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
 
-        Bus::mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_WORD);
+        _bus->mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_WORD);
 
         if (addr)
         {
@@ -558,7 +569,7 @@ void Interpreter::LW(void)
         }
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::LBU(void)
@@ -567,10 +578,10 @@ void Interpreter::LBU(void)
     {
         uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
 	
-        Bus::mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_BYTE);
+        _bus->mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_BYTE);
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::LHU(void)
@@ -579,10 +590,10 @@ void Interpreter::LHU(void)
     {
         uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
 
-        Bus::mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_HWORD);
+        _bus->mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_HWORD);
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::LWR(void)
@@ -592,14 +603,14 @@ void Interpreter::LWR(void)
     uint64_t value = 0;
     uint32_t offset = addr & 3;
 
-    Bus::mem->readmem(masked_addr, &value, SIZE_WORD);
+    _bus->mem->readmem(masked_addr, &value, SIZE_WORD);
     if (masked_addr)
     {
         _reg[_cur_instr.rt].s = (int32_t)(_reg[_cur_instr.rt].s & LWR_MASK[offset]);
         _reg[_cur_instr.rt].s += (int32_t)(value >> LWR_SHIFT[offset]);
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::LWU(void)
@@ -608,24 +619,24 @@ void Interpreter::LWU(void)
     {
         uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
 
-        Bus::mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_WORD);
+        _bus->mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_WORD);
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SB(void)
 {
-    Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), (uint8_t)(_reg[_cur_instr.rt].u & 0xFF), SIZE_BYTE);
+    _bus->mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), (uint8_t)(_reg[_cur_instr.rt].u & 0xFF), SIZE_BYTE);
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SH(void)
 {
-    Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), (uint16_t)(_reg[_cur_instr.rt].u & 0xFFFF), SIZE_HWORD);
+    _bus->mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), (uint16_t)(_reg[_cur_instr.rt].u & 0xFFFF), SIZE_HWORD);
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SWL(void)
@@ -635,23 +646,23 @@ void Interpreter::SWL(void)
     uint64_t value = 0;
     uint32_t offset = addr & 3;
 
-    Bus::mem->readmem(masked_addr, &value, SIZE_WORD);
+    _bus->mem->readmem(masked_addr, &value, SIZE_WORD);
     if (masked_addr)
     {
         value &= SWL_MASK[offset];
         value += (uint32_t)(_reg[_cur_instr.rt].u >> SWL_SHIFT[offset]);
 
-        Bus::mem->writemem(addr & ~0x03, value, SIZE_WORD);
+        _bus->mem->writemem(addr & ~0x03, value, SIZE_WORD);
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SW(void)
 {
-    Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), (uint32_t)(_reg[_cur_instr.rt].u & 0xFFFFFFFF), SIZE_WORD);
+    _bus->mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), (uint32_t)(_reg[_cur_instr.rt].u & 0xFFFFFFFF), SIZE_WORD);
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SDL(void)
@@ -671,21 +682,21 @@ void Interpreter::SWR(void)
     uint64_t value = 0;
     uint32_t offset = addr & 3;
 
-    Bus::mem->readmem(masked_addr, &value, SIZE_WORD);
+    _bus->mem->readmem(masked_addr, &value, SIZE_WORD);
     if (masked_addr)
     {
         value &= SWR_MASK[offset];
         value += (uint32_t)(_reg[_cur_instr.rt].u << SWR_SHIFT[offset]);
 
-        Bus::mem->writemem(addr & ~0x03, value, SIZE_WORD);
+        _bus->mem->writemem(addr & ~0x03, value, SIZE_WORD);
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::CACHE(void)
 {
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::LL(void)
@@ -695,20 +706,20 @@ void Interpreter::LL(void)
 
 void Interpreter::LWC1(void)
 {
-    if (_cp0.COP1Unusable())
+    if (_cp0.COP1Unusable(*this))
         return;
 
     uint32_t address = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
     uint64_t dest = 0;
 
-    Bus::mem->readmem(address, &dest, SIZE_WORD);
+    _bus->mem->readmem(address, &dest, SIZE_WORD);
 
     if (address)
     {
         *((int32_t*)_s_reg[_cur_instr.ft]) = (int32_t)dest;
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::LLD(void)
@@ -718,14 +729,14 @@ void Interpreter::LLD(void)
 
 void Interpreter::LDC1(void)
 {
-    if (_cp0.COP1Unusable())
+    if (_cp0.COP1Unusable(*this))
         return;
 
     uint32_t address = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
 
-    Bus::mem->readmem(address, (uint64_t*)_d_reg[_cur_instr.ft], SIZE_DWORD);
+    _bus->mem->readmem(address, (uint64_t*)_d_reg[_cur_instr.ft], SIZE_DWORD);
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::LD(void)
@@ -734,10 +745,10 @@ void Interpreter::LD(void)
     {
         uint32_t addr = ((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset));
 
-        Bus::mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_DWORD);
+        _bus->mem->readmem(addr, &_reg[_cur_instr.rt].u, SIZE_DWORD);
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SC(void)
@@ -747,12 +758,12 @@ void Interpreter::SC(void)
 
 void Interpreter::SWC1(void)
 {
-    if (_cp0.COP1Unusable())
+    if (_cp0.COP1Unusable(*this))
         return;
 
-    Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), *((int32_t*)_s_reg[_cur_instr.ft]), SIZE_WORD);
+    _bus->mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), *((int32_t*)_s_reg[_cur_instr.ft]), SIZE_WORD);
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SCD(void)
@@ -762,34 +773,34 @@ void Interpreter::SCD(void)
 
 void Interpreter::SDC1(void)
 {
-    if (_cp0.COP1Unusable())
+    if (_cp0.COP1Unusable(*this))
         return;
 
-    Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), *((int64_t*)_d_reg[_cur_instr.ft]), SIZE_DWORD);
+    _bus->mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), *((int64_t*)_d_reg[_cur_instr.ft]), SIZE_DWORD);
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SD(void)
 {
-    Bus::mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), _reg[_cur_instr.rt].u, SIZE_DWORD);
+    _bus->mem->writemem(((uint32_t)_reg[_cur_instr.base].u + signextend<int16_t, int32_t>(_cur_instr.offset)), _reg[_cur_instr.rt].u, SIZE_DWORD);
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::genericIdle(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1)
 {
     int32_t skip;
-    if (cop1 && _cp0.COP1Unusable())
+    if (cop1 && _cp0.COP1Unusable(*this))
         return;
 
     if (take_jump)
     {
-        _cp0.updateCount(_PC);
-        skip = Bus::next_interrupt - _cp0_reg[CP0_COUNT_REG];
+        _cp0.updateCount(Bus::state.PC, _bus->rom->getCountPerOp());
+        skip = Bus::state.next_interrupt - Bus::state.cp0_reg[CP0_COUNT_REG];
         if (skip > 3)
         {
-            _cp0_reg[CP0_COUNT_REG] += (skip & 0xFFFFFFFC);
+            Bus::state.cp0_reg[CP0_COUNT_REG] += (skip & 0xFFFFFFFC);
         }
         else
         {
@@ -804,46 +815,46 @@ void Interpreter::genericIdle(uint32_t destination, bool take_jump, Register64* 
 
 void Interpreter::genericJump(uint32_t destination, bool take_jump, Register64* link, bool likely, bool cop1)
 {
-    if (cop1 && _cp0.COP1Unusable())
+    if (cop1 && _cp0.COP1Unusable(*this))
         return;
 
     if (link != &_reg[0])
     {
-        (*link).s = ((uint32_t)_PC) + 8;
+        (*link).s = ((uint32_t)Bus::state.PC) + 8;
         (*link).s = signextend<int32_t, int64_t>((int32_t)(*link).s);
     }
 
     if (!likely || take_jump)
     {
-        _PC += 1;
+        Bus::state.PC += 1;
         _delay_slot = true;
 
         prefetch();
         (this->*instruction_table[_cur_instr.op])();
 
-        _cp0.updateCount(_PC);
+        _cp0.updateCount(Bus::state.PC, _bus->rom->getCountPerOp());
         _delay_slot = false;
-        if (take_jump && !Bus::skip_jump)
+        if (take_jump && !Bus::state.skip_jump)
         {
-            _PC = destination;
+            Bus::state.PC = destination;
         }
     }
     else
     {
-        _PC += 2;
-        _cp0.updateCount(_PC);
+        Bus::state.PC += 2;
+        _cp0.updateCount(Bus::state.PC, _bus->rom->getCountPerOp());
     }
 
-    Bus::last_jump_addr = (uint32_t)_PC;
-    if (Bus::next_interrupt <= _cp0_reg[CP0_COUNT_REG])
+    Bus::state.last_jump_addr = (uint32_t)Bus::state.PC;
+    if (Bus::state.next_interrupt <= Bus::state.cp0_reg[CP0_COUNT_REG])
     {
-        Bus::interrupt->generateInterrupt();
+        _bus->interrupt->generateInterrupt();
     }
 }
 
 void Interpreter::globalJump(uint32_t addr)
 {
-    _PC = addr;
+    Bus::state.PC = addr;
 }
 
 // NOTE: these exceptions assume that we never go into
@@ -853,21 +864,21 @@ void Interpreter::generalException(void)
 {
     unsigned offset = 0x180;
 
-    _cp0.updateCount(_PC);
-    _cp0_reg[CP0_STATUS_REG] |= 2;
+    _cp0.updateCount(Bus::state.PC, _bus->rom->getCountPerOp());
+    Bus::state.cp0_reg[CP0_STATUS_REG] |= 2;
 
     if (_delay_slot)
     {
-        _cp0_reg[CP0_CAUSE_REG] |= 0x80000000;
-        _cp0_reg[CP0_EPC_REG] = (uint32_t)_PC - 4;
+        Bus::state.cp0_reg[CP0_CAUSE_REG] |= 0x80000000;
+        Bus::state.cp0_reg[CP0_EPC_REG] = (uint32_t)Bus::state.PC - 4;
     }
     else
     {
-        _cp0_reg[CP0_CAUSE_REG] &= ~0x80000000U;
-        _cp0_reg[CP0_EPC_REG] = (uint32_t)_PC;
+        Bus::state.cp0_reg[CP0_CAUSE_REG] &= ~0x80000000U;
+        Bus::state.cp0_reg[CP0_EPC_REG] = (uint32_t)Bus::state.PC;
     }
 
-    if (_cp0_reg[CP0_STATUS_REG] & 0x400000)
+    if (Bus::state.cp0_reg[CP0_STATUS_REG] & 0x400000)
     {
         globalJump(0xBFC00200U + offset);
     }
@@ -876,12 +887,12 @@ void Interpreter::generalException(void)
         globalJump(0x80000000U + offset);
     }
 
-    Bus::last_jump_addr = (uint32_t)_PC;
+    Bus::state.last_jump_addr = (uint32_t)Bus::state.PC;
 
     if (_delay_slot)
     {
-        Bus::skip_jump = (uint32_t)_PC;
-        Bus::next_interrupt = 0;
+        Bus::state.skip_jump = (uint32_t)Bus::state.PC;
+        Bus::state.next_interrupt = 0;
     }
 }
 
@@ -891,7 +902,7 @@ void Interpreter::TLBRefillException(unsigned int address, TLBProbeMode mode, bo
 
     if (mode != TLB_FAST_READ)
     {
-        _cp0.updateCount(_PC);
+        _cp0.updateCount(Bus::state.PC, _bus->rom->getCountPerOp());
     }
 
     if (mode == TLB_WRITE)
@@ -905,10 +916,10 @@ void Interpreter::TLBRefillException(unsigned int address, TLBProbeMode mode, bo
 
     if (_delay_slot)
     {
-        if (!(_cp0_reg[CP0_STATUS_REG] & 0x2))
+        if (!(Bus::state.cp0_reg[CP0_STATUS_REG] & 0x2))
         {
-            _cp0_reg[CP0_CAUSE_REG] |= 0x80000000;
-            _cp0_reg[CP0_EPC_REG] = (uint32_t)_PC - 4;
+            Bus::state.cp0_reg[CP0_CAUSE_REG] |= 0x80000000;
+            Bus::state.cp0_reg[CP0_EPC_REG] = (uint32_t)Bus::state.PC - 4;
 
             // NOTE: offset should be 0x80 if we are in extended mode, but we don't implement it
             offset = 0x000;
@@ -920,10 +931,10 @@ void Interpreter::TLBRefillException(unsigned int address, TLBProbeMode mode, bo
     }
     else
     {
-        if (!(_cp0_reg[CP0_STATUS_REG] & 0x2))
+        if (!(Bus::state.cp0_reg[CP0_STATUS_REG] & 0x2))
         {
-            _cp0_reg[CP0_CAUSE_REG] &= ~0x80000000;
-            _cp0_reg[CP0_EPC_REG] = (uint32_t)_PC;
+            Bus::state.cp0_reg[CP0_CAUSE_REG] &= ~0x80000000;
+            Bus::state.cp0_reg[CP0_EPC_REG] = (uint32_t)Bus::state.PC;
 
             // NOTE: offset should be 0x80 if we are in extended mode, but we don't implement it
             offset = 0x000;
@@ -935,25 +946,25 @@ void Interpreter::TLBRefillException(unsigned int address, TLBProbeMode mode, bo
     }
 
     uint32_t vpn2 = address >> 13 & 0x7FFFF;
-    uint8_t asid = _cp0_reg[CP0_ENTRYHI_REG];
+    uint8_t asid = Bus::state.cp0_reg[CP0_ENTRYHI_REG];
 
     uint64_t entryhi = (int32_t)((vpn2 << 13) | asid);
 
-    uint64_t context = _cp0_reg[CP0_CONTEXT_REG];
+    uint64_t context = Bus::state.cp0_reg[CP0_CONTEXT_REG];
     context &= ~(0x7FFFFULL << 4);
     context |= vpn2 << 4;
 
-    _cp0_reg[CP0_ENTRYHI_REG] = entryhi;
-    _cp0_reg[CP0_CONTEXT_REG] = context;
-    _cp0_reg[CP0_BADVADDR_REG] = address;
+    Bus::state.cp0_reg[CP0_ENTRYHI_REG] = entryhi;
+    Bus::state.cp0_reg[CP0_CONTEXT_REG] = context;
+    Bus::state.cp0_reg[CP0_BADVADDR_REG] = address;
 
     if (!miss)
     {
         offset = 0x180;
     }
 
-    _cp0_reg[CP0_STATUS_REG] |= 0x2;
-    _cp0_reg[CP0_CAUSE_REG] = (_cp0_reg[CP0_CAUSE_REG] & ~0xFF) | (type << 2);
+    Bus::state.cp0_reg[CP0_STATUS_REG] |= 0x2;
+    Bus::state.cp0_reg[CP0_CAUSE_REG] = (Bus::state.cp0_reg[CP0_CAUSE_REG] & ~0xFF) | (type << 2);
 
     // HACK: Subtract 4 from these addresses because TLB exceptions are only raised
     // during the exection of an instruction where PC gets incremented, which means
@@ -961,7 +972,7 @@ void Interpreter::TLBRefillException(unsigned int address, TLBProbeMode mode, bo
     // than what we set here. This doesn't apply to general exceptions above
     // because general exceptions are only emulated at jumps, where the PC is not
     // further changed at the end of execution.
-    if (_cp0_reg[CP0_STATUS_REG] & 0x400000)
+    if (Bus::state.cp0_reg[CP0_STATUS_REG] & 0x400000)
     {
         globalJump(0xBFC00200U + offset - 4);
     }
@@ -970,11 +981,11 @@ void Interpreter::TLBRefillException(unsigned int address, TLBProbeMode mode, bo
         globalJump(0x80000000U + offset - 4);
     }
 
-    Bus::last_jump_addr = (uint32_t)_PC + 4;
+    Bus::state.last_jump_addr = (uint32_t)Bus::state.PC + 4;
 
     if (_delay_slot)
     {
-        Bus::skip_jump = (uint32_t)_PC + 4;
-        Bus::next_interrupt = 0;
+        Bus::state.skip_jump = (uint32_t)Bus::state.PC + 4;
+        Bus::state.next_interrupt = 0;
     }
 }

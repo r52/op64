@@ -3,11 +3,11 @@
 #include "emulator.h"
 
 #include <rom/rom.h>
-#include <core/bus.h>
-#include <plugin/plugincontainer.h>
 #include <plugin/gfxplugin.h>
 #include <cpu/interpreter.h>
 #include <mem/mpmemory.h>
+
+#include <ui/corecontrol.h>
 
 
 Emulator::Emulator(WId mainwindow) :
@@ -20,32 +20,12 @@ _mainwindow(mainwindow)
     qRegisterMetaType<EmuState>("EmuState");
 }
 
-Emulator::~Emulator()
-{
-    Bus::disconnectDevices();
-
-    if (nullptr != _cpu)
-    {
-        delete _cpu; _cpu = nullptr;
-    }
-
-    if (nullptr != _mem)
-    {
-        delete _mem; _mem = nullptr;
-    }
-
-    if (nullptr != _plugins)
-    {
-        delete _plugins; _plugins = nullptr;
-    }
-}
-
 bool Emulator::isRomLoaded(void)
 {
-    return (nullptr != Bus::rom && getState() > DEAD);
+    return (_bus && _bus->rom && getState() > DEAD);
 }
 
-bool Emulator::loadRom(const char* filename)
+bool Emulator::loadRom(const char* filename, QString& romname)
 {
     if (getState() > DEAD)
     {
@@ -56,14 +36,11 @@ bool Emulator::loadRom(const char* filename)
     Rom* rom;
     if (Rom::loadRom(filename, rom))
     {
-        Bus::connectRom(rom); rom = nullptr;
+        romname = QString::fromLocal8Bit((char*)rom->getHeader()->Name, 20).trimmed();
+
+        _bus.reset(new Bus(rom));
         setState(ROM_LOADED);
         return true;
-    }
-    else
-    {
-        // something went wrong. kill it
-        Bus::disconnectDevices();
     }
 
     return false;
@@ -71,55 +48,35 @@ bool Emulator::loadRom(const char* filename)
 
 bool Emulator::initializeHardware(PluginContainer* plugins, ICPU* cpu, IMemory* mem)
 {
-    if (getState() != ROM_LOADED)
+    if (!_bus || getState() != ROM_LOADED)
     {
         // not at correct state
         return false;
     }
 
-    setupBus(plugins, cpu, mem);
-
-    if (!Bus::initializeDevices())
+    if (_bus && _bus->connectDevices(cpu, mem, plugins) && _bus->initializeDevices())
     {
-        Bus::disconnectDevices();
-        setState(DEAD);
-        return false;
+        setState(HARDWARE_INITIALIZED);
+        return true;
     }
 
-    setState(HARDWARE_INITIALIZED);
-    return true;
+    setState(DEAD);
+    return false;
 }
 
 bool Emulator::execute(void)
 {
-    if (getState() != HARDWARE_INITIALIZED)
+    if (!_bus || getState() != HARDWARE_INITIALIZED)
     {
         return false;
     }
 
     setState(EMU_RUNNING);
 
-    Bus::executeMachine();
+    _bus->executeMachine();
 
     setState(EMU_STOPPED);
     return true;
-}
-
-bool Emulator::uninitializeHardware(void)
-{
-    if (getState() != EMU_STOPPED)
-    {
-        return false;
-    }
-
-    setState(DEAD);
-
-    if (Bus::disconnectDevices())
-    {
-        return true;
-    }
-
-    return false;
 }
 
 void Emulator::stopEmulator(void)
@@ -129,34 +86,27 @@ void Emulator::stopEmulator(void)
         return;
     }
 
-    Bus::stop = true;
-}
-
-void Emulator::setupBus(PluginContainer* plugins, ICPU* cpu, IMemory* mem)
-{
-    using namespace Bus;
-
-    // create devices
-    Bus::connectMemory(mem);
-    Bus::connectCPU(cpu);
-    Bus::connectPlugins(plugins);
+    CoreControl::stop = true;
 }
 
 void Emulator::setLimitFPS(bool limit)
 {
     LOG_INFO(EmulatorThread) << "Speed limit " << limit ? "on" : "off";
-    Bus::limitVI = limit;
+    CoreControl::limitVI = limit;
 }
 
 void Emulator::gameHardReset(void)
 {
     LOG_INFO(EmulatorThread) << "Hard resetting emulator...";
-    Bus::doHardReset = true;
+    CoreControl::doHardReset = true;
 }
 
 void Emulator::gameSoftReset(void)
 {
-    Bus::doSoftReset();
+    if (_bus)
+    {
+        _bus->doSoftReset();
+    }
 }
 
 void Emulator::runEmulator(void)
@@ -166,12 +116,12 @@ void Emulator::runEmulator(void)
 
     _plugins->setRenderWindow((void*)_renderwindow);
 
-    if (initializeHardware(_plugins, _cpu, _mem))
+    if (initializeHardware(_plugins.get(), _cpu.get(), _mem.get()))
     {
         execute();
-
-        uninitializeHardware();
     }
+
+    setState(DEAD);
 
     emit emulatorFinished();
 }

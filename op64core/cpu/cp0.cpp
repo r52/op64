@@ -4,31 +4,21 @@
 #include <core/bus.h>
 #include <rom/rom.h>
 
-CP0::CP0()
+
+void CP0::updateCount(uint32_t PC, uint8_t countPerOp)
 {
-    // forward internals
-    Bus::cp0_reg = _cp0_reg;
+    Bus::state.cp0_reg[CP0_COUNT_REG] += ((PC - Bus::state.last_jump_addr) >> 2) * countPerOp;
+    Bus::state.cp0_reg[CP0_RANDOM_REG] = (Bus::state.cp0_reg[CP0_COUNT_REG] / 2 % (32 - Bus::state.cp0_reg[CP0_WIRED_REG]))
+        + Bus::state.cp0_reg[CP0_WIRED_REG];
+    Bus::state.last_jump_addr = PC;
 }
 
-CP0::~CP0()
+bool CP0::COP1Unusable(ICPU& cpu)
 {
-    Bus::cp0_reg = nullptr;
-}
-
-void CP0::updateCount(uint32_t PC)
-{
-    _cp0_reg[CP0_COUNT_REG] += ((PC - Bus::last_jump_addr) >> 2) * Bus::rom->getCountPerOp();
-    _cp0_reg[CP0_RANDOM_REG] = (_cp0_reg[CP0_COUNT_REG] / 2 % (32 - _cp0_reg[CP0_WIRED_REG]))
-        + _cp0_reg[CP0_WIRED_REG];
-    Bus::last_jump_addr = PC;
-}
-
-bool CP0::COP1Unusable(void)
-{
-    if (!(_cp0_reg[CP0_STATUS_REG] & 0x20000000))
+    if (!(Bus::state.cp0_reg[CP0_STATUS_REG] & 0x20000000))
     {
-        _cp0_reg[CP0_CAUSE_REG] = (11 << 2) | 0x10000000;
-        Bus::cpu->generalException();
+        Bus::state.cp0_reg[CP0_CAUSE_REG] = (11 << 2) | 0x10000000;
+        cpu.generalException();
         return true;
     }
     return false;

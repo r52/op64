@@ -53,7 +53,7 @@ void SysTiming::doVILimit()
 {
     ++_framesElapsed;
 
-    if (Bus::limitVI && (_limitmode == LIMIT_BY_VI))
+    if (CoreControl::limitVI && (_limitmode == LIMIT_BY_VI))
     {
         auto modeledTime = _lastKeyVITime + getGameClockFrame(_mode, _framesElapsed);
         auto frameDelta = modeledTime - high_resolution_clock::now();

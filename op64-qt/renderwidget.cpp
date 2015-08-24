@@ -11,9 +11,9 @@
 #include <core/bus.h>
 
 
-RenderWidget::RenderWidget(Emulator* emu, QWidget* parent /*= 0*/) :
-_emu(emu),
-QWidget(parent)
+RenderWidget::RenderWidget(QString title, Emulator* emu, QWidget* parent /*= 0*/) :
+    _emu(emu),
+    QWidget(parent)
 {
     setAttribute(Qt::WA_PaintOnScreen, true);
     setAttribute(Qt::WA_NativeWindow, true);
@@ -24,8 +24,9 @@ QWidget(parent)
     connect(timer, SIGNAL(timeout()), this, SLOT(displayVI()));
     timer->start(1000);
 
-    romName = QString::fromLocal8Bit((char*)Bus::rom->getHeader()->Name, 20);
-    romName = romName.trimmed();
+    //romName = QString::fromLocal8Bit((char*)Bus::rom->getHeader()->Name, 20);
+    //romName = romName.trimmed();
+    romName = title;
     setWindowTitle(romName);
 
     QShortcut* flscrn = new QShortcut(QKeySequence("F11"), this);

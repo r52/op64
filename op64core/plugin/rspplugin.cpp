@@ -2,6 +2,9 @@
 #include "gfxplugin.h"
 #include "audioplugin.h"
 
+#include <plugin/plugincontainer.h>
+
+#include <oplog.h>
 #include <rcp/rcpcommon.h>
 #include <rcp/rcp.h>
 #include <core/bus.h>
@@ -19,7 +22,7 @@ RSPPlugin::~RSPPlugin()
     unloadPlugin();
 }
 
-OPStatus RSPPlugin::initialize(PluginContainer* plugins, void* renderWindow, void* statusBar)
+OPStatus RSPPlugin::initialize(Bus* bus, PluginContainer* plugins, void* renderWindow, void* statusBar)
 {
     //Get DLL information
     void (*GetDllInfo)(PLUGIN_INFO* PluginInfo);
@@ -95,31 +98,31 @@ OPStatus RSPPlugin::initialize(PluginContainer* plugins, void* renderWindow, voi
     Info.ProcessAlist = plugins->audio()->ProcessAList;
 
     Info.hInst = opLibGetMainHandle();
-    Info.RDRAM = (uint8_t*)Bus::rdram->mem;
-    Info.DMEM = (uint8_t*)Bus::rcp->sp.dmem;
-    Info.IMEM = (uint8_t*)Bus::rcp->sp.imem;
+    Info.RDRAM = (uint8_t*)Bus::rdram.mem;
+    Info.DMEM = (uint8_t*)Bus::rcp.sp.dmem;
+    Info.IMEM = (uint8_t*)Bus::rcp.sp.imem;
     Info.MemoryBswaped = 0;
 
-    Info.MI__INTR_REG = &Bus::rcp->mi.reg[MI_INTR_REG];
+    Info.MI__INTR_REG = &Bus::rcp.mi.reg[MI_INTR_REG];
 
-    Info.SP__MEM_ADDR_REG = &Bus::rcp->sp.reg[SP_MEM_ADDR_REG];
-    Info.SP__DRAM_ADDR_REG = &Bus::rcp->sp.reg[SP_DRAM_ADDR_REG];
-    Info.SP__RD_LEN_REG = &Bus::rcp->sp.reg[SP_RD_LEN_REG];
-    Info.SP__WR_LEN_REG = &Bus::rcp->sp.reg[SP_WR_LEN_REG];
-    Info.SP__STATUS_REG = &Bus::rcp->sp.reg[SP_STATUS_REG];
-    Info.SP__DMA_FULL_REG = &Bus::rcp->sp.reg[SP_DMA_FULL_REG];
-    Info.SP__DMA_BUSY_REG = &Bus::rcp->sp.reg[SP_DMA_BUSY_REG];
-    Info.SP__PC_REG = &Bus::rcp->sp.stat[SP_PC_REG];
-    Info.SP__SEMAPHORE_REG = &Bus::rcp->sp.reg[SP_SEMAPHORE_REG];
+    Info.SP__MEM_ADDR_REG = &Bus::rcp.sp.reg[SP_MEM_ADDR_REG];
+    Info.SP__DRAM_ADDR_REG = &Bus::rcp.sp.reg[SP_DRAM_ADDR_REG];
+    Info.SP__RD_LEN_REG = &Bus::rcp.sp.reg[SP_RD_LEN_REG];
+    Info.SP__WR_LEN_REG = &Bus::rcp.sp.reg[SP_WR_LEN_REG];
+    Info.SP__STATUS_REG = &Bus::rcp.sp.reg[SP_STATUS_REG];
+    Info.SP__DMA_FULL_REG = &Bus::rcp.sp.reg[SP_DMA_FULL_REG];
+    Info.SP__DMA_BUSY_REG = &Bus::rcp.sp.reg[SP_DMA_BUSY_REG];
+    Info.SP__PC_REG = &Bus::rcp.sp.stat[SP_PC_REG];
+    Info.SP__SEMAPHORE_REG = &Bus::rcp.sp.reg[SP_SEMAPHORE_REG];
 
-    Info.DPC__START_REG = &Bus::rcp->dpc.reg[DPC_START_REG];
-    Info.DPC__END_REG = &Bus::rcp->dpc.reg[DPC_END_REG];
-    Info.DPC__CURRENT_REG = &Bus::rcp->dpc.reg[DPC_CURRENT_REG];
-    Info.DPC__STATUS_REG = &Bus::rcp->dpc.reg[DPC_STATUS_REG];
-    Info.DPC__CLOCK_REG = &Bus::rcp->dpc.reg[DPC_CLOCK_REG];
-    Info.DPC__BUFBUSY_REG = &Bus::rcp->dpc.reg[DPC_BUFBUSY_REG];
-    Info.DPC__PIPEBUSY_REG = &Bus::rcp->dpc.reg[DPC_PIPEBUSY_REG];
-    Info.DPC__TMEM_REG = &Bus::rcp->dpc.reg[DPC_TMEM_REG];
+    Info.DPC__START_REG = &Bus::rcp.dpc.reg[DPC_START_REG];
+    Info.DPC__END_REG = &Bus::rcp.dpc.reg[DPC_END_REG];
+    Info.DPC__CURRENT_REG = &Bus::rcp.dpc.reg[DPC_CURRENT_REG];
+    Info.DPC__STATUS_REG = &Bus::rcp.dpc.reg[DPC_STATUS_REG];
+    Info.DPC__CLOCK_REG = &Bus::rcp.dpc.reg[DPC_CLOCK_REG];
+    Info.DPC__BUFBUSY_REG = &Bus::rcp.dpc.reg[DPC_BUFBUSY_REG];
+    Info.DPC__PIPEBUSY_REG = &Bus::rcp.dpc.reg[DPC_PIPEBUSY_REG];
+    Info.DPC__TMEM_REG = &Bus::rcp.dpc.reg[DPC_TMEM_REG];
 
     InitiateRSP(Info, &_cycleCount);
     _initialized = true;

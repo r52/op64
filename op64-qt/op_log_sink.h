@@ -6,8 +6,6 @@
 
 #include <QObject>
 
-#include "logwindow.h"
-
 class op_log_sink : public QObject, public sinks::basic_formatted_sink_backend<char, sinks::synchronized_feeding>
 {
     Q_OBJECT;

@@ -1,5 +1,6 @@
 #include "iplugin.h"
 
+#include <oplog.h>
 
 IPlugin::~IPlugin()
 {
@@ -139,4 +140,8 @@ OPStatus IPlugin::freeLibrary(LibHandle& handle)
     }
 
     return OP_OK;
+}
+
+void DummyFunction(void)
+{
 }

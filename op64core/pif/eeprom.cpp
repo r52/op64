@@ -14,19 +14,19 @@ static unsigned char byte2bcd(int n)
     return (unsigned char)((n / 10) << 4) | (n % 10);
 }
 
-void EEPROM::eepromCommand(uint8_t* command)
+void EEPROM::eepromCommand(Rom* rom, uint8_t* command)
 {
     BOOST_LOG_NAMED_SCOPE(__STR__(__COUNTER__));
 
-    if (Bus::rom->getSaveType() == SAVETYPE_AUTO)
+    if (rom->getSaveType() == SAVETYPE_AUTO)
     {
-        Bus::rom->setSaveType(SAVETYPE_EEPROM_4KB);
+        rom->setSaveType(SAVETYPE_EEPROM_4KB);
     }
 
     switch (command[2])
     {
     case 0: // check
-        if (Bus::rom->getSaveType() != SAVETYPE_EEPROM_4KB &&  Bus::rom->getSaveType() != SAVETYPE_EEPROM_16KB) {
+        if (rom->getSaveType() != SAVETYPE_EEPROM_4KB &&  rom->getSaveType() != SAVETYPE_EEPROM_16KB) {
             command[1] |= 0x80;
             break;
         }
@@ -39,7 +39,7 @@ void EEPROM::eepromCommand(uint8_t* command)
             }
             if ((command[1] & 3) > 1)
             {
-                command[4] = (Bus::rom->getSaveType() != SAVETYPE_EEPROM_16KB) ? 0x80 : 0xc0;
+                command[4] = (rom->getSaveType() != SAVETYPE_EEPROM_16KB) ? 0x80 : 0xc0;
             }
             if ((command[1] & 3) > 2)
             {
@@ -49,18 +49,18 @@ void EEPROM::eepromCommand(uint8_t* command)
         else
         {
             command[3] = 0;
-            command[4] = (Bus::rom->getSaveType() != SAVETYPE_EEPROM_16KB) ? 0x80 : 0xc0;
+            command[4] = (rom->getSaveType() != SAVETYPE_EEPROM_16KB) ? 0x80 : 0xc0;
             command[5] = 0;
         }
         break;
     case 4: // read
     {
-        read(&command[4], command[3]);
+        read(rom, &command[4], command[3]);
     }
         break;
     case 5: // write
     {
-        write(&command[4], command[3]);
+        write(rom, &command[4], command[3]);
     }
         break;
     case 6:
@@ -112,11 +112,11 @@ void EEPROM::eepromCommand(uint8_t* command)
     }
 }
 
-void EEPROM::loadEEPROM(void)
+void EEPROM::loadEEPROM(Rom* rom)
 {
     using namespace boost::filesystem;
 
-    path eeppath(ConfigStore::getInstance().getString(GlobalStrings::CFG_SECTION_CORE, "SavePath") + Bus::rom->getRomFilenameNoExtension() + ".eep");
+    path eeppath(ConfigStore::getInstance().getString(GlobalStrings::CFG_SECTION_CORE, "SavePath") + rom->getRomFilenameNoExtension() + ".eep");
 
     if (!exists(eeppath.parent_path()))
     {
@@ -135,11 +135,11 @@ void EEPROM::loadEEPROM(void)
     _eepfile.read((char*)_eeprom, sizeof(_eeprom));
 }
 
-void EEPROM::read(uint8_t* buf, int line)
+void EEPROM::read(Rom* rom, uint8_t* buf, int line)
 {
     if (!_eepfile.is_open())
     {
-        loadEEPROM();
+        loadEEPROM(rom);
     }
 
     for (int i = 0; i < 8; i++)
@@ -148,11 +148,11 @@ void EEPROM::read(uint8_t* buf, int line)
     }
 }
 
-void EEPROM::write(uint8_t* buf, int line)
+void EEPROM::write(Rom* rom, uint8_t* buf, int line)
 {
     if (!_eepfile.is_open())
     {
-        loadEEPROM();
+        loadEEPROM(rom);
     }
 
     for (int i = 0; i < 8; i++)

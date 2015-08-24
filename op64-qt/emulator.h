@@ -1,8 +1,15 @@
 /* state machine wrapper or something */
 #pragma once
 #include <cstdint>
+#include <memory>
+
 #include <QObject>
 #include "qwindowdefs.h"
+
+#include <core/bus.h>
+#include <mem/imemory.h>
+#include <cpu/icpu.h>
+#include <plugin/plugincontainer.h>
 
 enum EmuState : uint8_t
 {
@@ -16,9 +23,6 @@ enum EmuState : uint8_t
 
 Q_DECLARE_METATYPE(EmuState);
 
-class PluginContainer;
-class ICPU;
-class IMemory;
 
 class Emulator : public QObject
 {
@@ -26,13 +30,12 @@ class Emulator : public QObject
 
 public:
     Emulator(WId mainwindow);
-    ~Emulator();
+    ~Emulator() = default;
 
     // execution
-    bool loadRom(const char* filename);
+    bool loadRom(const char* filename, QString& romname);
     bool initializeHardware(PluginContainer* plugins, ICPU* cpu, IMemory* mem);
     bool execute(void);
-    bool uninitializeHardware(void);
     bool isRomLoaded(void);
     void stopEmulator(void);
     void toggleFullScreen(void);
@@ -71,8 +74,6 @@ private:
     Emulator(Emulator const&);
     void operator=(Emulator const&);
 
-    void setupBus(PluginContainer* plugins, ICPU* cpu, IMemory* mem);
-
     EmuState _state;
 
     // Windows
@@ -80,8 +81,9 @@ private:
     WId _renderwindow;
 
     // devices
-    PluginContainer* _plugins;
-    ICPU* _cpu;
-    IMemory* _mem;
+    std::unique_ptr<PluginContainer> _plugins;
+    std::unique_ptr<ICPU> _cpu;
+    std::unique_ptr<IMemory> _mem;
+    std::unique_ptr<Bus> _bus;
 };
 

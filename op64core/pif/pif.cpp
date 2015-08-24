@@ -22,35 +22,28 @@ PIF::~PIF(void)
 }
 
 
-void PIF::initialize(void)
+bool PIF::initialize(void)
 {
     for (uint32_t i = 0; i < 4; i++)
     {
-        Bus::controllers[i].Present = 0;
-        Bus::controllers[i].RawData = 0;
-        Bus::controllers[i].Plugin = PLUGIN_NONE;
+        Bus::state.controllers[i].Present = 0;
+        Bus::state.controllers[i].RawData = 0;
+        Bus::state.controllers[i].Plugin = PLUGIN_NONE;
     }
 
-    uninitialize();
+    _eeprom.reset(new EEPROM);
+    _mempak.reset(new MemPak);
 
-    _eeprom = std::make_unique<EEPROM>();
-    _mempak = std::make_unique<MemPak>();
+    return true;
 }
 
 void PIF::uninitialize(void)
 {
-    if (_eeprom)
-    {
-        _eeprom.reset();
-    }
-
-    if (_mempak)
-    {
-        _mempak.reset();
-    }
+    _eeprom.reset();
+    _mempak.reset();
 }
 
-void PIF::pifRead(void)
+void PIF::pifRead(Bus* bus)
 {
     int32_t i = 0, channel = 0;
     while (i < 0x40)
@@ -78,17 +71,17 @@ void PIF::pifRead(void)
             {
                 if (channel < 4)
                 {
-                    if (Bus::controllers[channel].Present &&
-                        Bus::controllers[channel].RawData)
+                    if (Bus::state.controllers[channel].Present &&
+                        Bus::state.controllers[channel].RawData)
                     {
-                        if (Bus::plugins->input()->ReadController != nullptr)
+                        if (bus->plugins->input()->ReadController != nullptr)
                         {
-                            Bus::plugins->input()->ReadController(channel, &ram[i]);
+                            bus->plugins->input()->ReadController(channel, &ram[i]);
                         }
                     }
                     else
                     {
-                        readController(channel, &ram[i]);
+                        readController(bus, channel, &ram[i]);
                     }
                 }
                 i += ram[i] + (ram[(i + 1)] & 0x3F) + 1;
@@ -101,13 +94,13 @@ void PIF::pifRead(void)
         }
         i++;
     }
-    if (Bus::plugins->input()->ReadController != nullptr)
+    if (bus->plugins->input()->ReadController != nullptr)
     {
-        Bus::plugins->input()->ReadController(-1, NULL);
+        bus->plugins->input()->ReadController(-1, NULL);
     }
 }
 
-void PIF::pifWrite(void)
+void PIF::pifWrite(Bus* bus)
 {
     int i = 0, channel = 0;
     if (ram[0x3F] > 1)
@@ -161,22 +154,22 @@ void PIF::pifWrite(void)
             {
                 if (channel < 4)
                 {
-                    if (Bus::controllers[channel].Present &&
-                        Bus::controllers[channel].RawData)
+                    if (Bus::state.controllers[channel].Present &&
+                        Bus::state.controllers[channel].RawData)
                     {
-                        if (Bus::plugins->input()->ControllerCommand != nullptr)
+                        if (bus->plugins->input()->ControllerCommand != nullptr)
                         {
-                            Bus::plugins->input()->ControllerCommand(channel, &ram[i]);
+                            bus->plugins->input()->ControllerCommand(channel, &ram[i]);
                         }
                     }
                     else
                     {
-                        controllerCommand(channel, &ram[i]);
+                        controllerCommand(bus, channel, &ram[i]);
                     }
                 }
                 else if (channel == 4)
                 {
-                    _eeprom->eepromCommand(&ram[i]);
+                    _eeprom->eepromCommand(bus->rom.get(), &ram[i]);
                 }
                 else
                 {
@@ -195,44 +188,44 @@ void PIF::pifWrite(void)
     }
     //PIF_RAMb[0x3F] = 0;
 
-    if (Bus::plugins->input()->ControllerCommand != nullptr) {
-        Bus::plugins->input()->ControllerCommand(-1, NULL);
+    if (bus->plugins->input()->ControllerCommand != nullptr) {
+        bus->plugins->input()->ControllerCommand(-1, NULL);
     }
 }
 
-void PIF::readController(int32_t controller, uint8_t* cmd)
+void PIF::readController(Bus* bus, int32_t controller, uint8_t* cmd)
 {
     switch (cmd[2])
     {
     case 1:
-        if (Bus::controllers[controller].Present)
+        if (Bus::state.controllers[controller].Present)
         {
             // TODO: pj64 polls getkeys at every VI and
             // simply copies the most recent values here.
             // which is better??
             BUTTONS Keys;
-            Bus::plugins->input()->GetKeys(controller, &Keys);
+            bus->plugins->input()->GetKeys(controller, &Keys);
             *((unsigned int *)(cmd + 3)) = Keys.Value;
         }
         break;
     case 2: // read controller pack
-        if (Bus::controllers[controller].Present)
+        if (Bus::state.controllers[controller].Present)
         {
-            if (Bus::controllers[controller].Plugin == PLUGIN_RAW)
+            if (Bus::state.controllers[controller].Plugin == PLUGIN_RAW)
             {
-                if (Bus::plugins->input()->ReadController != nullptr) {
-                    Bus::plugins->input()->ReadController(controller, cmd);
+                if (bus->plugins->input()->ReadController != nullptr) {
+                    bus->plugins->input()->ReadController(controller, cmd);
                 }
             }
         }
         break;
     case 3: // write controller pack
-        if (Bus::controllers[controller].Present)
+        if (Bus::state.controllers[controller].Present)
         {
-            if (Bus::controllers[controller].Plugin == PLUGIN_RAW)
+            if (Bus::state.controllers[controller].Plugin == PLUGIN_RAW)
             {
-                if (Bus::plugins->input()->ReadController != nullptr) {
-                    Bus::plugins->input()->ReadController(controller, cmd);
+                if (bus->plugins->input()->ReadController != nullptr) {
+                    bus->plugins->input()->ReadController(controller, cmd);
                 }
             }
         }
@@ -240,7 +233,7 @@ void PIF::readController(int32_t controller, uint8_t* cmd)
     }
 }
 
-void PIF::controllerCommand(int32_t controller, uint8_t* cmd)
+void PIF::controllerCommand(Bus* bus, int32_t controller, uint8_t* cmd)
 {
     switch (cmd[2])
     {
@@ -251,11 +244,11 @@ void PIF::controllerCommand(int32_t controller, uint8_t* cmd)
             break;
         }
 
-        if (Bus::controllers[controller].Present)
+        if (Bus::state.controllers[controller].Present)
         {
             cmd[3] = 0x05;
             cmd[4] = 0x00;
-            switch (Bus::controllers[controller].Plugin)
+            switch (Bus::state.controllers[controller].Plugin)
             {
             case PLUGIN_MEMPAK:
                 cmd[5] = 1;
@@ -274,24 +267,24 @@ void PIF::controllerCommand(int32_t controller, uint8_t* cmd)
         }
         break;
     case 0x01:
-        if (!Bus::controllers[controller].Present)
+        if (!Bus::state.controllers[controller].Present)
         {
             cmd[1] |= 0x80;
         }
         break;
     case 0x02: // read controller pack
-        if (Bus::controllers[controller].Present)
+        if (Bus::state.controllers[controller].Present)
         {
             int address = (cmd[3] << 8) | cmd[4];
-            switch (Bus::controllers[controller].Plugin)
+            switch (Bus::state.controllers[controller].Plugin)
             {
             case PLUGIN_MEMPAK:
-                _mempak->read(controller, address, &cmd[5]);
+                _mempak->read(bus->rom.get(), controller, address, &cmd[5]);
                 break;
             case PLUGIN_RAW:
-                if (Bus::plugins->input()->ControllerCommand != nullptr)
+                if (bus->plugins->input()->ControllerCommand != nullptr)
                 {
-                    Bus::plugins->input()->ControllerCommand(controller, cmd);
+                    bus->plugins->input()->ControllerCommand(controller, cmd);
                 }
                 break;
             default:
@@ -305,18 +298,18 @@ void PIF::controllerCommand(int32_t controller, uint8_t* cmd)
         }
         break;
     case 0x03: // write controller pack
-        if (Bus::controllers[controller].Present)
+        if (Bus::state.controllers[controller].Present)
         {
             int address = (cmd[3] << 8) | cmd[4];
-            switch (Bus::controllers[controller].Plugin)
+            switch (Bus::state.controllers[controller].Plugin)
             {
             case PLUGIN_MEMPAK:
-                _mempak->write(controller, address, &cmd[5]);
+                _mempak->write(bus->rom.get(), controller, address, &cmd[5]);
                 break;
             case PLUGIN_RAW:
-                if (Bus::plugins->input()->ControllerCommand != nullptr)
+                if (bus->plugins->input()->ControllerCommand != nullptr)
                 {
-                    Bus::plugins->input()->ControllerCommand(controller, cmd);
+                    bus->plugins->input()->ControllerCommand(controller, cmd);
                 }
                 break;
             default:
@@ -331,7 +324,7 @@ void PIF::controllerCommand(int32_t controller, uint8_t* cmd)
     }
 }
 
-OPStatus PIF::read(uint32_t address, uint32_t* data)
+OPStatus PIF::read(Bus* bus, uint32_t address, uint32_t* data)
 {
     uint32_t addr = PIF_ADDRESS(address);
 
@@ -347,7 +340,7 @@ OPStatus PIF::read(uint32_t address, uint32_t* data)
     return OP_OK;
 }
 
-OPStatus PIF::write(uint32_t address, uint32_t data, uint32_t mask)
+OPStatus PIF::write(Bus* bus, uint32_t address, uint32_t data, uint32_t mask)
 {
     uint32_t addr = PIF_ADDRESS(address);
 
@@ -364,12 +357,12 @@ OPStatus PIF::write(uint32_t address, uint32_t data, uint32_t mask)
         if (ram[0x3f] == 0x08)
         {
             ram[0x3f] = 0;
-            Bus::cpu->getCP0().updateCount(*Bus::PC);
-            Bus::interrupt->addInterruptEvent(SI_INT, 0x900);
+            bus->cpu->getCP0().updateCount(Bus::state.PC, bus->rom->getCountPerOp());
+            bus->interrupt->addInterruptEvent(SI_INT, 0x900);
         }
         else
         {
-            pifWrite();
+            pifWrite(bus);
         }
     }
 

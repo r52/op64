@@ -7,14 +7,12 @@
 
 #include <cstdint>
 
-class PluginContainer;
 class ConfigDialog;
 class Emulator;
 class RenderWidget;
 enum EmuState : uint8_t;
 
 class LogWindow;
-class QSettings;
 
 class QOP64Window : public QMainWindow
 {

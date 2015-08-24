@@ -85,6 +85,7 @@
     <ClInclude Include="cheat\cheatengine.h" />
     <ClInclude Include="core\bus.h" />
     <ClInclude Include="core\inputtypes.h" />
+    <ClInclude Include="core\state.h" />
     <ClInclude Include="core\systiming.h" />
     <ClInclude Include="cpu\cp0.h" />
     <ClInclude Include="cpu\cputypes.h" />

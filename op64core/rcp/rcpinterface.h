@@ -10,12 +10,14 @@ enum RCPIOMode
     RCP_IO_STAT
 };
 
+class Bus;
+
 class RCPInterface
 {
 public:
     virtual ~RCPInterface() {}
-    virtual OPStatus read(uint32_t address, uint32_t* data) = 0;
-    virtual OPStatus write(uint32_t address, uint32_t data, uint32_t mask) = 0;
+    virtual OPStatus read(Bus* bus, uint32_t address, uint32_t* data) = 0;
+    virtual OPStatus write(Bus* bus, uint32_t address, uint32_t data, uint32_t mask) = 0;
 
     inline void setIOMode(RCPIOMode mode)
     {

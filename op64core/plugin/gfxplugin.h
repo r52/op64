@@ -15,7 +15,7 @@ class GfxPlugin : public IPlugin
 public:
     virtual ~GfxPlugin();
 
-    virtual OPStatus initialize(PluginContainer* plugins, void* renderWindow, void* statusBar);
+    virtual OPStatus initialize(Bus* bus, PluginContainer* plugins, void* renderWindow, void* statusBar);
     static OPStatus loadPlugin(const char* libPath, GfxPlugin*& outplug);
 
     void(*CaptureScreen)(const char *);

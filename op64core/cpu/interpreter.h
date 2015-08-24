@@ -11,14 +11,15 @@
 #include <core/bus.h>
 #include <mem/imemory.h>
 
+#include <ui/corecontrol.h>
 
 #define NOT_IMPLEMENTED() \
-    Bus::stop = true; \
+    CoreControl::stop = true; \
     LOG_ERROR(Interpreter) << "Not implemented. Stopping..."; \
-    LOG_LEVEL(Interpreter, trace) << "PC: " << std::hex << (uint32_t)_PC << std::hex << _cur_instr.code;
+    LOG_LEVEL(Interpreter, trace) << "PC: " << std::hex << (uint32_t)Bus::state.PC << std::hex << _cur_instr.code;
 
 #define DO_JUMP(target, condition, link, likely, cop1) \
-    if (target == ((uint32_t)_PC) && _check_nop) \
+    if (target == ((uint32_t)Bus::state.PC) && _check_nop) \
     { \
         genericIdle(target, condition, link, likely, cop1); \
         return; \
@@ -30,14 +31,15 @@ class Interpreter : public ICPU
 {
 public:
     Interpreter(void) = default;
-    ~Interpreter(void);
+    ~Interpreter(void) = default;
 
     virtual uint32_t getCPUType(void)
     {
         return CPU_INTERPRETER;
     }
 
-    virtual void initialize(void);
+    virtual bool initialize(Bus* bus);
+    virtual void uninitialize(Bus* bus);
     virtual void execute(void);
 
     virtual void hardReset(void);
@@ -51,12 +53,12 @@ public:
 private:
     inline void prefetch(void)
     {
-        uint32_t* mem = Bus::mem->fastFetch(_PC);
+        uint32_t* mem = _bus->mem->fastFetch(Bus::state.PC);
 
         if (nullptr == mem)
         {
-            LOG_ERROR(Interpreter) << "Prefetch execution address " << std::hex << (uint32_t)_PC << " not found. Stopping...";
-            Bus::stop = true;
+            LOG_ERROR(Interpreter) << "Prefetch execution address " << std::hex << (uint32_t)Bus::state.PC << " not found. Stopping...";
+            CoreControl::stop = true;
             _cur_instr.code = 0;
 
             return;
@@ -67,9 +69,6 @@ private:
     }
 
 private:
-    // registers
-    uint32_t* _cp0_reg;     // pointer to cp0 regs
-
     // cpu states
     bool _check_nop = false;
     bool _non_ieee_mode = true; // for testing

@@ -79,8 +79,8 @@ public:
 
     static bool loadRom(const char* name, Rom*& outRom);
 
-    virtual OPStatus read(uint32_t address, uint32_t* data) override;
-    virtual OPStatus write(uint32_t address, uint32_t data, uint32_t mask) override;
+    virtual OPStatus read(Bus* bus, uint32_t address, uint32_t* data) override;
+    virtual OPStatus write(Bus* bus, uint32_t address, uint32_t data, uint32_t mask) override;
 
     inline uint8_t* getImage(void)
     {

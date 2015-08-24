@@ -15,17 +15,17 @@
 
 void RSPInterface::DMARead(void)
 {
-    uint32_t len_reg = Bus::rcp->sp.reg[SP_WR_LEN_REG];
+    uint32_t len_reg = Bus::rcp.sp.reg[SP_WR_LEN_REG];
 
     uint32_t length = ((len_reg & 0xfff) | 7) + 1;
     uint32_t count = ((len_reg >> 12) & 0xff) + 1;
     uint32_t skip = ((len_reg >> 20) & 0xfff);
 
-    uint32_t memaddr = Bus::rcp->sp.reg[SP_MEM_ADDR_REG] & 0xfff;
-    uint32_t dramaddr = Bus::rcp->sp.reg[SP_DRAM_ADDR_REG] & 0xffffff;
+    uint32_t memaddr = Bus::rcp.sp.reg[SP_MEM_ADDR_REG] & 0xfff;
+    uint32_t dramaddr = Bus::rcp.sp.reg[SP_DRAM_ADDR_REG] & 0xffffff;
 
-    uint8_t* spmem = ((Bus::rcp->sp.reg[SP_MEM_ADDR_REG] & 0x1000) != 0) ? (uint8_t*) Bus::rcp->sp.imem : (uint8_t*) Bus::rcp->sp.dmem;
-    uint8_t* dram = (uint8_t*)Bus::rdram->mem;
+    uint8_t* spmem = ((Bus::rcp.sp.reg[SP_MEM_ADDR_REG] & 0x1000) != 0) ? (uint8_t*) Bus::rcp.sp.imem : (uint8_t*) Bus::rcp.sp.dmem;
+    uint8_t* dram = (uint8_t*)Bus::rdram.mem;
 
     for (uint32_t j = 0; j < count; j++) {
         for (uint32_t i = 0; i < length; i++) {
@@ -39,17 +39,17 @@ void RSPInterface::DMARead(void)
 
 void RSPInterface::DMAWrite(void)
 {
-    uint32_t len_reg = Bus::rcp->sp.reg[SP_RD_LEN_REG];
+    uint32_t len_reg = Bus::rcp.sp.reg[SP_RD_LEN_REG];
 
     uint32_t length = ((len_reg & 0xfff) | 7) + 1;
     uint32_t count = ((len_reg >> 12) & 0xff) + 1;
     uint32_t skip = ((len_reg >> 20) & 0xfff);
 
-    uint32_t memaddr = Bus::rcp->sp.reg[SP_MEM_ADDR_REG] & 0xfff;
-    uint32_t dramaddr = Bus::rcp->sp.reg[SP_DRAM_ADDR_REG] & 0xffffff;
+    uint32_t memaddr = Bus::rcp.sp.reg[SP_MEM_ADDR_REG] & 0xfff;
+    uint32_t dramaddr = Bus::rcp.sp.reg[SP_DRAM_ADDR_REG] & 0xffffff;
 
-    uint8_t* spmem = ((Bus::rcp->sp.reg[SP_MEM_ADDR_REG] & 0x1000) != 0) ? (uint8_t*) Bus::rcp->sp.imem : (uint8_t*) Bus::rcp->sp.dmem;
-    uint8_t* dram = (uint8_t*) Bus::rdram->mem;
+    uint8_t* spmem = ((Bus::rcp.sp.reg[SP_MEM_ADDR_REG] & 0x1000) != 0) ? (uint8_t*) Bus::rcp.sp.imem : (uint8_t*) Bus::rcp.sp.dmem;
+    uint8_t* dram = (uint8_t*) Bus::rdram.mem;
 
     for (uint32_t j = 0; j < count; j++) {
         for (uint32_t i = 0; i < length; i++) {
@@ -61,49 +61,49 @@ void RSPInterface::DMAWrite(void)
     }
 }
 
-OPStatus RSPInterface::read(uint32_t address, uint32_t* data)
+OPStatus RSPInterface::read(Bus* bus, uint32_t address, uint32_t* data)
 {
     switch (_iomode)
     {
     case RCP_IO_REG:
-        return readReg(address, data);
+        return readReg(bus, address, data);
         break;
     case RCP_IO_MEM:
-        return readMem(address, data);
+        return readMem(bus, address, data);
         break;
     case RCP_IO_STAT:
-        return readStat(address, data);
+        return readStat(bus, address, data);
         break;
     }
 
     return OP_OK;
 }
 
-OPStatus RSPInterface::write(uint32_t address, uint32_t data, uint32_t mask)
+OPStatus RSPInterface::write(Bus* bus, uint32_t address, uint32_t data, uint32_t mask)
 {
     switch (_iomode)
     {
     case RCP_IO_REG:
-        return writeReg(address, data, mask);
+        return writeReg(bus, address, data, mask);
         break;
     case RCP_IO_MEM:
-        return writeMem(address, data, mask);
+        return writeMem(bus, address, data, mask);
         break;
     case RCP_IO_STAT:
-        return writeStat(address, data, mask);
+        return writeStat(bus, address, data, mask);
         break;
     }
 
     return OP_OK;
 }
 
-OPStatus RSPInterface::readMem(uint32_t address, uint32_t* data)
+OPStatus RSPInterface::readMem(Bus* bus, uint32_t address, uint32_t* data)
 {
     *data = mem[RSP_ADDRESS(address)];
     return OP_OK;
 }
 
-OPStatus RSPInterface::readReg(uint32_t address, uint32_t* data)
+OPStatus RSPInterface::readReg(Bus* bus, uint32_t address, uint32_t* data)
 {
     uint32_t regnum = RSP_REG(address);
 
@@ -117,7 +117,7 @@ OPStatus RSPInterface::readReg(uint32_t address, uint32_t* data)
     return OP_OK;
 }
 
-OPStatus RSPInterface::readStat(uint32_t address, uint32_t* data)
+OPStatus RSPInterface::readStat(Bus* bus, uint32_t address, uint32_t* data)
 {
     uint32_t reg = RSP_REG2(address);
 
@@ -125,7 +125,7 @@ OPStatus RSPInterface::readStat(uint32_t address, uint32_t* data)
     return OP_OK;
 }
 
-OPStatus RSPInterface::writeMem(uint32_t address, uint32_t data, uint32_t mask)
+OPStatus RSPInterface::writeMem(Bus* bus, uint32_t address, uint32_t data, uint32_t mask)
 {
     uint32_t addr = RSP_ADDRESS(address);
 
@@ -133,14 +133,14 @@ OPStatus RSPInterface::writeMem(uint32_t address, uint32_t data, uint32_t mask)
     return OP_OK;
 }
 
-OPStatus RSPInterface::writeReg(uint32_t address, uint32_t data, uint32_t mask)
+OPStatus RSPInterface::writeReg(Bus* bus, uint32_t address, uint32_t data, uint32_t mask)
 {
     uint32_t regnum = RSP_REG(address);
 
     switch (regnum)
     {
     case SP_STATUS_REG:
-        updateReg(data & mask);
+        updateReg(bus,data & mask);
     case SP_DMA_FULL_REG:
     case SP_DMA_BUSY_REG:
         return OP_OK;
@@ -164,7 +164,7 @@ OPStatus RSPInterface::writeReg(uint32_t address, uint32_t data, uint32_t mask)
     return OP_OK;
 }
 
-OPStatus RSPInterface::writeStat(uint32_t address, uint32_t data, uint32_t mask)
+OPStatus RSPInterface::writeStat(Bus* bus, uint32_t address, uint32_t data, uint32_t mask)
 {
     uint32_t reg = RSP_REG2(address);
 
@@ -172,14 +172,14 @@ OPStatus RSPInterface::writeStat(uint32_t address, uint32_t data, uint32_t mask)
     return OP_OK;
 }
 
-void RSPInterface::prepareRSP(void)
+void RSPInterface::prepareRSP(Bus* bus)
 {
     int32_t save_pc = stat[SP_PC_REG] & ~0xFFF;
 
     // Video task
     if (dmem[0xFC0 / 4] == 1)
     {
-        if (Bus::rcp->dpc.reg[DPC_STATUS_REG] & 0x2) // DP frozen (DK64, BC)
+        if (Bus::rcp.dpc.reg[DPC_STATUS_REG] & 0x2) // DP frozen (DK64, BC)
         {
             // don't do the task now
             // the task will be done when DP is unfreezed (see update_DPC)
@@ -187,45 +187,45 @@ void RSPInterface::prepareRSP(void)
         }
 
         // unprotecting old frame buffers
-        Bus::mem->unprotectFramebuffer();
+        bus->mem->unprotectFramebuffer();
 
         stat[SP_PC_REG] &= 0xFFF;
-        Bus::plugins->rsp()->DoRspCycles(0xffffffff);
+        bus->plugins->rsp()->DoRspCycles(0xffffffff);
         stat[SP_PC_REG] |= save_pc;
 
-        Bus::cpu->getCP0().updateCount(*Bus::PC);
+        bus->cpu->getCP0().updateCount(Bus::state.PC, bus->rom->getCountPerOp());
 
-        if (Bus::rcp->mi.reg[MI_INTR_REG] & 0x1)
+        if (Bus::rcp.mi.reg[MI_INTR_REG] & 0x1)
         {
-            Bus::interrupt->addInterruptEvent(SP_INT, 1000);
+            bus->interrupt->addInterruptEvent(SP_INT, 1000);
         }
 
-        if (Bus::rcp->mi.reg[MI_INTR_REG] & 0x20)
+        if (Bus::rcp.mi.reg[MI_INTR_REG] & 0x20)
         {
-            Bus::interrupt->addInterruptEvent(DP_INT, 1000);
+            bus->interrupt->addInterruptEvent(DP_INT, 1000);
         }
 
-        Bus::rcp->mi.reg[MI_INTR_REG] &= ~0x21;
+        Bus::rcp.mi.reg[MI_INTR_REG] &= ~0x21;
         reg[SP_STATUS_REG] &= ~0x303;
 
         // protecting new frame buffers
-        Bus::mem->protectFramebuffer();
+        bus->mem->protectFramebuffer();
     }
     // Audio task
     else if (dmem[0xFC0 / 4] == 2)
     {
         stat[SP_PC_REG] &= 0xFFF;
-        Bus::plugins->rsp()->DoRspCycles(0xFFFFFFFF);
+        bus->plugins->rsp()->DoRspCycles(0xFFFFFFFF);
         stat[SP_PC_REG] |= save_pc;
 
-        Bus::cpu->getCP0().updateCount(*Bus::PC);
+        bus->cpu->getCP0().updateCount(Bus::state.PC, bus->rom->getCountPerOp());
 
-        if (Bus::rcp->mi.reg[MI_INTR_REG] & 0x1)
+        if (Bus::rcp.mi.reg[MI_INTR_REG] & 0x1)
         {
-            Bus::interrupt->addInterruptEvent(SP_INT, 4000/*500*/);
+            bus->interrupt->addInterruptEvent(SP_INT, 4000/*500*/);
         }
 
-        Bus::rcp->mi.reg[MI_INTR_REG] &= ~0x1;
+        Bus::rcp.mi.reg[MI_INTR_REG] &= ~0x1;
         reg[SP_STATUS_REG] &= ~0x303;
 
     }
@@ -233,22 +233,22 @@ void RSPInterface::prepareRSP(void)
     else
     {
         stat[SP_PC_REG] &= 0xFFF;
-        Bus::plugins->rsp()->DoRspCycles(0xFFFFFFFF);
+        bus->plugins->rsp()->DoRspCycles(0xFFFFFFFF);
         stat[SP_PC_REG] |= save_pc;
 
-        Bus::cpu->getCP0().updateCount(*Bus::PC);
+        bus->cpu->getCP0().updateCount(Bus::state.PC, bus->rom->getCountPerOp());
 
-        if (Bus::rcp->mi.reg[MI_INTR_REG] & 0x1)
+        if (Bus::rcp.mi.reg[MI_INTR_REG] & 0x1)
         {
-            Bus::interrupt->addInterruptEvent(SP_INT, 0/*100*/);
+            bus->interrupt->addInterruptEvent(SP_INT, 0/*100*/);
         }
 
-        Bus::rcp->mi.reg[MI_INTR_REG] &= ~0x1;
+        Bus::rcp.mi.reg[MI_INTR_REG] &= ~0x1;
         reg[SP_STATUS_REG] &= ~0x203;
     }
 }
 
-void RSPInterface::updateReg(uint32_t w)
+void RSPInterface::updateReg(Bus* bus, uint32_t w)
 {
     if (w & 0x1) // clear halt
         reg[SP_STATUS_REG] &= ~0x1;
@@ -260,14 +260,14 @@ void RSPInterface::updateReg(uint32_t w)
 
     if (w & 0x8) // clear SP interrupt
     {
-        Bus::rcp->mi.reg[MI_INTR_REG] &= ~1;
-        Bus::interrupt->checkInterrupt();
+        Bus::rcp.mi.reg[MI_INTR_REG] &= ~1;
+        bus->interrupt->checkInterrupt();
     }
 
     if (w & 0x10) // set SP interrupt
     {
-        Bus::rcp->mi.reg[MI_INTR_REG] |= 1;
-        Bus::interrupt->checkInterrupt();
+        Bus::rcp.mi.reg[MI_INTR_REG] |= 1;
+        bus->interrupt->checkInterrupt();
     }
 
     if (w & 0x20) // clear single step
@@ -326,6 +326,6 @@ void RSPInterface::updateReg(uint32_t w)
 
     if (!(reg[SP_STATUS_REG] & 0x3)) // !halt && !broke
     {
-        prepareRSP();
+        prepareRSP(bus);
     }
 }

@@ -1,5 +1,6 @@
 #include "inputplugin.h"
 
+#include <oplog.h>
 #include <core/bus.h>
 #include <rom/rom.h>
 
@@ -17,23 +18,23 @@ InputPlugin::~InputPlugin()
     unloadPlugin();
 }
 
-OPStatus InputPlugin::initialize(PluginContainer* plugins, void* renderWindow, void* statusBar)
+OPStatus InputPlugin::initialize(Bus* bus, PluginContainer* plugins, void* renderWindow, void* statusBar)
 {
-    Bus::controllers[0].Present = 0;
-    Bus::controllers[0].RawData = 0;
-    Bus::controllers[0].Plugin = PLUGIN_NONE;
+    Bus::state.controllers[0].Present = 0;
+    Bus::state.controllers[0].RawData = 0;
+    Bus::state.controllers[0].Plugin = PLUGIN_NONE;
 
-    Bus::controllers[1].Present = 0;
-    Bus::controllers[1].RawData = 0;
-    Bus::controllers[1].Plugin = PLUGIN_NONE;
+    Bus::state.controllers[1].Present = 0;
+    Bus::state.controllers[1].RawData = 0;
+    Bus::state.controllers[1].Plugin = PLUGIN_NONE;
 
-    Bus::controllers[2].Present = 0;
-    Bus::controllers[2].RawData = 0;
-    Bus::controllers[2].Plugin = PLUGIN_NONE;
+    Bus::state.controllers[2].Present = 0;
+    Bus::state.controllers[2].RawData = 0;
+    Bus::state.controllers[2].Plugin = PLUGIN_NONE;
 
-    Bus::controllers[3].Present = 0;
-    Bus::controllers[3].RawData = 0;
-    Bus::controllers[3].Plugin = PLUGIN_NONE;
+    Bus::state.controllers[3].Present = 0;
+    Bus::state.controllers[3].RawData = 0;
+    Bus::state.controllers[3].Plugin = PLUGIN_NONE;
 
     //Get DLL information
     void (*GetDllInfo)(PLUGIN_INFO* PluginInfo);
@@ -60,7 +61,7 @@ OPStatus InputPlugin::initialize(PluginContainer* plugins, void* renderWindow, v
             return OP_ERROR;
         }
 
-        InitiateControllers_1_0(renderWindow, Bus::controllers);
+        InitiateControllers_1_0(renderWindow, Bus::state.controllers);
         _initialized = true;
     }
 
@@ -85,10 +86,10 @@ OPStatus InputPlugin::initialize(PluginContainer* plugins, void* renderWindow, v
         }
 
         CONTROL_INFO ControlInfo;
-        ControlInfo.Controls = Bus::controllers;
-        if (Bus::rom)
+        ControlInfo.Controls = Bus::state.controllers;
+        if (bus && bus->rom)
         {
-            ControlInfo.HEADER = Bus::rom->getImage();
+            ControlInfo.HEADER = bus->rom->getImage();
         }
         else
         {

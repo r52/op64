@@ -36,9 +36,6 @@ QOP64Window::QOP64Window(QWidget *parent)
 
     setupGUI();
 
-    // Start bus
-    Bus::BusStartup();
-
     // Setup config dialog
     cfgDialog = new ConfigDialog(this);
 
@@ -60,9 +57,10 @@ void QOP64Window::openRom(void)
 
     if (!_romFile.isEmpty())
     {
-        if (_emu->loadRom(_romFile.toLocal8Bit().data()))
+        QString romName("op64");
+        if (_emu->loadRom(_romFile.toLocal8Bit().data(), romName))
         {
-            renderWidget = new RenderWidget(_emu);
+            renderWidget = new RenderWidget(romName, _emu);
             renderWidget->setGeometry(QRect(100, 100, 640, 480));
             renderWidget->setMinimumSize(QSize(640, 480));
 
@@ -297,9 +295,6 @@ void QOP64Window::shudownEverything(void)
     {
         _logWindow->deleteLater(); _logWindow = nullptr;
     }
-    
-    // Stop bus
-    Bus::BusShutdown();
 }
 
 void QOP64Window::toggleFullscreen(void)

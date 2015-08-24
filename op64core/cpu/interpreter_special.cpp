@@ -20,7 +20,7 @@ void Interpreter::SLL(void)
         _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>(((int32_t)_reg[_cur_instr.rt].s) << _cur_instr.sa);
     }
     
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SRL(void)
@@ -30,7 +30,7 @@ void Interpreter::SRL(void)
         _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((uint32_t)_reg[_cur_instr.rt].u >> _cur_instr.sa);
     }
     
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SRA(void)
@@ -40,7 +40,7 @@ void Interpreter::SRA(void)
         _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rt].s >> _cur_instr.sa);
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SLLV(void)
@@ -50,7 +50,7 @@ void Interpreter::SLLV(void)
         _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((int32_t)(_reg[_cur_instr.rt].s) << ((uint32_t)_reg[_cur_instr.rs].u & 0x1F));
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SRLV(void)
@@ -60,7 +60,7 @@ void Interpreter::SRLV(void)
         _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((uint32_t)_reg[_cur_instr.rt].u >> ((uint32_t)_reg[_cur_instr.rs].u & 0x1F));
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SRAV(void)
@@ -70,7 +70,7 @@ void Interpreter::SRAV(void)
         _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rt].s >> ((uint32_t)_reg[_cur_instr.rs].u & 0x1F));
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::JR(void)
@@ -89,7 +89,7 @@ void Interpreter::JALR(void)
 
 void Interpreter::SYSCALL(void)
 {
-    _cp0_reg[CP0_CAUSE_REG] = 8 << 2;
+    Bus::state.cp0_reg[CP0_CAUSE_REG] = 8 << 2;
     generalException();
 }
 
@@ -107,47 +107,47 @@ void Interpreter::MFHI(void)
 {
     _reg[_cur_instr.rd].s = _hi.s;
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::MTHI(void)
 {
     _hi.s = _reg[_cur_instr.rs].s;
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::MFLO(void)
 {
     _reg[_cur_instr.rd].s = _lo.s;
     
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::MTLO(void)
 {
     _lo.s = _reg[_cur_instr.rs].s;
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DSLLV(void)
 {
     _reg[_cur_instr.rd].s = _reg[_cur_instr.rt].s << ((uint32_t)_reg[_cur_instr.rs].u & 0x3F);
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DSRLV(void)
 {
     _reg[_cur_instr.rd].u = _reg[_cur_instr.rt].u >> ((uint32_t)_reg[_cur_instr.rs].u & 0x3F);
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DSRAV(void)
 {
     _reg[_cur_instr.rd].s = _reg[_cur_instr.rt].s >> ((uint32_t)_reg[_cur_instr.rs].u & 0x3F);
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::MULT(void)
@@ -155,7 +155,7 @@ void Interpreter::MULT(void)
     int64_t result = (int64_t)((int32_t)_reg[_cur_instr.rs].s * (int64_t)((int32_t)_reg[_cur_instr.rt].s));
     _hi.s = signextend<int32_t, int64_t>(result >> 32);
     _lo.s = signextend<int32_t, int64_t>((int32_t)result);
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::MULTU(void)
@@ -163,7 +163,7 @@ void Interpreter::MULTU(void)
     uint64_t result = (uint64_t)((uint32_t)_reg[_cur_instr.rs].u * (uint64_t)((uint32_t)_reg[_cur_instr.rt].u));
     _hi.s = signextend<int32_t, int64_t>(result >> 32);
     _lo.s = signextend<int32_t, int64_t>((int32_t)result);
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DIV(void)
@@ -177,7 +177,7 @@ void Interpreter::DIV(void)
     {
         LOG_WARNING(Interpreter) << "DIV: divide by 0";
     }
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DIVU(void)
@@ -191,7 +191,7 @@ void Interpreter::DIVU(void)
     {
         LOG_WARNING(Interpreter) << "Divide by 0";
     }
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DMULT(void)
@@ -221,7 +221,7 @@ void Interpreter::DMULT(void)
     _lo.s = (uint32_t)lo_prod + (mid_prods << 32);
 #endif
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DMULTU(void)
@@ -251,7 +251,7 @@ void Interpreter::DMULTU(void)
     _lo.u = (uint32_t)lo_prod + (mid_prods << 32);
 #endif
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DDIV(void)
@@ -265,7 +265,7 @@ void Interpreter::DDIV(void)
     {
         LOG_WARNING(Interpreter) << "Divide by 0";
     }
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DDIVU(void)
@@ -279,35 +279,35 @@ void Interpreter::DDIVU(void)
     {
         LOG_WARNING(Interpreter) << "Divide by 0";
     }
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::ADD(void)
 {
     _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rs].s + (int32_t)_reg[_cur_instr.rt].s);
     
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::ADDU(void)
 {
     _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rs].s + (int32_t)_reg[_cur_instr.rt].s);
     
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SUB(void)
 {
     _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rs].s - (int32_t)_reg[_cur_instr.rt].s);
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SUBU(void)
 {
     _reg[_cur_instr.rd].s = signextend<int32_t, int64_t>((int32_t)_reg[_cur_instr.rs].s - (int32_t)_reg[_cur_instr.rt].s);
     
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::AND(void)
@@ -317,7 +317,7 @@ void Interpreter::AND(void)
         _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s & _reg[_cur_instr.rt].s;
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::OR(void)
@@ -327,7 +327,7 @@ void Interpreter::OR(void)
         _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s | _reg[_cur_instr.rt].s;
     }
     
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::XOR(void)
@@ -337,7 +337,7 @@ void Interpreter::XOR(void)
         _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s ^ _reg[_cur_instr.rt].s;
     }
     
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::NOR(void)
@@ -347,7 +347,7 @@ void Interpreter::NOR(void)
         _reg[_cur_instr.rd].s = ~(_reg[_cur_instr.rs].s | _reg[_cur_instr.rt].s);
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SLT(void)
@@ -361,7 +361,7 @@ void Interpreter::SLT(void)
         _reg[_cur_instr.rd].s = 0;
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::SLTU(void)
@@ -375,35 +375,35 @@ void Interpreter::SLTU(void)
         _reg[_cur_instr.rd].s = 0;
     }
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DADD(void)
 {
     _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s + _reg[_cur_instr.rt].s;
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DADDU(void)
 {
     _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s + _reg[_cur_instr.rt].s;
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DSUB(void)
 {
     _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s - _reg[_cur_instr.rt].s;
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DSUBU(void)
 {
     _reg[_cur_instr.rd].s = _reg[_cur_instr.rs].s - _reg[_cur_instr.rt].s;
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::TGE(void)
@@ -440,40 +440,40 @@ void Interpreter::DSLL(void)
 {
     _reg[_cur_instr.rd].s = (_reg[_cur_instr.rt].s << _cur_instr.sa);
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DSRL(void)
 {
     _reg[_cur_instr.rd].u = (_reg[_cur_instr.rt].u >> _cur_instr.sa);
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DSRA(void)
 {
     _reg[_cur_instr.rd].s = (_reg[_cur_instr.rt].s >> _cur_instr.sa);
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DSLL32(void)
 {
     _reg[_cur_instr.rd].s = (_reg[_cur_instr.rt].s << (32 + _cur_instr.sa));
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DSRL32(void)
 {
     _reg[_cur_instr.rd].u = (_reg[_cur_instr.rt].u >> (32 + _cur_instr.sa));
 
-    ++_PC;
+    ++Bus::state.PC;
 }
 
 void Interpreter::DSRA32(void)
 {
     _reg[_cur_instr.rd].s = (_reg[_cur_instr.rt].s >> (32 + _cur_instr.sa));
 
-    ++_PC;
+    ++Bus::state.PC;
 }

@@ -21,8 +21,8 @@ class IMemory
 public:
     virtual ~IMemory();
 
-    virtual void initialize(void);
-    virtual void uninitialize(void);
+    virtual bool initialize(Bus* bus);
+    virtual void uninitialize(Bus* bus);
     virtual void readmem(uint32_t& address, uint64_t* dest, DataSize size) = 0;
     virtual void writemem(uint32_t address, uint64_t src, DataSize size) = 0;
 
@@ -34,7 +34,7 @@ public:
     {
         if ((address & 0xc0000000) != 0x80000000)
         {
-            if (!(address = TLB::virtual_to_physical_address(address, TLB_FAST_READ)))
+            if (!(address = TLB::virtual_to_physical_address(_bus, address, TLB_FAST_READ)))
             {
                 return nops;
             }
@@ -44,19 +44,23 @@ public:
 
         if (address < RDRAM_SIZE)
         {
-            return (uint32_t*)((uint8_t*)Bus::rdram->mem + address);
+            return (uint32_t*)((uint8_t*)Bus::rdram.mem + address);
         }
         else if (address >= 0x10000000)
         {
-            return (uint32_t*)((uint8_t*)Bus::rom->getImage() + address - 0x10000000);
+            return (uint32_t*)((uint8_t*)_bus->rom->getImage() + address - 0x10000000);
         }
         else if ((address & 0xffffe000) == 0x04000000)
         {
-            return (uint32_t*)((uint8_t*)Bus::rcp->sp.mem + (address & 0x1ffc));
+            return (uint32_t*)((uint8_t*)Bus::rcp.sp.mem + (address & 0x1ffc));
         }
 
         return nullptr;
     }
+
+protected:
+    // not owned
+    Bus* _bus = nullptr;
 
 private:
 	uint32_t nops[2] = { 0 };

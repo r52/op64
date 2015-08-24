@@ -8,7 +8,7 @@ class InputPlugin : public IPlugin
 public:
     virtual ~InputPlugin();
 
-    virtual OPStatus initialize(PluginContainer* plugins, void* renderWindow, void* statusBar);
+    virtual OPStatus initialize(Bus* bus, PluginContainer* plugins, void* renderWindow, void* statusBar);
     static OPStatus loadPlugin(const char* libPath, InputPlugin*& outplug);
 
     void(*RumbleCommand)(int Control, int bRumble);

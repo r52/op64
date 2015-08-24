@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <boost/filesystem/fstream.hpp>
 
+class Rom;
+
 class EEPROM
 {
 public:
@@ -10,12 +12,12 @@ public:
     ~EEPROM();
 
 public:
-    void eepromCommand(uint8_t* command);
+    void eepromCommand(Rom* rom, uint8_t* command);
 
 private:
-    void loadEEPROM(void);
-    void read(uint8_t* buf, int line);
-    void write(uint8_t* buf, int line);
+    void loadEEPROM(Rom* rom);
+    void read(Rom* rom, uint8_t* buf, int line);
+    void write(Rom* rom, uint8_t* buf, int line);
 
 private:
     uint8_t _eeprom[0x800] = { 0xff };

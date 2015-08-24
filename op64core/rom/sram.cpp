@@ -7,11 +7,11 @@
 #include <core/bus.h>
 #include <rom/rom.h>
 
-void SRAM::loadSRAM(void)
+void SRAM::loadSRAM(Bus* bus)
 {
     using namespace boost::filesystem;
 
-    path srampath(ConfigStore::getInstance().getString(GlobalStrings::CFG_SECTION_CORE, "SavePath") + Bus::rom->getRomFilenameNoExtension() + ".sra");
+    path srampath(ConfigStore::getInstance().getString(GlobalStrings::CFG_SECTION_CORE, "SavePath") + bus->rom->getRomFilenameNoExtension() + ".sra");
 
     if (!exists(srampath.parent_path()))
     {
@@ -31,11 +31,11 @@ void SRAM::loadSRAM(void)
     _sramfile.seekp(0, std::ios::beg);
 }
 
-void SRAM::dmaToSRAM(uint8_t* src, int32_t offset, int32_t len)
+void SRAM::dmaToSRAM(Bus* bus, uint8_t* src, int32_t offset, int32_t len)
 {
     if (!_sramfile.is_open())
     {
-        loadSRAM();
+        loadSRAM(bus);
     }
 
     _sramfile.seekp(offset, std::ios::beg);
@@ -43,11 +43,11 @@ void SRAM::dmaToSRAM(uint8_t* src, int32_t offset, int32_t len)
     _sramfile.flush();
 }
 
-void SRAM::dmaFromSRAM(uint8_t* dest, int32_t offset, int32_t len)
+void SRAM::dmaFromSRAM(Bus* bus, uint8_t* dest, int32_t offset, int32_t len)
 {
     if (!_sramfile.is_open())
     {
-        loadSRAM();
+        loadSRAM(bus);
     }
 
     _sramfile.seekg(offset, std::ios::beg);

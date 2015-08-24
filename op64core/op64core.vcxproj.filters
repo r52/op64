@@ -276,6 +276,9 @@
     <ClInclude Include="globalstrings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="core\state.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cheat\cheatengine.cpp">

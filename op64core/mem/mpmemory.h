@@ -20,7 +20,7 @@ class MPMemory : public IMemory
     typedef void(MPMemory::*dataptr_write)(RCPInterface&, uint32_t, uint64_t);
 
 public:
-    virtual void initialize(void);
+    virtual bool initialize(Bus* bus);
 
     inline virtual void readmem(uint32_t& address, uint64_t* dest, DataSize size) final
     {
@@ -98,7 +98,6 @@ private:
     void write_rdramFB(uint32_t address, uint64_t src, DataSize size);
 
 private:
-
     dataptr_read readsize[NUM_DATA_SIZES];
     dataptr_write writesize[NUM_DATA_SIZES];
 

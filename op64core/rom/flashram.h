@@ -21,17 +21,17 @@ public:
     FlashRam() = default;
     ~FlashRam();
 
-    void dmaToFlash(uint8_t* src, int32_t offset, int32_t len);
-    void dmaFromFlash(uint8_t* dest, int32_t offset, int32_t len);
-    uint32_t readFlashStatus(void);
-    void writeFlashCommand(uint32_t command);
+    void dmaToFlash(Bus* bus, uint8_t* src, int32_t offset, int32_t len);
+    void dmaFromFlash(Bus* bus, uint8_t* dest, int32_t offset, int32_t len);
 
     // Interface
-    virtual OPStatus read(uint32_t address, uint32_t* data) override;
-    virtual OPStatus write(uint32_t address, uint32_t data, uint32_t mask) override;
+    virtual OPStatus read(Bus* bus, uint32_t address, uint32_t* data) override;
+    virtual OPStatus write(Bus* bus, uint32_t address, uint32_t data, uint32_t mask) override;
 
 private:
-    void loadFlashRam(void);
+    uint32_t readFlashStatus(void);
+    void writeFlashCommand(Bus* bus, uint32_t command);
+    void loadFlashRam(Bus* bus);
 
 private:
     FlashRamMode _mode = NOPES_MODE;

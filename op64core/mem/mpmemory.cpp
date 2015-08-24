@@ -28,16 +28,20 @@ static FrameBufferInfo fbInfo[6];
 static char framebufferRead[0x800];
 
 
-void MPMemory::initialize(void)
+bool MPMemory::initialize(Bus* bus)
 {
     LOG_INFO(MPMemory) << "Initializing...";
-    IMemory::initialize();
+
+    if (!IMemory::initialize(bus))
+    {
+        return false;
+    }
 
     fill_array(readmem_table, 0, 0x10000, &MPMemory::read_nomem);
     fill_array(writemem_table, 0, 0x10000, &MPMemory::write_nomem);
 
     // init rdram
-    fill_array(Bus::rdram->mem, 0, RDRAM_SIZE / 4, 0);
+    fill_array(Bus::rdram.mem, 0, RDRAM_SIZE / 4, 0);
 
     fill_array(readmem_table, 0x8000, 0x80, &MPMemory::read_rdram);
     fill_array(readmem_table, 0xa000, 0x80, &MPMemory::read_rdram);
@@ -54,7 +58,7 @@ void MPMemory::initialize(void)
     readmem_table[0xa3f0] = &MPMemory::read_rdram_reg;
     writemem_table[0x83f0] = &MPMemory::write_rdram_reg;
     writemem_table[0xa3f0] = &MPMemory::write_rdram_reg;
-    fill_array(Bus::rdram->reg, 0, RDRAM_NUM_REGS, 0);
+    fill_array(Bus::rdram.reg, 0, RDRAM_NUM_REGS, 0);
 
     fill_array(readmem_table, 0x83f1, 0xf, &MPMemory::read_nothing);
     fill_array(readmem_table, 0xa3f1, 0xf, &MPMemory::read_nothing);
@@ -68,8 +72,8 @@ void MPMemory::initialize(void)
     writemem_table[0x8400] = &MPMemory::write_rsp_mem;
     writemem_table[0xa400] = &MPMemory::write_rsp_mem;
 
-    fill_array(Bus::rcp->sp.dmem, 0, (0x1000 / 4), 0);
-    fill_array(Bus::rcp->sp.imem, 0, (0x1000 / 4), 0);
+    fill_array(Bus::rcp.sp.dmem, 0, (0x1000 / 4), 0);
+    fill_array(Bus::rcp.sp.imem, 0, (0x1000 / 4), 0);
 
     fill_array(readmem_table, 0x8401, 0x3, &MPMemory::read_nothing);
     fill_array(readmem_table, 0xa401, 0x3, &MPMemory::read_nothing);
@@ -81,8 +85,8 @@ void MPMemory::initialize(void)
     readmem_table[0xa404] = &MPMemory::read_rsp_reg;
     writemem_table[0x8404] = &MPMemory::write_rsp_reg;
     writemem_table[0xa404] = &MPMemory::write_rsp_reg;
-    fill_array(Bus::rcp->sp.reg, 0, SP_NUM_REGS, 0);
-    Bus::rcp->sp.reg[SP_STATUS_REG] = 1;
+    fill_array(Bus::rcp.sp.reg, 0, SP_NUM_REGS, 0);
+    Bus::rcp.sp.reg[SP_STATUS_REG] = 1;
 
     fill_array(readmem_table, 0x8405, 0x3, &MPMemory::read_nothing);
     fill_array(readmem_table, 0xa405, 0x3, &MPMemory::read_nothing);
@@ -93,7 +97,7 @@ void MPMemory::initialize(void)
     readmem_table[0xa408] = &MPMemory::read_rsp_stat;
     writemem_table[0x8408] = &MPMemory::write_rsp_stat;
     writemem_table[0xa408] = &MPMemory::write_rsp_stat;
-    fill_array(Bus::rcp->sp.stat, 0, SP2_NUM_REGS, 0);
+    fill_array(Bus::rcp.sp.stat, 0, SP2_NUM_REGS, 0);
 
     fill_array(readmem_table, 0x8409, 0x7, &MPMemory::read_nothing);
     fill_array(readmem_table, 0xa409, 0x7, &MPMemory::read_nothing);
@@ -105,7 +109,7 @@ void MPMemory::initialize(void)
     readmem_table[0xa410] = &MPMemory::read_dp;
     writemem_table[0x8410] = &MPMemory::write_dp;
     writemem_table[0xa410] = &MPMemory::write_dp;
-    fill_array(Bus::rcp->dpc.reg, 0, DPC_NUM_REGS, 0);
+    fill_array(Bus::rcp.dpc.reg, 0, DPC_NUM_REGS, 0);
 
     fill_array(readmem_table, 0x8411, 0xf, &MPMemory::read_nothing);
     fill_array(readmem_table, 0xa411, 0xf, &MPMemory::read_nothing);
@@ -117,7 +121,7 @@ void MPMemory::initialize(void)
     readmem_table[0xa420] = &MPMemory::read_dps;
     writemem_table[0x8420] = &MPMemory::write_dps;
     writemem_table[0xa420] = &MPMemory::write_dps;
-    fill_array(Bus::rcp->dps.reg, 0, DPS_NUM_REGS, 0);
+    fill_array(Bus::rcp.dps.reg, 0, DPS_NUM_REGS, 0);
 
     fill_array(readmem_table, 0x8421, 0xf, &MPMemory::read_nothing);
     fill_array(readmem_table, 0xa421, 0xf, &MPMemory::read_nothing);
@@ -130,8 +134,8 @@ void MPMemory::initialize(void)
     readmem_table[0xa430] = &MPMemory::read_mi;
     writemem_table[0xa830] = &MPMemory::write_mi;
     writemem_table[0xa430] = &MPMemory::write_mi;
-    fill_array(Bus::rcp->mi.reg, 0, MI_NUM_REGS, 0);
-    Bus::rcp->mi.reg[MI_VERSION_REG] = 0x02020102;
+    fill_array(Bus::rcp.mi.reg, 0, MI_NUM_REGS, 0);
+    Bus::rcp.mi.reg[MI_VERSION_REG] = 0x02020102;
 
     fill_array(readmem_table, 0x8431, 0xf, &MPMemory::read_nothing);
     fill_array(readmem_table, 0xa431, 0xf, &MPMemory::read_nothing);
@@ -143,7 +147,7 @@ void MPMemory::initialize(void)
     readmem_table[0xa440] = &MPMemory::read_vi;
     writemem_table[0x8440] = &MPMemory::write_vi;
     writemem_table[0xa440] = &MPMemory::write_vi;
-    fill_array(Bus::rcp->vi.reg, 0, VI_NUM_REGS, 0);
+    fill_array(Bus::rcp.vi.reg, 0, VI_NUM_REGS, 0);
 
     fill_array(readmem_table, 0x8441, 0xf, &MPMemory::read_nothing);
     fill_array(readmem_table, 0xa441, 0xf, &MPMemory::read_nothing);
@@ -156,7 +160,7 @@ void MPMemory::initialize(void)
     readmem_table[0xa450] = &MPMemory::read_ai;
     writemem_table[0x8450] = &MPMemory::write_ai;
     writemem_table[0xa450] = &MPMemory::write_ai;
-    fill_array(Bus::rcp->ai.reg, 0, AI_NUM_REGS, 0);
+    fill_array(Bus::rcp.ai.reg, 0, AI_NUM_REGS, 0);
 
     fill_array(readmem_table, 0x8451, 0xf, &MPMemory::read_nothing);
     fill_array(readmem_table, 0xa451, 0xf, &MPMemory::read_nothing);
@@ -168,7 +172,7 @@ void MPMemory::initialize(void)
     readmem_table[0xa460] = &MPMemory::read_pi;
     writemem_table[0x8460] = &MPMemory::write_pi;
     writemem_table[0xa460] = &MPMemory::write_pi;
-    fill_array(Bus::rcp->pi.reg, 0, PI_NUM_REGS, 0);
+    fill_array(Bus::rcp.pi.reg, 0, PI_NUM_REGS, 0);
 
     fill_array(readmem_table, 0x8461, 0xf, &MPMemory::read_nothing);
     fill_array(readmem_table, 0xa461, 0xf, &MPMemory::read_nothing);
@@ -180,7 +184,7 @@ void MPMemory::initialize(void)
     readmem_table[0xa470] = &MPMemory::read_ri;
     writemem_table[0x8470] = &MPMemory::write_ri;
     writemem_table[0xa470] = &MPMemory::write_ri;
-    fill_array(Bus::rcp->ri.reg, 0, RI_NUM_REGS, 0);
+    fill_array(Bus::rcp.ri.reg, 0, RI_NUM_REGS, 0);
 
     fill_array(readmem_table, 0x8471, 0xf, &MPMemory::read_nothing);
     fill_array(readmem_table, 0xa471, 0xf, &MPMemory::read_nothing);
@@ -192,7 +196,7 @@ void MPMemory::initialize(void)
     readmem_table[0xa480] = &MPMemory::read_si;
     writemem_table[0x8480] = &MPMemory::write_si;
     writemem_table[0xa480] = &MPMemory::write_si;
-    fill_array(Bus::rcp->si.reg, 0, SI_NUM_REGS, 0);
+    fill_array(Bus::rcp.si.reg, 0, SI_NUM_REGS, 0);
 
     fill_array(readmem_table, 0x8481, 0x37f, &MPMemory::read_nothing);
     fill_array(readmem_table, 0xa481, 0x37f, &MPMemory::read_nothing);
@@ -215,7 +219,7 @@ void MPMemory::initialize(void)
     fill_array(writemem_table, 0xa802, 0x7fe, &MPMemory::write_nothing);
 
     // rom
-    uint32_t rom_size = Bus::rom->getSize();
+    uint32_t rom_size = bus->rom->getSize();
     fill_array(readmem_table, 0x9000, (rom_size >> 16), &MPMemory::read_rom);
     fill_array(readmem_table, 0xb000, (rom_size >> 16), &MPMemory::read_rom);
     fill_array(writemem_table, 0x9000, (rom_size >> 16), &MPMemory::write_nothing);
@@ -232,7 +236,7 @@ void MPMemory::initialize(void)
     readmem_table[0xbfc0] = &MPMemory::read_pif;
     writemem_table[0x9fc0] = &MPMemory::write_pif;
     writemem_table[0xbfc0] = &MPMemory::write_pif;
-    fill_array(Bus::pif->ram, 0, PIF_RAM_SIZE, 0);
+    fill_array(bus->pif->ram, 0, PIF_RAM_SIZE, 0);
 
     fill_array(readmem_table, 0x9fc1, 0x3f, &MPMemory::read_nothing);
     fill_array(readmem_table, 0xbfc1, 0x3f, &MPMemory::read_nothing);
@@ -252,11 +256,13 @@ void MPMemory::initialize(void)
 
     fbInfo[0].addr = 0;
 
-    Bus::rcp->ai.fifo[0].delay = 0;
-    Bus::rcp->ai.fifo[1].delay = 0;
+    Bus::rcp.ai.fifo[0].delay = 0;
+    Bus::rcp.ai.fifo[1].delay = 0;
 
-    Bus::rcp->ai.fifo[0].length = 0;
-    Bus::rcp->ai.fifo[1].length = 0;
+    Bus::rcp.ai.fifo[0].length = 0;
+    Bus::rcp.ai.fifo[1].length = 0;
+
+    return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -266,7 +272,7 @@ void MPMemory::read_size_byte(RCPInterface& device, uint32_t& address, uint64_t*
 {
     uint32_t data;
     unsigned shift = BSHIFT(address);
-    device.read(address, &data);
+    device.read(_bus, address, &data);
     *dest = (data >> shift) & 0xff;
 }
 
@@ -274,22 +280,22 @@ void MPMemory::read_size_half(RCPInterface& device, uint32_t& address, uint64_t*
 {
     uint32_t data;
     unsigned shift = HSHIFT(address);
-    device.read(address, &data);
+    device.read(_bus, address, &data);
     *dest = (data >> shift) & 0xffff;
 }
 
 void MPMemory::read_size_word(RCPInterface& device, uint32_t& address, uint64_t* dest)
 {
     uint32_t data;
-    device.read(address, &data);
+    device.read(_bus, address, &data);
     *dest = data;
 }
 
 void MPMemory::read_size_dword(RCPInterface& device, uint32_t& address, uint64_t* dest)
 {
     uint32_t data[2];
-    device.read(address, &data[0]);
-    device.read(address + 4, &data[1]);
+    device.read(_bus, address, &data[0]);
+    device.read(_bus, address + 4, &data[1]);
     *dest = ((uint64_t)data[0] << 32) | data[1];
 }
 
@@ -299,7 +305,7 @@ void MPMemory::write_size_byte(RCPInterface& device, uint32_t address, uint64_t 
     uint32_t data = (uint32_t)src << shift;
     uint32_t mask = (uint32_t)0xff << shift;
 
-    device.write(address, data, mask);
+    device.write(_bus, address, data, mask);
 }
 
 void MPMemory::write_size_half(RCPInterface& device, uint32_t address, uint64_t src)
@@ -308,18 +314,18 @@ void MPMemory::write_size_half(RCPInterface& device, uint32_t address, uint64_t 
     uint32_t data = (uint32_t)src << shift;
     uint32_t mask = (uint32_t)0xffff << shift;
 
-    device.write(address, data, mask);
+    device.write(_bus, address, data, mask);
 }
 
 void MPMemory::write_size_word(RCPInterface& device, uint32_t address, uint64_t src)
 {
-    device.write(address, src, ~0U);
+    device.write(_bus, address, src, ~0U);
 }
 
 void MPMemory::write_size_dword(RCPInterface& device, uint32_t address, uint64_t src)
 {
-    device.write(address, src >> 32, ~0U);
-    device.write(address + 4, src, ~0U);
+    device.write(_bus, address, src >> 32, ~0U);
+    device.write(_bus, address + 4, src, ~0U);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -340,7 +346,7 @@ void MPMemory::write_nothing(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::read_nomem(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    address = TLB::virtual_to_physical_address(address, TLB_READ);
+    address = TLB::virtual_to_physical_address(_bus, address, TLB_READ);
     if (address == 0x00000000)
         return;
 
@@ -349,7 +355,7 @@ void MPMemory::read_nomem(uint32_t& address, uint64_t* dest, DataSize size)
 
 void MPMemory::write_nomem(uint32_t address, uint64_t src, DataSize size)
 {
-    address = TLB::virtual_to_physical_address(address, TLB_WRITE);
+    address = TLB::virtual_to_physical_address(_bus, address, TLB_WRITE);
     if (address == 0x00000000) return;
 
     writemem(address, src, size);
@@ -360,8 +366,8 @@ void MPMemory::write_nomem(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::read_rdram(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    Bus::rdram->setIOMode(RCP_IO_MEM);
-    (this->*readsize[size])(*Bus::rdram, address, dest);
+    Bus::rdram.setIOMode(RCP_IO_MEM);
+    (this->*readsize[size])(Bus::rdram, address, dest);
 }
 
 void MPMemory::read_rdramFB(uint32_t& address, uint64_t* dest, DataSize size)
@@ -375,20 +381,20 @@ void MPMemory::read_rdramFB(uint32_t& address, uint64_t* dest, DataSize size)
             if ((address & 0x7FFFFF) >= start && (address & 0x7FFFFF) <= end &&
                 framebufferRead[(address & 0x7FFFFF) >> 12])
             {
-                Bus::plugins->gfx()->fbRead(address);
+                _bus->plugins->gfx()->fbRead(address);
                 framebufferRead[(address & 0x7FFFFF) >> 12] = 0;
             }
         }
     }
 
-    Bus::rdram->setIOMode(RCP_IO_MEM);
-    (this->*readsize[size])(*Bus::rdram, address, dest);
+    Bus::rdram.setIOMode(RCP_IO_MEM);
+    (this->*readsize[size])(Bus::rdram, address, dest);
 }
 
 void MPMemory::write_rdram(uint32_t address, uint64_t src, DataSize size)
 {
-    Bus::rdram->setIOMode(RCP_IO_MEM);
-    (this->*writesize[size])(*Bus::rdram, address, src);
+    Bus::rdram.setIOMode(RCP_IO_MEM);
+    (this->*writesize[size])(Bus::rdram, address, src);
 }
 
 void MPMemory::write_rdramFB(uint32_t address, uint64_t src, DataSize size)
@@ -401,13 +407,13 @@ void MPMemory::write_rdramFB(uint32_t address, uint64_t src, DataSize size)
             uint32_t end = start + fbInfo[i].width * fbInfo[i].height * fbInfo[i].size - 1;
             if ((address & 0x7FFFFF) >= start && (address & 0x7FFFFF) <= end)
             {
-                Bus::plugins->gfx()->fbWrite(address, 4);
+                _bus->plugins->gfx()->fbWrite(address, 4);
             }
         }
     }
 
-    Bus::rdram->setIOMode(RCP_IO_MEM);
-    (this->*writesize[size])(*Bus::rdram, address, src);
+    Bus::rdram.setIOMode(RCP_IO_MEM);
+    (this->*writesize[size])(Bus::rdram, address, src);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -415,14 +421,14 @@ void MPMemory::write_rdramFB(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::read_rdram_reg(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    Bus::rdram->setIOMode(RCP_IO_REG);
-    (this->*readsize[size])(*Bus::rdram, address, dest);
+    Bus::rdram.setIOMode(RCP_IO_REG);
+    (this->*readsize[size])(Bus::rdram, address, dest);
 }
 
 void MPMemory::write_rdram_reg(uint32_t address, uint64_t src, DataSize size)
 {
-    Bus::rdram->setIOMode(RCP_IO_REG);
-    (this->*writesize[size])(*Bus::rdram, address, src);
+    Bus::rdram.setIOMode(RCP_IO_REG);
+    (this->*writesize[size])(Bus::rdram, address, src);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -430,14 +436,14 @@ void MPMemory::write_rdram_reg(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::read_rsp_mem(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    Bus::rcp->sp.setIOMode(RCP_IO_MEM);
-    (this->*readsize[size])(Bus::rcp->sp, address, dest);
+    Bus::rcp.sp.setIOMode(RCP_IO_MEM);
+    (this->*readsize[size])(Bus::rcp.sp, address, dest);
 }
 
 void MPMemory::write_rsp_mem(uint32_t address, uint64_t src, DataSize size)
 {
-    Bus::rcp->sp.setIOMode(RCP_IO_MEM);
-    (this->*writesize[size])(Bus::rcp->sp, address, src);
+    Bus::rcp.sp.setIOMode(RCP_IO_MEM);
+    (this->*writesize[size])(Bus::rcp.sp, address, src);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -445,14 +451,14 @@ void MPMemory::write_rsp_mem(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::read_rsp_reg(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    Bus::rcp->sp.setIOMode(RCP_IO_REG);
-    (this->*readsize[size])(Bus::rcp->sp, address, dest);
+    Bus::rcp.sp.setIOMode(RCP_IO_REG);
+    (this->*readsize[size])(Bus::rcp.sp, address, dest);
 }
 
 void MPMemory::write_rsp_reg(uint32_t address, uint64_t src, DataSize size)
 {
-    Bus::rcp->sp.setIOMode(RCP_IO_REG);
-    (this->*writesize[size])(Bus::rcp->sp, address, src);
+    Bus::rcp.sp.setIOMode(RCP_IO_REG);
+    (this->*writesize[size])(Bus::rcp.sp, address, src);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -460,14 +466,14 @@ void MPMemory::write_rsp_reg(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::read_rsp_stat(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    Bus::rcp->sp.setIOMode(RCP_IO_STAT);
-    (this->*readsize[size])(Bus::rcp->sp, address, dest);
+    Bus::rcp.sp.setIOMode(RCP_IO_STAT);
+    (this->*readsize[size])(Bus::rcp.sp, address, dest);
 }
 
 void MPMemory::write_rsp_stat(uint32_t address, uint64_t src, DataSize size)
 {
-    Bus::rcp->sp.setIOMode(RCP_IO_STAT);
-    (this->*writesize[size])(Bus::rcp->sp, address, src);
+    Bus::rcp.sp.setIOMode(RCP_IO_STAT);
+    (this->*writesize[size])(Bus::rcp.sp, address, src);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -475,12 +481,12 @@ void MPMemory::write_rsp_stat(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::read_dp(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    (this->*readsize[size])(Bus::rcp->dpc, address, dest);
+    (this->*readsize[size])(Bus::rcp.dpc, address, dest);
 }
 
 void MPMemory::write_dp(uint32_t address, uint64_t src, DataSize size)
 {
-    (this->*writesize[size])(Bus::rcp->dpc, address, src);
+    (this->*writesize[size])(Bus::rcp.dpc, address, src);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -488,12 +494,12 @@ void MPMemory::write_dp(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::read_dps(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    (this->*readsize[size])(Bus::rcp->dps, address, dest);
+    (this->*readsize[size])(Bus::rcp.dps, address, dest);
 }
 
 void MPMemory::write_dps(uint32_t address, uint64_t src, DataSize size)
 {
-    (this->*writesize[size])(Bus::rcp->dps, address, src);
+    (this->*writesize[size])(Bus::rcp.dps, address, src);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -501,12 +507,12 @@ void MPMemory::write_dps(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::read_mi(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    (this->*readsize[size])(Bus::rcp->mi, address, dest);
+    (this->*readsize[size])(Bus::rcp.mi, address, dest);
 }
 
 void MPMemory::write_mi(uint32_t address, uint64_t src, DataSize size)
 {
-    (this->*writesize[size])(Bus::rcp->mi, address, src);
+    (this->*writesize[size])(Bus::rcp.mi, address, src);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -514,12 +520,12 @@ void MPMemory::write_mi(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::read_vi(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    (this->*readsize[size])(Bus::rcp->vi, address, dest);
+    (this->*readsize[size])(Bus::rcp.vi, address, dest);
 }
 
 void MPMemory::write_vi(uint32_t address, uint64_t src, DataSize size)
 {
-    (this->*writesize[size])(Bus::rcp->vi, address, src);
+    (this->*writesize[size])(Bus::rcp.vi, address, src);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -527,12 +533,12 @@ void MPMemory::write_vi(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::read_ai(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    (this->*readsize[size])(Bus::rcp->ai, address, dest);
+    (this->*readsize[size])(Bus::rcp.ai, address, dest);
 }
 
 void MPMemory::write_ai(uint32_t address, uint64_t src, DataSize size)
 {
-    (this->*writesize[size])(Bus::rcp->ai, address, src);
+    (this->*writesize[size])(Bus::rcp.ai, address, src);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -540,12 +546,12 @@ void MPMemory::write_ai(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::read_pi(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    (this->*readsize[size])(Bus::rcp->pi, address, dest);
+    (this->*readsize[size])(Bus::rcp.pi, address, dest);
 }
 
 void MPMemory::write_pi(uint32_t address, uint64_t src, DataSize size)
 {
-    (this->*writesize[size])(Bus::rcp->pi, address, src);
+    (this->*writesize[size])(Bus::rcp.pi, address, src);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -553,12 +559,12 @@ void MPMemory::write_pi(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::read_ri(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    (this->*readsize[size])(Bus::rcp->ri, address, dest);
+    (this->*readsize[size])(Bus::rcp.ri, address, dest);
 }
 
 void MPMemory::write_ri(uint32_t address, uint64_t src, DataSize size)
 {
-    (this->*writesize[size])(Bus::rcp->ri, address, src);
+    (this->*writesize[size])(Bus::rcp.ri, address, src);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -566,12 +572,12 @@ void MPMemory::write_ri(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::read_si(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    (this->*readsize[size])(Bus::rcp->si, address, dest);
+    (this->*readsize[size])(Bus::rcp.si, address, dest);
 }
 
 void MPMemory::write_si(uint32_t address, uint64_t src, DataSize size)
 {
-    (this->*writesize[size])(Bus::rcp->si, address, src);
+    (this->*writesize[size])(Bus::rcp.si, address, src);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -579,7 +585,7 @@ void MPMemory::write_si(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::read_flashram_status(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    (this->*readsize[size])(*Bus::flashram, address, dest);
+    (this->*readsize[size])(*_bus->flashram, address, dest);
 }
 
 void MPMemory::write_flashram_dummy(uint32_t address, uint64_t src, DataSize size)
@@ -588,7 +594,7 @@ void MPMemory::write_flashram_dummy(uint32_t address, uint64_t src, DataSize siz
 
 void MPMemory::write_flashram_command(uint32_t address, uint64_t src, DataSize size)
 {
-    (this->*writesize[size])(*Bus::flashram, address, src);
+    (this->*writesize[size])(*_bus->flashram, address, src);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -596,12 +602,12 @@ void MPMemory::write_flashram_command(uint32_t address, uint64_t src, DataSize s
 
 void MPMemory::read_rom(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    (this->*readsize[size])(*Bus::rom, address, dest);
+    (this->*readsize[size])(*_bus->rom, address, dest);
 }
 
 void MPMemory::write_rom(uint32_t address, uint64_t src, DataSize size)
 {
-    (this->*writesize[size])(*Bus::rom, address, src);
+    (this->*writesize[size])(*_bus->rom, address, src);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -609,17 +615,17 @@ void MPMemory::write_rom(uint32_t address, uint64_t src, DataSize size)
 
 void MPMemory::read_pif(uint32_t& address, uint64_t* dest, DataSize size)
 {
-    (this->*readsize[size])(*Bus::pif, address, dest);
+    (this->*readsize[size])(*_bus->pif, address, dest);
 }
 
 void MPMemory::write_pif(uint32_t address, uint64_t src, DataSize size)
 {
-    (this->*writesize[size])(*Bus::pif, address, src);
+    (this->*writesize[size])(*_bus->pif, address, src);
 }
 
 void MPMemory::unprotectFramebuffer(void)
 {
-    if (Bus::plugins->gfx()->fbGetInfo && Bus::plugins->gfx()->fbRead && Bus::plugins->gfx()->fbWrite &&
+    if (_bus->plugins->gfx()->fbGetInfo && _bus->plugins->gfx()->fbRead && _bus->plugins->gfx()->fbWrite &&
         fbInfo[0].addr)
     {
         for(uint32_t i = 0; i < 6; i++)
@@ -642,12 +648,12 @@ void MPMemory::unprotectFramebuffer(void)
 
 void MPMemory::protectFramebuffer(void)
 {
-    if (Bus::plugins->gfx()->fbGetInfo && Bus::plugins->gfx()->fbRead && Bus::plugins->gfx()->fbWrite)
+    if (_bus->plugins->gfx()->fbGetInfo && _bus->plugins->gfx()->fbRead && _bus->plugins->gfx()->fbWrite)
     {
-        Bus::plugins->gfx()->fbGetInfo(fbInfo);
+        _bus->plugins->gfx()->fbGetInfo(fbInfo);
     }
 
-    if (Bus::plugins->gfx()->fbGetInfo && Bus::plugins->gfx()->fbRead && Bus::plugins->gfx()->fbWrite
+    if (_bus->plugins->gfx()->fbGetInfo && _bus->plugins->gfx()->fbRead && _bus->plugins->gfx()->fbWrite
         && fbInfo[0].addr)
     {
         for(uint32_t i = 0; i < 6; i++)

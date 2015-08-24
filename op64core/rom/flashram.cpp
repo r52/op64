@@ -5,6 +5,7 @@
 #include <globalstrings.h>
 #include <core/bus.h>
 #include <ui/configstore.h>
+#include <ui/corecontrol.h>
 #include <rom/rom.h>
 
 
@@ -19,11 +20,11 @@ FlashRam::~FlashRam()
     }
 }
 
-void FlashRam::loadFlashRam(void)
+void FlashRam::loadFlashRam(Bus* bus)
 {
     using namespace boost::filesystem;
 
-    path flashpath(ConfigStore::getInstance().getString(GlobalStrings::CFG_SECTION_CORE, "SavePath") + Bus::rom->getRomFilenameNoExtension() + ".fla");
+    path flashpath(ConfigStore::getInstance().getString(GlobalStrings::CFG_SECTION_CORE, "SavePath") + bus->rom->getRomFilenameNoExtension() + ".fla");
 
     if (!exists(flashpath.parent_path()))
     {
@@ -43,7 +44,7 @@ void FlashRam::loadFlashRam(void)
     _flashramfile.seekp(0, std::ios::beg);
 }
 
-void FlashRam::dmaFromFlash(uint8_t* dest, int32_t offset, int32_t len)
+void FlashRam::dmaFromFlash(Bus* bus, uint8_t* dest, int32_t offset, int32_t len)
 {
     switch (_mode)
     {
@@ -54,7 +55,7 @@ void FlashRam::dmaFromFlash(uint8_t* dest, int32_t offset, int32_t len)
     case FlashRam::READ_MODE:
         if (!_flashramfile.is_open())
         {
-            loadFlashRam();
+            loadFlashRam(bus);
         }
 
         _flashramfile.seekg(offset*2, std::ios::beg);
@@ -62,12 +63,12 @@ void FlashRam::dmaFromFlash(uint8_t* dest, int32_t offset, int32_t len)
         break;
     default:
         LOG_ERROR(FlashRam) << "Unknown DMA FlashRAM read mode: " << std::hex << _mode;
-        Bus::stop = true;
+        CoreControl::stop = true;
         break;
     }
 }
 
-void FlashRam::dmaToFlash(uint8_t* src, int32_t offset, int32_t len)
+void FlashRam::dmaToFlash(Bus* bus, uint8_t* src, int32_t offset, int32_t len)
 {
     switch (_mode)
     {
@@ -76,7 +77,7 @@ void FlashRam::dmaToFlash(uint8_t* src, int32_t offset, int32_t len)
         break;
     default:
         LOG_ERROR(FlashRam) << "Unknown DMA FlashRAM write mode: " << std::hex << _mode;
-        Bus::stop = true;
+        CoreControl::stop = true;
         break;
     }
 }
@@ -86,7 +87,7 @@ uint32_t FlashRam::readFlashStatus(void)
     return (uint32_t)(_status >> 32);
 }
 
-void FlashRam::writeFlashCommand(uint32_t command)
+void FlashRam::writeFlashCommand(Bus* bus, uint32_t command)
 {
     switch (command & 0xff000000)
     {
@@ -114,7 +115,7 @@ void FlashRam::writeFlashCommand(uint32_t command)
         {
             if (!_flashramfile.is_open())
             {
-                loadFlashRam();
+                loadFlashRam(bus);
             }
 
             _flashramfile.seekp(_offset);
@@ -125,7 +126,7 @@ void FlashRam::writeFlashCommand(uint32_t command)
         {
             if (!_flashramfile.is_open())
             {
-                loadFlashRam();
+                loadFlashRam(bus);
             }
 
             _flashramfile.seekp(_offset);
@@ -136,7 +137,7 @@ void FlashRam::writeFlashCommand(uint32_t command)
             break;
         default:
             LOG_ERROR(FlashRam) << "Unknown flashram command with mode: " << std::hex << _mode;
-            Bus::stop = true;
+            CoreControl::stop = true;
             break;
         }
         _mode = NOPES_MODE;
@@ -155,16 +156,16 @@ void FlashRam::writeFlashCommand(uint32_t command)
     }
 }
 
-OPStatus FlashRam::write(uint32_t address, uint32_t data, uint32_t mask)
+OPStatus FlashRam::write(Bus* bus, uint32_t address, uint32_t data, uint32_t mask)
 {
-    if (Bus::rom->getSaveType() == SAVETYPE_AUTO)
+    if (bus->rom->getSaveType() == SAVETYPE_AUTO)
     {
-        Bus::rom->setSaveType(SAVETYPE_FLASH_RAM);
+        bus->rom->setSaveType(SAVETYPE_FLASH_RAM);
     }
 
-    if (Bus::rom->getSaveType() == SAVETYPE_FLASH_RAM && !(address & 0xffff))
+    if (bus->rom->getSaveType() == SAVETYPE_FLASH_RAM && !(address & 0xffff))
     {
-        writeFlashCommand(data & mask);
+        writeFlashCommand(bus, data & mask);
     }
     else
     {
@@ -174,14 +175,14 @@ OPStatus FlashRam::write(uint32_t address, uint32_t data, uint32_t mask)
     return OP_OK;
 }
 
-OPStatus FlashRam::read(uint32_t address, uint32_t* data)
+OPStatus FlashRam::read(Bus* bus, uint32_t address, uint32_t* data)
 {
-    if (Bus::rom->getSaveType() == SAVETYPE_AUTO)
+    if (bus->rom->getSaveType() == SAVETYPE_AUTO)
     {
-        Bus::rom->setSaveType(SAVETYPE_FLASH_RAM);
+        bus->rom->setSaveType(SAVETYPE_FLASH_RAM);
     }
 
-    if (Bus::rom->getSaveType() == SAVETYPE_FLASH_RAM && !(address & 0xffff))
+    if (bus->rom->getSaveType() == SAVETYPE_FLASH_RAM && !(address & 0xffff))
     {
         *data = readFlashStatus();
     }

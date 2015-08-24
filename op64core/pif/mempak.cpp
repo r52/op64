@@ -14,7 +14,7 @@ MemPak::~MemPak()
     }
 }
 
-void MemPak::read(int control, int address, uint8_t* buf)
+void MemPak::read(Rom* rom, int control, int address, uint8_t* buf)
 {
     if (address == 0x8001) {
         memset(buf, 0, 0x20);
@@ -25,7 +25,7 @@ void MemPak::read(int control, int address, uint8_t* buf)
 
     if (address <= 0x7FE0) {
         if (!_mempakfile.is_open()) {
-            loadMempak();
+            loadMempak(rom);
         }
         memcpy(buf, &_mempaks[control][address], 0x20);
     }
@@ -37,7 +37,7 @@ void MemPak::read(int control, int address, uint8_t* buf)
     buf[0x20] = calculateCRC(buf);
 }
 
-void MemPak::write(int control, int address, uint8_t* buf)
+void MemPak::write(Rom* rom, int control, int address, uint8_t* buf)
 {
     if (address == 0x8001)
     {
@@ -48,7 +48,7 @@ void MemPak::write(int control, int address, uint8_t* buf)
     address &= 0xFFE0;
     if (address <= 0x7FE0) {
         if (!_mempakfile.is_open()) {
-            loadMempak();
+            loadMempak(rom);
         }
         memcpy(&_mempaks[control][address], buf, 0x20);
 
@@ -61,7 +61,7 @@ void MemPak::write(int control, int address, uint8_t* buf)
     buf[0x20] = calculateCRC(buf);
 }
 
-void MemPak::loadMempak(void)
+void MemPak::loadMempak(Rom* rom)
 {
     uint8_t init[] = {
         0x81, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0C, 0x0D, 0x0E, 0x0F,
@@ -93,7 +93,7 @@ void MemPak::loadMempak(void)
 
     using namespace boost::filesystem;
 
-    path mpakpath(ConfigStore::getInstance().getString(GlobalStrings::CFG_SECTION_CORE, "SavePath") + Bus::rom->getRomFilenameNoExtension() + ".mpk");
+    path mpakpath(ConfigStore::getInstance().getString(GlobalStrings::CFG_SECTION_CORE, "SavePath") + rom->getRomFilenameNoExtension() + ".mpk");
 
     if (!exists(mpakpath.parent_path()))
     {

@@ -8,21 +8,21 @@
 class RSPInterface : public RCPInterface, public RegisterInterface
 {
 public:
-    virtual OPStatus read(uint32_t address, uint32_t* data) override;
-    virtual OPStatus write(uint32_t address, uint32_t data, uint32_t mask) override;
+    virtual OPStatus read(Bus* bus, uint32_t address, uint32_t* data) override;
+    virtual OPStatus write(Bus* bus, uint32_t address, uint32_t data, uint32_t mask) override;
 
-    void prepareRSP(void);
+    void prepareRSP(Bus* bus);
 
 private:
-    OPStatus readMem(uint32_t address, uint32_t* data);
-    OPStatus readReg(uint32_t address, uint32_t* data);
-    OPStatus readStat(uint32_t address, uint32_t* data);
+    OPStatus readMem(Bus* bus, uint32_t address, uint32_t* data);
+    OPStatus readReg(Bus* bus, uint32_t address, uint32_t* data);
+    OPStatus readStat(Bus* bus, uint32_t address, uint32_t* data);
 
-    OPStatus writeMem(uint32_t address, uint32_t data, uint32_t mask);
-    OPStatus writeReg(uint32_t address, uint32_t data, uint32_t mask);
-    OPStatus writeStat(uint32_t address, uint32_t data, uint32_t mask);
+    OPStatus writeMem(Bus* bus, uint32_t address, uint32_t data, uint32_t mask);
+    OPStatus writeReg(Bus* bus, uint32_t address, uint32_t data, uint32_t mask);
+    OPStatus writeStat(Bus* bus, uint32_t address, uint32_t data, uint32_t mask);
 
-    void updateReg(uint32_t w);
+    void updateReg(Bus* bus, uint32_t w);
 
     void DMARead();
     void DMAWrite();

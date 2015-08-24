@@ -3,7 +3,7 @@
 
 
 
-OPStatus RDRAMController::read(uint32_t address, uint32_t* data)
+OPStatus RDRAMController::read(Bus* bus, uint32_t address, uint32_t* data)
 {
     switch (_iomode)
     {
@@ -18,7 +18,7 @@ OPStatus RDRAMController::read(uint32_t address, uint32_t* data)
     return OP_OK;
 }
 
-OPStatus RDRAMController::write(uint32_t address, uint32_t data, uint32_t mask)
+OPStatus RDRAMController::write(Bus* bus, uint32_t address, uint32_t data, uint32_t mask)
 {
     switch (_iomode)
     {

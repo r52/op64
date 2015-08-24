@@ -14,35 +14,35 @@
 
 static uint16_t read_address_16bit(uint32_t address)
 {
-    return *(uint16_t*)(((uint8_t*)Bus::rdram->mem + (HES(address & 0xFFFFFF))));
+    return *(uint16_t*)(((uint8_t*)Bus::rdram.mem + (HES(address & 0xFFFFFF))));
 }
 
 static uint8_t read_address_8bit(uint32_t address)
 {
-    return *(uint8_t*)(((uint8_t*)Bus::rdram->mem + (BES(address & 0xFFFFFF))));
+    return *(uint8_t*)(((uint8_t*)Bus::rdram.mem + (BES(address & 0xFFFFFF))));
 }
 
 static void update_address_16bit(uint32_t address, uint16_t new_value)
 {
-    *(uint16_t*)(((uint8_t*)Bus::rdram->mem + (HES(address & 0xFFFFFF)))) = new_value;
+    *(uint16_t*)(((uint8_t*)Bus::rdram.mem + (HES(address & 0xFFFFFF)))) = new_value;
 }
 
 static void update_address_8bit(uint32_t address, uint8_t new_value)
 {
-    *(uint8_t*)(((uint8_t*)Bus::rdram->mem + (BES(address & 0xFFFFFF)))) = new_value;
+    *(uint8_t*)(((uint8_t*)Bus::rdram.mem + (BES(address & 0xFFFFFF)))) = new_value;
 }
 
 static bool address_equal_to_8bit(uint32_t address, uint8_t value)
 {
     uint8_t value_read;
-    value_read = *(uint8_t *)(((uint8_t*)Bus::rdram->mem + (BES(address & 0xFFFFFF))));
+    value_read = *(uint8_t *)(((uint8_t*)Bus::rdram.mem + (BES(address & 0xFFFFFF))));
     return value_read == value;
 }
 
 static bool address_equal_to_16bit(uint32_t address, uint16_t value)
 {
     uint16_t value_read;
-    value_read = *(uint16_t*)(((uint8_t*)Bus::rdram->mem + (HES(address & 0xFFFFFF))));
+    value_read = *(uint16_t*)(((uint8_t*)Bus::rdram.mem + (HES(address & 0xFFFFFF))));
     return value_read == value;
 }
 

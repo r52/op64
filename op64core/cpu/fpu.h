@@ -13,28 +13,6 @@ enum CompareFlag
 
 #pragma  optimize("", off)
 
-inline void set_rounding(void)
-{
-    switch (Bus::cpu->rounding_mode) {
-    case ROUND_MODE:
-        fesetround(FE_TONEAREST);
-        _MM_SET_ROUNDING_MODE(_MM_ROUND_NEAREST);
-        break;
-    case TRUNC_MODE:
-        fesetround(FE_TOWARDZERO);
-        _MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
-        break;
-    case CEIL_MODE:
-        fesetround(FE_UPWARD);
-        _MM_SET_ROUNDING_MODE(_MM_ROUND_UP);
-        break;
-    case FLOOR_MODE:
-        fesetround(FE_DOWNWARD);
-        _MM_SET_ROUNDING_MODE(_MM_ROUND_DOWN);
-        break;
-    }
-}
-
 inline void set_rounding(uint32_t mode)
 {
     switch (mode) {
@@ -56,12 +34,6 @@ inline void set_rounding(uint32_t mode)
         break;
     }
 }
-
-inline uint32_t get_rounding(void)
-{
-    return Bus::cpu->rounding_mode;
-}
-
 
 inline int32_t f32_to_i32(float* f)
 {

@@ -49,10 +49,12 @@ enum TLBProbeMode : uint8_t
     TLB_FAST_READ
 };
 
+class Bus;
+
 class TLB
 {
 public:
-    static uint32_t virtual_to_physical_address(uint32_t address, TLBProbeMode mode);
+    static uint32_t virtual_to_physical_address(Bus* bus, uint32_t address, TLBProbeMode mode);
 
     static void tlb_init(tlb_o& tlb);
 

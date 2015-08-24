@@ -1,5 +1,6 @@
 #include "audioplugin.h"
 
+#include <oplog.h>
 #include <core/bus.h>
 #include <rcp/rcp.h>
 
@@ -21,7 +22,7 @@ AudioPlugin::~AudioPlugin()
     unloadPlugin();
 }
 
-OPStatus AudioPlugin::initialize(PluginContainer* plugins, void* renderWindow, void* statusBar)
+OPStatus AudioPlugin::initialize(Bus* bus, PluginContainer* plugins, void* renderWindow, void* statusBar)
 {
     // TODO future: linux version (mupen spec)
     struct AUDIO_INFO {
@@ -61,25 +62,25 @@ OPStatus AudioPlugin::initialize(PluginContainer* plugins, void* renderWindow, v
 
     Info.hinst = opLibGetMainHandle();
     Info.MemoryBswaped = 1;
-    if (Bus::rom)
+    if (bus && bus->rom)
     {
-        Info.HEADER = Bus::rom->getImage();
+        Info.HEADER = bus->rom->getImage();
     }
     else
     {
         uint8_t buf[100];
         Info.HEADER = buf;
     }
-    Info.RDRAM = (uint8_t*)Bus::rdram->mem;
-    Info.DMEM = (uint8_t*)Bus::rcp->sp.dmem;
-    Info.IMEM = (uint8_t*)Bus::rcp->sp.imem;
-    Info.MI__INTR_REG = &Bus::rcp->mi.reg[MI_INTR_REG];
-    Info.AI__DRAM_ADDR_REG = &Bus::rcp->ai.reg[AI_DRAM_ADDR_REG];
-    Info.AI__LEN_REG = &Bus::rcp->ai.reg[AI_LEN_REG];
-    Info.AI__CONTROL_REG = &Bus::rcp->ai.reg[AI_CONTROL_REG];
-    Info.AI__STATUS_REG = &Bus::rcp->ai.reg[AI_STATUS_REG];
-    Info.AI__DACRATE_REG = &Bus::rcp->ai.reg[AI_DACRATE_REG];
-    Info.AI__BITRATE_REG = &Bus::rcp->ai.reg[AI_BITRATE_REG];
+    Info.RDRAM = (uint8_t*)Bus::rdram.mem;
+    Info.DMEM = (uint8_t*)Bus::rcp.sp.dmem;
+    Info.IMEM = (uint8_t*)Bus::rcp.sp.imem;
+    Info.MI__INTR_REG = &Bus::rcp.mi.reg[MI_INTR_REG];
+    Info.AI__DRAM_ADDR_REG = &Bus::rcp.ai.reg[AI_DRAM_ADDR_REG];
+    Info.AI__LEN_REG = &Bus::rcp.ai.reg[AI_LEN_REG];
+    Info.AI__CONTROL_REG = &Bus::rcp.ai.reg[AI_CONTROL_REG];
+    Info.AI__STATUS_REG = &Bus::rcp.ai.reg[AI_STATUS_REG];
+    Info.AI__DACRATE_REG = &Bus::rcp.ai.reg[AI_DACRATE_REG];
+    Info.AI__BITRATE_REG = &Bus::rcp.ai.reg[AI_BITRATE_REG];
     Info.CheckInterrupts = DummyFunction;
 
     _initialized = InitiateAudio(Info) != 0;
@@ -88,8 +89,8 @@ OPStatus AudioPlugin::initialize(PluginContainer* plugins, void* renderWindow, v
         startUpdateThread();
     }
 
-    if (Bus::rcp->ai.reg[AI_DACRATE_REG] != 0) {
-        DacrateChanged(Bus::rom ? Bus::rom->getSystemType() : SYSTEM_NTSC);
+    if (Bus::rcp.ai.reg[AI_DACRATE_REG] != 0) {
+        DacrateChanged((bus && bus->rom) ? bus->rom->getSystemType() : SYSTEM_NTSC);
     }
 
     return _initialized ? OP_OK : OP_ERROR;

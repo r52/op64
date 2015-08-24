@@ -14,6 +14,8 @@
 #define HW2_INT     0x200
 #define NMI_INT     0x400
 
+class Bus;
+
 struct Interrupt
 {
     int32_t type;
@@ -52,7 +54,7 @@ public:
     InterruptHandler(void);
     ~InterruptHandler(void);
 
-    void initialize(void);
+    void initialize(Bus* bus);
     void addInterruptEvent(int32_t type, uint32_t delay);
     void addInterruptEventCount(int32_t type, uint32_t count);
     void generateInterrupt(void);
@@ -68,6 +70,9 @@ private:
     void popInterruptEvent(void);
 
 private:
+    // alias
+    Bus* _bus;
+
     InterruptQueue q;
 
     int32_t _vi_counter = 0;
