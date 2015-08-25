@@ -17,7 +17,7 @@ find_package(Qt5Widgets REQUIRED)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.58 COMPONENTS chrono date_time filesystem log system thread REQUIRED)
+find_package(Boost 1.59 COMPONENTS chrono date_time filesystem log system thread REQUIRED)
 
 # OpenGL
 find_package(OpenGL REQUIRED)
@@ -33,8 +33,8 @@ file(GLOB UI_SOURCES "*.cpp")
 
 add_executable(op64-qt ${UI_SOURCES} qop64window.qrc)
 
-# C++11
-set_property(TARGET op64-qt PROPERTY CXX_STANDARD 11)
+# C++14
+set_property(TARGET op64-qt PROPERTY CXX_STANDARD 14)
 set_property(TARGET op64-qt PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # Linking

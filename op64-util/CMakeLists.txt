@@ -20,7 +20,7 @@ set(UTIL_SOURCES
 
 add_library(op64-util STATIC ${UTIL_SOURCES})
 
-set_property(TARGET op64-util PROPERTY CXX_STANDARD 11)
+set_property(TARGET op64-util PROPERTY CXX_STANDARD 14)
 set_property(TARGET op64-util PROPERTY CXX_STANDARD_REQUIRED ON)
 
 target_include_directories(op64-util PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
