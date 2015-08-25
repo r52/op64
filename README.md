@@ -13,25 +13,24 @@ op64 is an experimental 64-bit emulator for Windows and Linux, based on the [Pro
 
 These dependencies are large in size and thus cannot be included with the repository and must be manually downloaded.
 
-* (Required) [Boost Libraries](http://www.boost.org/)
+* [Boost Libraries](http://www.boost.org/)
     * op64 uses the Boost library for cross platform abstractions that are not (yet?) available in the C++ Standard Library
     * Precompiled [statically linked .libs](https://github.com/r52/op64/wiki/Quick-Guide-to-Compiling-Boost-for-op64) for Visual Studio 2015 for the components used in op64 are available within the repository
     * Set the environment variable `BOOST_ROOT` to the root of the Boost library installation
-* (Required) [Qt 5.3 or higher](http://www.qt.io/) for the Qt GUI project
+* [Qt 5.3 or higher](http://www.qt.io/) for the Qt GUI project
     * Install an opensource 64-bit build for your OS and compiler
-    * Alternatively, Windows Qt compact builds without the icu and webkit modules are available at http://sourceforge.net/projects/qtx64/. These builds remove the dependency of the gigantic icu dlls
-    * Alternatively, acquire the source code and build Qt with the modules that you want. This option also allows you to [build statically linked versions of the Qt libraries](https://github.com/r52/op64/wiki/Quick-Guide-to-Compiling-Qt-for-Static-Linking) which removes the dependency of the gigantic Qt redistributable dlls (official Qt builds are dynamically linked, meaning Qt dlls must be packaged with the application)
+    * Alternatively, acquire the source code and build Qt with the modules that you want. This option also allows you to [build statically linked versions of the Qt libraries](https://github.com/r52/op64/wiki/Quick-Guide-to-Compiling-Qt-for-Static-Linking) which removes the dependency of the gigantic Qt redistributable DLLs (official Qt builds are dynamically linked, meaning Qt dlls must be packaged with the application). _op64's project files are set to link statically to Qt by default on both Windows and Linux_.
     * Set the environment variable `QTDIR` to the root of your Qt installation (contains the include and lib directories)
     * Qt Visual Studio Add-in is recommended for Visual Studio users
-* A C++ compiler with some resemblance of C++11 features, such as
-    * Visual Studio 2015 and later
+* A C++ compiler with C++11/14 support, such as
+    * Visual Studio 2015
     * Intel C++ 15
     * GCC 4.7 and later
     * Clang 3.1 and later
 
 ## Building on Windows
 
-Visual Studio 2015 and later is a hard requirement as op64 uses C++11 features that are not available in compilers older than Visual Studio 2015. Visual Studio 2013 support has been dropped. Intel C++ 15.0 works perfectly as it fully supports C++11. VS Community editions work perfectly.
+Visual Studio 2015 and later is a hard requirement as op64 uses C++11/14 features that are not available in compilers older than Visual Studio 2015. Visual Studio 2013 support has been dropped. Intel C++ 15.0 works, but still requires VS2015 due to op64 using features from the C++14 STL. Visual Studio Community editions are supported.
 
 ### Compilers Tested
 
