@@ -1,17 +1,15 @@
 #pragma once
 
+#include "oppreproc.h"
+
 #ifdef _MSC_VER
 #include <windows.h>
-#define IMPORT extern "C" __declspec(dllimport)
-#define EXPORT __declspec(dllexport)
 typedef HMODULE LibHandle;
 #else
-#define IMPORT extern "C"
-#define EXPORT __attribute__((visibility("default")))
 typedef void* LibHandle;
 #endif
 
-bool opLoadLib(LibHandle* handle, const char* libpath);
-void* opLibGetFunc(LibHandle lib, const char* procname);
-void* opLibGetMainHandle(void);
-bool opLibClose(LibHandle lib);
+OP_API bool opLoadLib(LibHandle* handle, const char* libpath);
+OP_API void* opLibGetFunc(LibHandle lib, const char* procname);
+OP_API void* opLibGetMainHandle(void);
+OP_API bool opLibClose(LibHandle lib);

@@ -1,8 +1,9 @@
 #pragma once
 
 #include <ctime>
+#include "oppreproc.h"
 
 namespace op
 {
-    tm localtime(const std::time_t& time);
+    OP_API tm localtime(const std::time_t& time);
 }

@@ -14,7 +14,7 @@ set(CMAKE_AUTORCC ON)
 find_package(Qt5Widgets REQUIRED)
 
 # Boost
-set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.59 COMPONENTS chrono date_time filesystem log system thread REQUIRED)

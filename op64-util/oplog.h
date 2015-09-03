@@ -25,4 +25,4 @@ BOOST_LOG_ATTRIBUTE_KEYWORD(modname, "ModName", std::string)
 #define LOG_ERROR(name) LOG_SCOPE_LEVEL(name, error)
 #define LOG_FATAL(name) LOG_SCOPE_LEVEL(name, fatal)
 
-void oplog_init(void);
+OP_API void oplog_init(void);

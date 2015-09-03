@@ -56,4 +56,19 @@
 #define COMPILER __STR__(__VERSION__)
 #endif
 
+// Library
+#if defined _MSC_VER || defined __CYGWIN__
+#define OP_HELPER_DLL_IMPORT __declspec(dllimport)
+#define OP_HELPER_DLL_EXPORT __declspec(dllexport)
+#else
+#define OP_HELPER_DLL_IMPORT __attribute__ ((visibility ("default")))
+#define OP_HELPER_DLL_EXPORT __attribute__ ((visibility ("default")))
+#endif
+
+#ifdef OP_DLL_EXPORTS
+#define OP_API OP_HELPER_DLL_EXPORT
+#else
+#define OP_API OP_HELPER_DLL_IMPORT
+#endif
+
 #define CACHE_LINE_SIZE 64
