@@ -15,11 +15,11 @@ These dependencies are large in size and thus cannot be included with the reposi
 
 * [Boost Libraries](http://www.boost.org/)
     * op64 uses the Boost library for cross platform abstractions that are not (yet?) available in the C++ Standard Library
-    * Precompiled [statically linked .libs](https://github.com/r52/op64/wiki/Quick-Guide-to-Compiling-Boost-for-op64) for Visual Studio 2015 for the components used in op64 are available within the repository
+    * Precompiled [binaries](https://github.com/r52/op64/wiki/Quick-Guide-to-Compiling-Boost-for-op64) for Visual Studio 2015 for the components used in op64 are available within the repository
     * Set the environment variable `BOOST_ROOT` to the root of the Boost library installation
 * [Qt 5.3 or higher](http://www.qt.io/) for the Qt GUI project
     * Install an opensource 64-bit build for your OS and compiler
-    * Alternatively, acquire the source code and build Qt with the modules that you want. This option also allows you to [build statically linked versions of the Qt libraries](https://github.com/r52/op64/wiki/Quick-Guide-to-Compiling-Qt-for-Static-Linking) which removes the dependency of the gigantic Qt redistributable DLLs (official Qt builds are dynamically linked, meaning Qt dlls must be packaged with the application). _op64's project files are set to link statically to Qt by default on both Windows and Linux_.
+    * Alternatively, acquire the source code and build Qt with the modules that you want. This option also allows you to [build minimal versions of the Qt libraries](https://github.com/r52/op64/wiki/Quick-Guide-to-Compiling-Qt-for-op64) which removes certain large dependencies such as ICU and WebKit.
     * Set the environment variable `QTDIR` to the root of your Qt installation (contains the include and lib directories)
     * Qt Visual Studio Add-in is recommended for Visual Studio users
 * A C++ compiler with C++11/14 support, such as
