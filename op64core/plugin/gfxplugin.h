@@ -2,13 +2,6 @@
 
 #include "iplugin.h"
 
-typedef struct
-{
-    uint32_t addr;
-    uint32_t size;
-    uint32_t width;
-    uint32_t height;
-} FrameBufferInfo;
 
 class GfxPlugin : public IPlugin
 {

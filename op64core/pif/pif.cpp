@@ -31,6 +31,8 @@ bool PIF::initialize(void)
         Bus::state.controllers[i].Plugin = PLUGIN_NONE;
     }
 
+    fill_array(ram, 0, PIF_RAM_SIZE, 0);
+
     _eeprom.reset(new EEPROM);
     _mempak.reset(new MemPak);
 
