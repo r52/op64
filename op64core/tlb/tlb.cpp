@@ -160,17 +160,16 @@ bool TLB::tlb_probe(const tlb_o& tlb, uint64_t vaddr, uint8_t vasid, unsigned* i
     // Scan 8 entries in parallel.
     // op64: the original loop from cen64 has a bug where i += 8
     // which terminates the loop after just 1 iteration (since 32/8 = 4)
-    for (unsigned i = 0; i < 32 / 8; i++)
+    for (unsigned i = 0; i < 32; i += 8)
     {
-        unsigned j = i * 8;
         __m128i check_l, check_h, vpn_check;
         __m128i check_a, check_g, asid_check;
         __m128i check;
 
-        __m128i page_mask_l = _mm_load_si128((__m128i*) (tlb.page_mask.data + j + 0));
-        __m128i page_mask_h = _mm_load_si128((__m128i*) (tlb.page_mask.data + j + 4));
-        __m128i vpn_l = _mm_load_si128((__m128i*) (tlb.vpn2.data + j + 0));
-        __m128i vpn_h = _mm_load_si128((__m128i*) (tlb.vpn2.data + j + 4));
+        __m128i page_mask_l = _mm_load_si128((__m128i*) (tlb.page_mask.data + i + 0));
+        __m128i page_mask_h = _mm_load_si128((__m128i*) (tlb.page_mask.data + i + 4));
+        __m128i vpn_l = _mm_load_si128((__m128i*) (tlb.vpn2.data + i + 0));
+        __m128i vpn_h = _mm_load_si128((__m128i*) (tlb.vpn2.data + i + 4));
 
         // Check for matching VPNs.
         check_l = _mm_and_si128(vpn, page_mask_l);
@@ -181,8 +180,8 @@ bool TLB::tlb_probe(const tlb_o& tlb, uint64_t vaddr, uint8_t vasid, unsigned* i
         vpn_check = _mm_packs_epi16(vpn_check, vpn_check);
 
         // Check for matching ASID/global, too.
-        check_g = _mm_loadl_epi64((__m128i*) (tlb.global + j));
-        check_a = _mm_loadl_epi64((__m128i*) (tlb.asid + j));
+        check_g = _mm_loadl_epi64((__m128i*) (tlb.global + i));
+        check_a = _mm_loadl_epi64((__m128i*) (tlb.asid + i));
         asid_check = _mm_cmpeq_epi8(check_a, asid);
         asid_check = _mm_or_si128(check_g, asid_check);
 
@@ -190,7 +189,7 @@ bool TLB::tlb_probe(const tlb_o& tlb, uint64_t vaddr, uint8_t vasid, unsigned* i
         check = _mm_and_si128(vpn_check, asid_check);
         if ((one_hot_idx = _mm_movemask_epi8(check)) != 0)
         {
-            *index = j + one_hot_lut[one_hot_idx & 0xFF];
+            *index = i + one_hot_lut[one_hot_idx & 0xFF];
             return false;
         }
     }
