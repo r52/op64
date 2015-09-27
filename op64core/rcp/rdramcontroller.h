@@ -22,5 +22,5 @@ private:
     OPStatus writeReg(uint32_t address, uint32_t data, uint32_t mask);
 
 public:
-    __align(uint32_t mem[RDRAM_SIZE / 4], 16);
+    alignas(16) uint32_t mem[RDRAM_SIZE / 4];
 };

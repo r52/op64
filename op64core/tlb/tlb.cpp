@@ -34,7 +34,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cpu/icpu.h>
 #include <cpu/cp0.h>
 
-__align(static const int8_t one_hot_lut[256], CACHE_LINE_SIZE) = {
+alignas(CACHE_LINE_SIZE) static const int8_t one_hot_lut[256] = {
     -1,
 
     // 1

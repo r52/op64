@@ -9,14 +9,6 @@
 #endif
 
 #ifdef _MSC_VER
-#define __align(var, len) __declspec(align(len)) var
-#elif defined(__GNUC__)
-#define __align(var, len) var __attribute__ ((aligned(len)))
-#else
-#define __align(var, len) var len
-#endif
-
-#ifdef _MSC_VER
 #define _s_snprintf(buf, len, ...) _snprintf_s(buf, len, __VA_ARGS__)
 #else
 #define _s_snprintf(buf, len, ...) snprintf(buf, len, __VA_ARGS__)
