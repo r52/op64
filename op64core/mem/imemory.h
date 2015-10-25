@@ -41,33 +41,7 @@ public:
     virtual void unprotectFramebuffer(void) = 0;
     virtual void protectFramebuffer(void) = 0;
 
-    inline uint32_t* fastFetch(uint32_t address)
-    {
-        if ((address & 0xc0000000) != 0x80000000)
-        {
-            if (!(address = TLB::virtual_to_physical_address(_bus, address, TLB_FAST_READ)))
-            {
-                return nops;
-            }
-        }
-
-        address &= 0x1ffffffc;
-
-        if (address < RDRAM_SIZE)
-        {
-            return (uint32_t*)((uint8_t*)Bus::rdram.mem + address);
-        }
-        else if (address >= 0x10000000)
-        {
-            return (uint32_t*)((uint8_t*)_bus->rom->getImage() + address - 0x10000000);
-        }
-        else if ((address & 0xffffe000) == 0x04000000)
-        {
-            return (uint32_t*)((uint8_t*)Bus::rcp.sp.mem + (address & 0x1ffc));
-        }
-
-        return nullptr;
-    }
+    virtual uint32_t* fetch(uint32_t address) = 0;
 
 protected:
     // Data read
@@ -143,7 +117,5 @@ protected:
     FrameBufferInfo fbInfo[6];
     uint8_t framebufferRead[0x800];
 
-private:
 	uint32_t nops[2] = { 0 };
-
 };

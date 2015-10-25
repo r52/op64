@@ -53,7 +53,7 @@ public:
 private:
     inline void prefetch(void)
     {
-        uint32_t* mem = _bus->mem->fastFetch(Bus::state.PC);
+        uint32_t* mem = _bus->mem->fetch(Bus::state.PC);
 
         if (nullptr == mem)
         {
