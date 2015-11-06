@@ -11,7 +11,7 @@ void ConfigStore::loadConfig(void)
 {
     boost::filesystem::path _configpath(GlobalStrings::CFG_FILENAME);
 
-    bool fileExists = exists(_configpath);
+    bool fileExists = boost::filesystem::exists(_configpath);
 
     if (!fileExists)
     {

@@ -116,10 +116,8 @@ OPStatus AudioPlugin::loadPlugin(const char* libPath, AudioPlugin*& outplug)
     //Find entries for functions in DLL
     void(*InitFunc)(void);
 
-    getPluginFunction(plugin->_libHandle, "RomClosed", plugin->RomClosed);
-    getPluginFunction(plugin->_libHandle, "RomOpen", plugin->RomOpen);
-    getPluginFunction(plugin->_libHandle, "CloseDLL", plugin->CloseLib);
-    getPluginFunction(plugin->_libHandle, "DllConfig", plugin->Config);
+    plugin->loadDefaults();
+    plugin->loadPJ64Settings();
 
     getPluginFunction(plugin->_libHandle, "AiDacrateChanged", plugin->AiDacrateChanged);
     getPluginFunction(plugin->_libHandle, "InitiateAudio", InitFunc);

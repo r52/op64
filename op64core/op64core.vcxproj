@@ -105,6 +105,7 @@
     <ClInclude Include="plugin\gfxplugin.h" />
     <ClInclude Include="plugin\inputplugin.h" />
     <ClInclude Include="plugin\iplugin.h" />
+    <ClInclude Include="plugin\pj64settingwrapper.h" />
     <ClInclude Include="plugin\plugincontainer.h" />
     <ClInclude Include="plugin\plugintypes.h" />
     <ClInclude Include="plugin\rspplugin.h" />

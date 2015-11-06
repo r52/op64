@@ -5,6 +5,7 @@
 #include <shared_mutex>
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/optional/optional.hpp>
 #include <unordered_set>
 
 #include "oplog.h"
@@ -71,6 +72,19 @@ public:
                 LOG_WARNING(ConfigStore) << "Invalid callback id";
             }
         }
+    }
+
+    bool exists(std::string section, std::string key)
+    {
+        std::shared_lock<std::shared_timed_mutex> lock(ptsem);
+        boost::optional< boost::property_tree::ptree& > child = pt.get_child_optional(section + "." + key);
+
+        if (!child)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     void addChangeCallback(std::string section, std::string key, CallbackID id)

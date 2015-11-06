@@ -126,10 +126,8 @@ OPStatus InputPlugin::loadPlugin(const char * libPath, InputPlugin*& outplug)
     //Find entries for functions in DLL
     void(*InitFunc)(void);
     
-    getPluginFunction(plugin->_libHandle, "RomClosed", plugin->RomClosed);
-    getPluginFunction(plugin->_libHandle, "RomOpen", plugin->RomOpen);
-    getPluginFunction(plugin->_libHandle, "CloseDLL", plugin->CloseLib);
-    getPluginFunction(plugin->_libHandle, "DllConfig", plugin->Config);
+    plugin->loadDefaults();
+    plugin->loadPJ64Settings();
 
     getPluginFunction(plugin->_libHandle, "ControllerCommand", plugin->ControllerCommand);
     getPluginFunction(plugin->_libHandle, "InitiateControllers", InitFunc);

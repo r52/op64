@@ -20,6 +20,9 @@ protected:
     virtual OPStatus unloadPlugin();
 
 private:
+    virtual int GetDefaultSettingStartRange() const { return FirstCtrlDefaultSet; }
+    virtual int GetSettingStartRange() const { return FirstCtrlSettings; }
+
     InputPlugin();
 
     // Not implemented

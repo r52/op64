@@ -17,6 +17,9 @@ protected:
     virtual OPStatus unloadPlugin();
 
 private:
+    virtual int GetDefaultSettingStartRange() const { return FirstRSPDefaultSet; }
+    virtual int GetSettingStartRange() const { return FirstRSPSettings; }
+
     RSPPlugin();
 
     // Not implemented

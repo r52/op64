@@ -19,7 +19,6 @@ public:
     void DacrateChanged(SystemType Type);
 
     void(*LenChanged)(void);
-    void(*Config)(void* hParent);
     unsigned int(*ReadLength)(void);
     void(*ProcessAList)(void);
 
@@ -27,6 +26,9 @@ protected:
     virtual OPStatus unloadPlugin();
 
 private:
+    virtual int GetDefaultSettingStartRange() const { return FirstAudioDefaultSet; }
+    virtual int GetSettingStartRange() const { return FirstAudioSettings; }
+
     AudioPlugin();
 
     // Not implemented

@@ -32,6 +32,9 @@ protected:
     virtual OPStatus unloadPlugin();
 
 private:
+    virtual int GetDefaultSettingStartRange() const { return FirstGfxDefaultSet; }
+    virtual int GetSettingStartRange() const { return FirstGfxSettings; }
+
     GfxPlugin();
 
     // Not implemented

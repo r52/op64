@@ -4,6 +4,7 @@
 #include <oplib.h>
 
 #include "plugintypes.h"
+#include "pj64settingwrapper.h"
 
 class Bus;
 class PluginContainer;
@@ -20,6 +21,9 @@ public:
     virtual void gameReset(void) final;
     virtual std::string pluginName(void) const final { return _pluginInfo.Name; }
 
+    virtual int GetDefaultSettingStartRange() const = 0;
+    virtual int GetSettingStartRange() const = 0;
+
     void(*Config)(void* hParent);
 
 protected:
@@ -35,6 +39,12 @@ protected:
     static inline void getPluginFunction(LibHandle& handle, const char * funcname, T & funcptr) {
         funcptr = (T) opLibGetFunc(handle, funcname);
     }
+
+    void loadDefaults();
+    void loadPJ64Settings();
+
+    void(*SetSettingInfo)(PLUGIN_SETTINGS*);
+    void(*SetSettingInfo2)(PLUGIN_SETTINGS2*);
 
 private:
     // Not implemented

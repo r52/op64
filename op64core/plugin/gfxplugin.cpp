@@ -87,10 +87,8 @@ OPStatus GfxPlugin::loadPlugin(const char* libPath, GfxPlugin*& outplug)
     //Find entries for functions in DLL
     int(*InitFunc)(void * Gfx_Info);
 
-    getPluginFunction(plugin->_libHandle, "RomClosed", plugin->RomClosed);
-    getPluginFunction(plugin->_libHandle, "RomOpen", plugin->RomOpen);
-    getPluginFunction(plugin->_libHandle, "CloseDLL", plugin->CloseLib);
-    getPluginFunction(plugin->_libHandle, "DllConfig", plugin->Config);
+    plugin->loadDefaults();
+    plugin->loadPJ64Settings();
 
     getPluginFunction(plugin->_libHandle, "InitiateGFX", InitFunc);
     getPluginFunction(plugin->_libHandle, "ChangeWindow", plugin->ChangeWindow);
