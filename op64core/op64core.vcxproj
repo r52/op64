@@ -51,6 +51,7 @@
       <AdditionalIncludeDirectories>..\op64-util;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <StructMemberAlignment>16Bytes</StructMemberAlignment>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -66,8 +67,8 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <InterproceduralOptimization>MultiFile</InterproceduralOptimization>
       <StructMemberAlignment>16Bytes</StructMemberAlignment>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level3</WarningLevel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

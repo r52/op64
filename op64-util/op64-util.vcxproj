@@ -53,6 +53,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>OP_DLL_EXPORTS;__VERSION__=$(VisualStudioEdition);_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StructMemberAlignment>16Bytes</StructMemberAlignment>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -68,8 +70,8 @@
       <Parallelization>true</Parallelization>
       <UseIntelOptimizedHeaders>true</UseIntelOptimizedHeaders>
       <StructMemberAlignment>16Bytes</StructMemberAlignment>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
       <PreprocessorDefinitions>OP_DLL_EXPORTS;__VERSION__=$(VisualStudioEdition);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
