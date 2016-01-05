@@ -5,7 +5,6 @@
 #include <boost/log/expressions/formatters/named_scope.hpp>
 #include <boost/log/expressions/formatters/date_time.hpp>
 #include <boost/log/support/date_time.hpp>
-#include <boost/make_shared.hpp>
 
 #include "oplog.h"
 
