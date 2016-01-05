@@ -53,5 +53,8 @@
     <ClCompile Include="oppreproc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="opstrutil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
