@@ -1,0 +1,3 @@
+[submodule "gcadapter64"]
+	path = gcadapter64
+	url = https://github.com/r52/gcadapter64.git
